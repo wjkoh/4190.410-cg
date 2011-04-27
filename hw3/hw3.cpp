@@ -13,6 +13,7 @@
 #endif
 
 #include <iostream>
+#include <limits>
 using namespace std;
 
 #include <cmath>
@@ -37,6 +38,10 @@ const float INITIAL_FOV = 60.0;
 // seek - look at point로 지정하기
 // Cylinder의 bounding box 수정하기
 // 우상단->좌하단 드래그 시 문제
+//
+// 파일 입출력
+// Interpolating subdivision
+// UI
 
 // Camera position
 vector3 cam_vec(0.0, 0.0, 5); // origin to camera
@@ -181,7 +186,7 @@ vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt, vector<quater
             quaternionf_p b3 = pt[(i + 1) % pt.size()];
             quaternionf_p b2 = b3 - tan/3;
 
-            for (float t = 0; t <= 1; t += piece_res)
+            for (float t = 0; t < 1; t += piece_res)
             {
                 quaternionf_p pt = Bezier_curve(t, b0, b1, b2, b3);
                 result.push_back(pt);
@@ -243,14 +248,14 @@ vector<vector3> B_Spline(const vector<vector3>& pt, vector<vector3>& tangents, b
     int max_idx = (closed ? pt.size() - 1: pt.size() - 4); 
     for (int i = 0; i <= max_idx; ++i)
     {
-        if (closed || (i > 0 && i < pt.size() - 2))
+        //if (closed || (i > 0 && i < pt.size() - 2)) //???
         {
             vector3 b0 = pt[i];
             vector3 b1 = pt[(i+1) % pt.size()];
             vector3 b2 = pt[(i+2) % pt.size()];
             vector3 b3 = pt[(i+3) % pt.size()];
 
-            for (float t = 0; t <= 1; t += piece_res)
+            for (float t = 0; t < 1; t += piece_res)
             {
                 vector3 pt = B_spline(t, b0, b1, b2, b3);
                 result.push_back(pt);
@@ -327,6 +332,61 @@ vector<vector3> Natural_Cubic_Spline(const vector<vector3>& pt, vector<vector3>&
     }
 
     return B_Spline(cp, tangents, closed, resolution);
+}
+
+vector<vector3> B_Subdivision(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+{
+    assert(pt.size() >= 4);
+
+    float pieces = 1.0 / resolution;
+    float piece_res = 1.0 / (pieces / (closed ? (float)pt.size() : (float)(pt.size() - 3)));
+
+    tangents.clear();
+    vector<vector3> result = pt;
+    while (result.size() < pieces)
+    {
+        int max_idx = (closed ? result.size() - 2: result.size() - 4); // -2가 맞을까? -1이 맞을까? 
+
+        vector<vector3> temp;
+        for (int i = 0; i <= max_idx; ++i)
+        {
+            vector3 b0 = result[i];
+            vector3 b1 = result[(i+1) % result.size()];
+            vector3 b2 = result[(i+2) % result.size()];
+            vector3 b3 = result[(i+3) % result.size()];
+
+            if (i == 0)
+            {
+                vector3 p0 = (4*b0 + 4*b1)/8;
+                vector3 p1 = (1*b0 + 6*b1 + 1*b2)/8;
+                vector3 p2 = (4*b1 + 4*b2)/8;
+                temp.push_back(p0);
+                temp.push_back(p1);
+                temp.push_back(p2);
+            }
+            vector3 p3 = (1*b1 + 6*b2 +1*b3)/8;
+            vector3 p4 = (4*b2 + 4*b3)/8;
+            temp.push_back(p3);
+
+            if (fabs(p4[0] - result.front()[0]) >= numeric_limits<float>::epsilon() ||
+                fabs(p4[1] - result.front()[1]) >= numeric_limits<float>::epsilon() ||
+                fabs(p4[2] - result.front()[2]) >= numeric_limits<float>::epsilon())
+            {
+                temp.push_back(p4);
+            }
+        }
+        result = temp;
+    }
+
+    tangents.clear();
+    for (int i = 0; i < result.size() + (closed ? 0 : -1); ++i)
+    {
+        tangents.push_back(normalize(result[(i+1) % result.size()] - result[i]));
+    }
+    if (!closed)
+        tangents.push_back(tangents.back());
+
+    return result;
 }
 
 
@@ -811,8 +871,11 @@ void display(void)
 
             //vector3d normal = unit_cross(new_c, new_c_n); //surface_normals[i][j]; //rotate_vector(surface_normals[i][j], vector3().cardinal(2), -PI / 2);
             //vector3d normal = unit_cross(b, a); //surface_normals[i][j]; //rotate_vector(surface_normals[i][j], vector3().cardinal(2), -PI / 2);
+            if (!surface_normals.empty())
+            {
             vector3d normal = surface_normals[i][j];
             glNormal3f(normal[0], normal[1], normal[2]);
+            }
             glVertex3f(new_c[0], new_c[1], new_c[2]);
             glVertex3f(new_c_n[0], new_c_n[1], new_c_n[2]);
         }
@@ -1025,6 +1088,8 @@ void keyboard(unsigned char key, int x, int y)
         case '1':
         case '2':
         case '3':
+        case '4':
+        case '5':
             draw_swept_surface(key);
             glutPostRedisplay();
             break;
@@ -1230,13 +1295,17 @@ void draw_swept_surface(int type)
         case '3':
             func = Natural_Cubic_Spline;
             break;
+        case '4':
+            func = B_Subdivision;
+            break;
     }
 
     vector<cross_sect_t> tangent_list;
     for (int i = 0; i < 6; ++i)
     {
         draw_pt_list.push_back(func(pts, tangents, true, 0.01));
-        tangent_list.push_back(tangents);
+        if (!tangents.empty())
+            tangent_list.push_back(tangents);
     }
 
     {
@@ -1254,13 +1323,17 @@ void draw_swept_surface(int type)
                 // 처음부터 끝까지 곡선을 이루는 각 point
                 //if (j >= draw_pt_list[i].size()) break;
                 temp.push_back(draw_pt_list[i][j % draw_pt_list[i].size()]);
-                temp2.push_back(tangent_list[i][j % tangent_list[i].size()]);
+                if (!tangent_list.empty())
+                    temp2.push_back(tangent_list[i][j % tangent_list[i].size()]);
             }
             temp = Catmull_Rom(temp, tangents, false);
-            temp2 = Catmull_Rom(temp2, tangents, false);
-
             result.push_back(temp);
-            result2.push_back(temp2);
+            if (!temp2.empty())
+            {
+                temp2 = Catmull_Rom(temp2, tangents, false);
+                result2.push_back(temp2);
+            }
+
         }
         cout << "end " << scale_spline.size() << endl;
         cout << "end " << result.front().size() << endl;
@@ -1283,12 +1356,16 @@ void draw_swept_surface(int type)
                 
                 c.push_back(temp);
 
-                vector3 normal = rotate_vector(result2[pt_idx][len_idx], vector3().cardinal(2), PI / 2);
-                normal = rotate_vector(normal, axis, angle);
-                normals.push_back(normal.normalize());
+                if (!result2.empty())
+                {
+                    vector3 normal = rotate_vector(result2[pt_idx][len_idx], vector3().cardinal(2), PI / 2);
+                    normal = rotate_vector(normal, axis, angle);
+                    normals.push_back(normal.normalize());
+                }
             }
             surfaces.push_back(c);
-            surface_normals.push_back(normals);
+            if (!normals.empty())
+                surface_normals.push_back(normals);
         }
     }
 
