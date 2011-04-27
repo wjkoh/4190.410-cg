@@ -22,6 +22,7 @@ using namespace std;
 typedef cml::vector3f vector3;
 typedef cml::vector3d vector3d;
 typedef cml::matrix44f_c matrix;
+typedef cml::quaternionf_p quaternionf_p;
 
 #define _D_ //cout << __LINE__ << endl;
 const double PI = 4.0*atan(1.0);
@@ -78,6 +79,7 @@ int finger1 = 30;
 float position_z = 0; // move
 
 // 큰 로봇팔
+//
 float big_rot = 0;
 float big_shoulder_yaw = 100;
 float big_elbow = 0;
@@ -93,18 +95,21 @@ typedef list<vector3> set_t;
 set_t g_vertices;
 
 
-/*
-affine_trans(vector<>, vector<vector3>)
-{
-}
-
-affine_trans(vector<>, vector<quaternionf_p>)
-{
-    // multilinear
-}
-*/
-
 vector<vector3> tangents;
+
+quaternionf_p Bezier_curve(float t, quaternionf_p b0, quaternionf_p b1, quaternionf_p b2, quaternionf_p b3)
+{
+    // De Casteljau's algorithm
+    quaternionf_p p1 = slerp(b0, b1, t);
+    quaternionf_p p2 = slerp(b1, b2, t);
+    quaternionf_p p3 = slerp(b2, b3, t);
+
+    quaternionf_p p12 = slerp(p1, p2, t);
+    quaternionf_p p23 = slerp(p2, p3, t);
+
+    quaternionf_p p = slerp(p12, p23, t);
+    return p;
+} 
 
 vector3 Bezier_curve(float t, vector3 b0, vector3 b1, vector3 b2, vector3 b3)
 {
@@ -126,17 +131,60 @@ vector3 Bezier_curve_deriv(float t, vector3 b0, vector3 b1, vector3 b2, vector3 
 } 
 
 typedef vector<vector3> cross_sect_t;
+
 vector<cross_sect_t> draw_pt_list;
+vector<cross_sect_t> normal_list;
+
 vector<cross_sect_t> surfaces;
+vector<cross_sect_t> surface_normals;
 vector<vector3> draw_pos_list;
 vector<vector3> pos_spline;
 vector<vector3> scale_factors;
 vector<vector3> scale_spline;
 
-vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = true, float resolution = 0.05)
+vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt, vector<quaternionf_p>& tangents, bool closed = false, float resolution = 0.01)
 {
-    vector3 prev_tan(0, 0, 0);
-    prev_tan = (pt[1] - pt.back()) / 2;
+    quaternionf_p prev_tan = log(inverse(pt.back())*pt[1])/2;
+    if (!closed)
+        prev_tan = log(inverse(pt[0])*pt[2]) / 2;
+
+    float pieces = 1.0 / resolution;
+    float piece_res = 1.0 / (pieces / (closed ? (float)pt.size() : (float)(pt.size() - 3)));
+
+    tangents.clear();
+    vector<quaternionf_p> result;
+    for (int i = 0; i < pt.size(); ++i)
+    {
+        quaternionf_p tan = log(inverse(pt[i])*pt[(i + 2) % pt.size()])/2;
+
+        if (closed || (i > 0 && i < pt.size() - 2))
+        {
+            quaternionf_p b0 = pt[i];
+            quaternionf_p b1 = b0 + prev_tan/3;
+            quaternionf_p b3 = pt[(i + 1) % pt.size()];
+            quaternionf_p b2 = b3 - tan/3;
+
+            for (float t = 0; t <= 1; t += piece_res)
+            {
+                quaternionf_p pt = Bezier_curve(t, b0, b1, b2, b3);
+                result.push_back(pt);
+
+                //quaternionf_p tangent = Bezier_curve_deriv(t, b0, b1, b2, b3);
+                //tangents.push_back(tangent);
+            }
+        }
+        prev_tan = tan;
+    }
+    return result;
+}
+vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+{
+    vector3 prev_tan = (pt[1] - pt.back()) / 2;
+    if (!closed)
+        prev_tan = (pt[2] - pt[0]) / 2;
+
+    float pieces = 1.0 / resolution;
+    float piece_res = 1.0 / (pieces / (closed ? (float)pt.size() : (float)(pt.size() - 3)));
 
     tangents.clear();
     vector<vector3> result;
@@ -144,14 +192,14 @@ vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents
     {
         vector3 tan = (pt[(i + 2) % pt.size()] - pt[i]) / 2;
 
-        if (closed || (i > 0 && i < pt.size() - 1))
+        if (closed || (i > 0 && i < pt.size() - 2))
         {
             vector3 b0 = pt[i];
-            vector3 b1 = b0 + prev_tan;
+            vector3 b1 = b0 + prev_tan/3;
             vector3 b3 = pt[(i + 1) % pt.size()];
-            vector3 b2 = b3 - tan;
+            vector3 b2 = b3 - tan/3;
 
-            for (float t = 0; t <= 1; t += resolution)
+            for (float t = 0; t <= 1; t += piece_res)
             {
                 vector3 pt = Bezier_curve(t, b0, b1, b2, b3);
                 result.push_back(pt);
@@ -459,7 +507,7 @@ void draw_robot_arm(bool has_cylinder, int shoulder_yaw_local, int elbow, int fi
         glPopMatrix();
 
         glTranslatef(1.5 + 0.7/2, 0.0, 0.0);
-        //glRotatef(big_rot, 1.0, 0.0, 0.0);
+        glRotatef(big_rot, 1.0, 0.0, 0.0);
         glColor3f(0/255.0, 0/255.0, 139/255.0);
         glPushMatrix();
         glScalef(3.0, 0.7, 0.7);
@@ -622,21 +670,24 @@ void display(void)
     glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
 
     glColor3f(0.0f, 0.0f, 1.0f);
+    //glBegin(GL_LINE_STRIP);
     glBegin(GL_TRIANGLE_STRIP);
-    for (vector<cross_sect_t>::iterator it = surfaces.begin(); it != surfaces.end(); ++it)
+    //glBegin(GL_QUAD_STRIP);
+    //for (vector<cross_sect_t>::iterator it = surfaces.begin(); it != surfaces.end(); ++it)
+    for (int i = 0; i < surfaces.size(); ++i)
     {
-        if (it + 1 == surfaces.end())
+        if (i + 1 == surfaces.size())
             break;
 
-        cross_sect_t& c = *it;
-        cross_sect_t& c_n = *(it + 1);
+        cross_sect_t& c = surfaces[i];
+        cross_sect_t& c_n = surfaces[i + 1];
 
-        for (int i = 0; i < c.size(); ++i)
+        for (int j = 0; j < c.size(); ++j)
         {
-            vector3 new_c = c[i];
-            vector3 new_c_n = c_n[i];
+            vector3 new_c = c[j];
+            vector3 new_c_n = c_n[j];
 
-            vector3d normal = rotate_vector(tangents[i], vector3().cardinal(2), -PI / 2);
+            vector3d normal = unit_cross(new_c, new_c_n); //surface_normals[i][j]; //rotate_vector(surface_normals[i][j], vector3().cardinal(2), -PI / 2);
             glNormal3f(normal[0], normal[1], normal[2]);
             glVertex3f(new_c[0], new_c[1], new_c[2]);
             glVertex3f(new_c_n[0], new_c_n[1], new_c_n[2]);
@@ -645,7 +696,7 @@ void display(void)
         vector3 new_c = c[0];
         glVertex3f(new_c[0], new_c[1], new_c[2]);
     }
-    glEnd( );
+    glEnd();
 
     // FLOOR
     glEnable(GL_BLEND);
@@ -977,16 +1028,20 @@ int main(int argc, char** argv)
     init();
 
     draw_pos_list.push_back(vector3(0,0,0));
-    draw_pos_list.push_back(vector3(0,4,-3));
+    draw_pos_list.push_back(vector3(0,0,-3));
     draw_pos_list.push_back(vector3(0,0,-6));
-    draw_pos_list.push_back(vector3(0,4,-9));
+    draw_pos_list.push_back(vector3(0,0,-9));
+    draw_pos_list.push_back(vector3(0,0,-12));
+    draw_pos_list.push_back(vector3(0,0,-14));
     pos_spline = Catmull_Rom(draw_pos_list, tangents, false);
 
     scale_factors.push_back(vector3(1.0, 0, 0));
-    scale_factors.push_back(vector3(0.5, 0, 0));
     scale_factors.push_back(vector3(0.7, 0, 0));
+    scale_factors.push_back(vector3(0.6, 0, 0));
+    scale_factors.push_back(vector3(0.4, 0, 0));
     scale_factors.push_back(vector3(0.2, 0, 0));
-    scale_spline = Catmull_Rom(scale_factors, tangents);
+    scale_factors.push_back(vector3(0.1, 0, 0));
+    scale_spline = Catmull_Rom(scale_factors, tangents, false);
 
     vector<vector3> pts;
     pts.push_back(vector3(0,1,0));
@@ -998,20 +1053,121 @@ int main(int argc, char** argv)
     pts.push_back(vector3(-1,0,0));
     pts.push_back(vector3(-2,2,0));
 
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
+    vector<vector3> pts2;
+    pts2.push_back(vector3(2,2,0));
+    pts2.push_back(vector3(2,-2,0));
+    pts2.push_back(vector3(-2,-2,0));
+    pts2.push_back(vector3(-2,2,0));
 
+    quaternionf_p orient;
+    orient.identity();
+
+    vector<quaternionf_p> orients;
+    vector3 axis(0, 0, 1);
+    float angle = PI / 8;
+
+    orients.push_back(orient);
+    quaternion_rotation_axis_angle(orient, axis, angle);
+    orients.push_back(orient);
+    angle += PI / 8;
+    quaternion_rotation_axis_angle(orient, axis, angle);
+    orients.push_back(orient);
+    angle += PI / 8;
+    quaternion_rotation_axis_angle(orient, axis, angle);
+    orients.push_back(orient);
+    angle += PI / 8;
+    quaternion_rotation_axis_angle(orient, axis, angle);
+    orients.push_back(orient);
+    angle += PI / 8;
+    quaternion_rotation_axis_angle(orient, axis, angle);
+    orients.push_back(orient);
+    angle += PI / 8;
+    quaternion_rotation_axis_angle(orient, axis, angle);
+    orients.push_back(orient);
+
+    vector<quaternionf_p> tant;
+    vector<quaternionf_p> ori_spline = Catmull_Rom(orients, tant, false);
+    for (int i = 0; i < ori_spline.size(); ++i)
+        cout << ori_spline[i] << endl;
+
+
+    /*
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
+    draw_pt_list.push_back(Catmull_Rom(pts2, tangents));
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
+    draw_pt_list.push_back(Catmull_Rom(pts2, tangents));
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
+    draw_pt_list.push_back(Catmull_Rom(pts2, tangents));
+    */
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
+    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
+    cout << Catmull_Rom(pts, tangents).size() << endl;
+    cout << Catmull_Rom(pts2, tangents).size() << endl;
+
+    {
+        vector<vector<vector3> > result;
+        // cross section의 한 point 당
+		int j;
+        cout << draw_pt_list.front().size() << endl;
+        for (int j = 0; j < draw_pt_list.front().size(); ++j)
+        {
+            vector<vector3> temp;
+            for (int i = 0; i < draw_pt_list.size(); ++i)
+            {
+                // 처음부터 끝까지 곡선을 이루는 각 point
+                //if (j >= draw_pt_list[i].size()) break;
+                temp.push_back(draw_pt_list[i][j % draw_pt_list[i].size()]);
+            }
+            temp = Catmull_Rom(temp, tangents, false);
+
+            result.push_back(temp);
+            normal_list.push_back(tangents);
+        }
+        cout << "end " << scale_spline.size() << endl;
+        cout << "end " << result.front().size() << endl;
+
+        for (int len_idx = 0; len_idx < result.front().size(); ++len_idx)
+        {
+            vector<vector3> c;
+            vector<vector3> normals;
+            for (int pt_idx = 0; pt_idx < result.size(); ++pt_idx)
+            {
+                vector3 temp = scale_spline[len_idx][0] * result[pt_idx][len_idx];
+
+                vector3 axis;
+                float angle;
+                quaternion_to_axis_angle(ori_spline[min<int>(len_idx, ori_spline.size()-1)], axis, angle);
+                temp = rotate_vector(temp, axis, angle) + pos_spline[len_idx];
+                
+                c.push_back(temp);
+
+                vector3 normal = normal_list[pt_idx][len_idx]; // rotate_vector(normal_list[pt_idx][len_idx], axis, angle);
+                normals.push_back(normal.normalize());
+            }
+            surfaces.push_back(c);
+            surface_normals.push_back(normals);
+        }
+    }
+
+    /*
     for (int i = 0; i < pos_spline.size(); ++i)
     {
-        int j = i / (1 / 0.1);
+        int j = 0;
 
         cross_sect_t c;
         for (int k = 0; k < draw_pt_list[j].size(); ++k)
-            c.push_back(scale_spline[i][0] * draw_pt_list[j][k] + pos_spline[i]);
+        {
+            double s = scale_spline[i][0];
+            cml::vector3d t = draw_pt_list[j][k];
+            c.push_back(s*t + pos_spline[i]);
+        }
         surfaces.push_back(c);
     }
+    */
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
