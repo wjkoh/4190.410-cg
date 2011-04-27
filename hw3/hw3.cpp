@@ -97,6 +97,7 @@ typedef list<vector3> set_t;
 set_t g_vertices;
 
 
+bool wireframe_mode = false;
 vector<vector3> tangents;
 
 quaternionf_p Bezier_curve(float t, quaternionf_p b0, quaternionf_p b1, quaternionf_p b2, quaternionf_p b3)
@@ -134,10 +135,19 @@ vector3 Bezier_curve_deriv(float t, vector3 b0, vector3 b1, vector3 b2, vector3 
 
 vector3 B_spline(float t, vector3 b0, vector3 b1, vector3 b2, vector3 b3)
 {
-    vector3 pt = pow(1 - t, 3)/6*b0 \
-                 + (3*pow(t, 3) - 6*pow(t, 2) + 4)/6*b1 \
-                 + (-3*pow(t, 3) + 3*pow(t, 2) + 3*t + 1)/6*b2 \
-                 + pow(t, 3)/6*b3;
+    vector3 pt = (pow(1 - t, 3)*b0 \
+                 + (3*pow(t, 3) - 6*pow(t, 2) + 4)*b1 \
+                 + (-3*pow(t, 3) + 3*pow(t, 2) + 3*t + 1)*b2 \
+                 + pow(t, 3)*b3)/6;
+    return pt;
+} 
+
+vector3 B_spline_deriv(float t, vector3 b0, vector3 b1, vector3 b2, vector3 b3)
+{
+    vector3 pt = (-pow(t-1, 2)*b0 \
+                 + (3*pow(t, 2) - 4*t)*b1 \
+                 + (-3*pow(t, 2) + 2*t + 1)*b2 \
+                 + pow(t, 2)*b3)/2;
     return pt;
 } 
 
@@ -145,7 +155,6 @@ typedef vector<vector3> cross_sect_t;
 
 vector<cross_sect_t> surfaces;
 vector<cross_sect_t> surface_normals;
-
 
 
 vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt, vector<quaternionf_p>& tangents, bool closed = false, float resolution = 0.01)
@@ -207,7 +216,7 @@ vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents
             vector3 b3 = pt[(i + 1) % pt.size()];
             vector3 b2 = b3 - tan/3;
 
-            for (float t = 0; t <= 1; t += piece_res)
+            for (float t = 0; t < 1; t += piece_res)
             {
                 vector3 pt = Bezier_curve(t, b0, b1, b2, b3);
                 result.push_back(pt);
@@ -246,8 +255,8 @@ vector<vector3> B_Spline(const vector<vector3>& pt, vector<vector3>& tangents, b
                 vector3 pt = B_spline(t, b0, b1, b2, b3);
                 result.push_back(pt);
 
-                //vector3 tangent = Bezier_curve_deriv(t, b0, b1, b2, b3);
-                //tangents.push_back(tangent);
+                vector3 tangent = B_spline_deriv(t, b0, b1, b2, b3);
+                tangents.push_back(tangent);
             }
         }
     }
@@ -778,8 +787,10 @@ void display(void)
     glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
 
     glColor3f(0.0f, 0.0f, 1.0f);
-    //glBegin(GL_LINE_STRIP);
-    glBegin(GL_TRIANGLE_STRIP);
+    if (wireframe_mode)
+        glBegin(GL_LINE_STRIP);
+    else
+        glBegin(GL_TRIANGLE_STRIP);
     //glBegin(GL_QUAD_STRIP);
     //for (vector<cross_sect_t>::iterator it = surfaces.begin(); it != surfaces.end(); ++it)
     for (int i = 0; i < surfaces.size(); ++i)
@@ -795,7 +806,12 @@ void display(void)
             vector3 new_c = c[j];
             vector3 new_c_n = c_n[j];
 
-            vector3d normal = unit_cross(new_c, new_c_n); //surface_normals[i][j]; //rotate_vector(surface_normals[i][j], vector3().cardinal(2), -PI / 2);
+            vector3 a = new_c_n - new_c;
+            vector3 b = c[(j+1) % c.size()] - new_c;
+
+            //vector3d normal = unit_cross(new_c, new_c_n); //surface_normals[i][j]; //rotate_vector(surface_normals[i][j], vector3().cardinal(2), -PI / 2);
+            //vector3d normal = unit_cross(b, a); //surface_normals[i][j]; //rotate_vector(surface_normals[i][j], vector3().cardinal(2), -PI / 2);
+            vector3d normal = surface_normals[i][j];
             glNormal3f(normal[0], normal[1], normal[2]);
             glVertex3f(new_c[0], new_c[1], new_c[2]);
             glVertex3f(new_c_n[0], new_c_n[1], new_c_n[2]);
@@ -993,7 +1009,7 @@ void keyboard(unsigned char key, int x, int y)
                 if (key == 'd')
                 {
                     view_distance -= 0.1;
-                    view_distance = max(view_distance, 0.0f);
+                    view_distance = max(view_distance, 0.1f);
                 }
                 else
                     view_distance += 0.1;
@@ -1010,6 +1026,10 @@ void keyboard(unsigned char key, int x, int y)
         case '2':
         case '3':
             draw_swept_surface(key);
+            glutPostRedisplay();
+            break;
+        case 'w':
+            wireframe_mode = !wireframe_mode;
             glutPostRedisplay();
             break;
     }
@@ -1211,27 +1231,36 @@ void draw_swept_surface(int type)
             func = Natural_Cubic_Spline;
             break;
     }
+
+    vector<cross_sect_t> tangent_list;
     for (int i = 0; i < 6; ++i)
+    {
         draw_pt_list.push_back(func(pts, tangents, true, 0.01));
+        tangent_list.push_back(tangents);
+    }
 
     {
         vector<vector<vector3> > result;
+        vector<vector<vector3> > result2;
         // cross section의 한 point 당
 		int j;
         cout << draw_pt_list.front().size() << endl;
         for (int j = 0; j < draw_pt_list.front().size(); ++j)
         {
             vector<vector3> temp;
+            vector<vector3> temp2;
             for (int i = 0; i < draw_pt_list.size(); ++i)
             {
                 // 처음부터 끝까지 곡선을 이루는 각 point
                 //if (j >= draw_pt_list[i].size()) break;
                 temp.push_back(draw_pt_list[i][j % draw_pt_list[i].size()]);
+                temp2.push_back(tangent_list[i][j % tangent_list[i].size()]);
             }
             temp = Catmull_Rom(temp, tangents, false);
+            temp2 = Catmull_Rom(temp2, tangents, false);
 
             result.push_back(temp);
-            normal_list.push_back(tangents);
+            result2.push_back(temp2);
         }
         cout << "end " << scale_spline.size() << endl;
         cout << "end " << result.front().size() << endl;
@@ -1254,7 +1283,8 @@ void draw_swept_surface(int type)
                 
                 c.push_back(temp);
 
-                vector3 normal = normal_list[pt_idx][len_idx]; // rotate_vector(normal_list[pt_idx][len_idx], axis, angle);
+                vector3 normal = rotate_vector(result2[pt_idx][len_idx], vector3().cardinal(2), PI / 2);
+                normal = rotate_vector(normal, axis, angle);
                 normals.push_back(normal.normalize());
             }
             surfaces.push_back(c);
