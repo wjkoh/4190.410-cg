@@ -17,12 +17,14 @@ using namespace std;
 
 #include <cmath>
 #include <cstdio>
+#include <cassert>
 
 #include "cml/cml.h"
 typedef cml::vector3f vector3;
 typedef cml::vector3d vector3d;
 typedef cml::matrix44f_c matrix;
 typedef cml::quaternionf_p quaternionf_p;
+typedef cml::matrixf_c matrix_d;
 
 #define _D_ //cout << __LINE__ << endl;
 const double PI = 4.0*atan(1.0);
@@ -130,20 +132,26 @@ vector3 Bezier_curve_deriv(float t, vector3 b0, vector3 b1, vector3 b2, vector3 
     return pt;
 } 
 
-typedef vector<vector3> cross_sect_t;
+vector3 B_spline(float t, vector3 b0, vector3 b1, vector3 b2, vector3 b3)
+{
+    vector3 pt = pow(1 - t, 3)/6*b0 \
+                 + (3*pow(t, 3) - 6*pow(t, 2) + 4)/6*b1 \
+                 + (-3*pow(t, 3) + 3*pow(t, 2) + 3*t + 1)/6*b2 \
+                 + pow(t, 3)/6*b3;
+    return pt;
+} 
 
-vector<cross_sect_t> draw_pt_list;
-vector<cross_sect_t> normal_list;
+typedef vector<vector3> cross_sect_t;
 
 vector<cross_sect_t> surfaces;
 vector<cross_sect_t> surface_normals;
-vector<vector3> draw_pos_list;
-vector<vector3> pos_spline;
-vector<vector3> scale_factors;
-vector<vector3> scale_spline;
+
+
 
 vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt, vector<quaternionf_p>& tangents, bool closed = false, float resolution = 0.01)
 {
+    assert(pt.size() > 0);
+
     quaternionf_p prev_tan = log(inverse(pt.back())*pt[1])/2;
     if (!closed)
         prev_tan = log(inverse(pt[0])*pt[2]) / 2;
@@ -213,9 +221,109 @@ vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents
     return result;
 }
 
+vector<vector3> B_Spline(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+{
+    assert(pt.size() >= 4);
+
+    float pieces = 1.0 / resolution;
+    float piece_res = 1.0 / (pieces / (closed ? (float)pt.size() : (float)(pt.size() - 3)));
+
+    tangents.clear();
+    vector<vector3> result;
+
+    int max_idx = (closed ? pt.size() - 1: pt.size() - 4); 
+    for (int i = 0; i <= max_idx; ++i)
+    {
+        if (closed || (i > 0 && i < pt.size() - 2))
+        {
+            vector3 b0 = pt[i];
+            vector3 b1 = pt[(i+1) % pt.size()];
+            vector3 b2 = pt[(i+2) % pt.size()];
+            vector3 b3 = pt[(i+3) % pt.size()];
+
+            for (float t = 0; t <= 1; t += piece_res)
+            {
+                vector3 pt = B_spline(t, b0, b1, b2, b3);
+                result.push_back(pt);
+
+                //vector3 tangent = Bezier_curve_deriv(t, b0, b1, b2, b3);
+                //tangents.push_back(tangent);
+            }
+        }
+    }
+    return result;
+}
+
+vector<vector3> Natural_Cubic_Spline(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+{
+    int pt_size = pt.size();
+    matrix_d conv_mat(pt_size, pt_size);
+    conv_mat.zero();
+
+    int j = pt_size -1;
+    for (int i = 0; i < pt_size; ++i)
+    {
+        if (!closed && (i == 0 || i == pt_size - 1))
+        {
+            if (i == 0)
+            {
+                conv_mat(i, 0) = 1;
+                j = (j + 1) % pt_size;
+                conv_mat(i, 1) = -2;
+                j = (j + 1) % pt_size;
+                conv_mat(i, 2) = 1;
+                j = (j + 1) % pt_size;
+            }
+            else
+            {
+                conv_mat(i, pt_size - 3) = 1;
+                j = (j + 1) % pt_size;
+                conv_mat(i, pt_size - 2) = -2;
+                j = (j + 1) % pt_size;
+                conv_mat(i, pt_size - 1) = 1;
+                j = (j + 1) % pt_size;
+            }
+            continue;
+        }
+
+        int k = j;
+        j = (j + 1) % pt_size;
+
+        conv_mat(i, k) = 1;
+        k = (k + 1) % pt_size;
+        conv_mat(i, k) = 4;
+        k = (k + 1) % pt_size;
+        conv_mat(i, k) = 1;
+        k = (k + 1) % pt_size;
+    }
+    cout << "before" << endl;
+    cout << conv_mat << endl;
+    conv_mat /= 6;
+    cout << conv_mat << endl;
+    conv_mat.inverse();
+    cout << conv_mat << endl;
+
+    vector<vector3> cp;
+    for (int i = 0; i < pt_size; ++i)
+    {
+        vector3 result;
+        result.zero();
+        for (int j = 0; j < pt_size; ++j)
+        {
+            cout << conv_mat(i, j) << " " << pt[j] << endl;
+            result += conv_mat(i, j) * pt[j];
+        }
+        cout << "cp " << result << endl;
+        cp.push_back(result);
+    }
+
+    return B_Spline(cp, tangents, closed, resolution);
+}
+
 
 // Function prototypes
 void set_cam_dist(float view_dist = view_distance);
+void draw_swept_surface(int type);
 
 // Picking
 vector3d screen_to_object(int x, int y)
@@ -899,32 +1007,9 @@ void keyboard(unsigned char key, int x, int y)
             // 여러 관절 조종
             // (애니메이션 끄고 할 것)
         case '1':
-        case '!':
-            elbow = (elbow + (key == '1' ? 1 : -1) * 10) % 360;
-            if (elbow < 0) elbow = 0;
-            if (elbow > 120) elbow = 120;
-            glutPostRedisplay();
-            break;
         case '2':
-        case '@':
-            shoulder_roll = (shoulder_roll + (key == '2' ? 1 : -1) * 5) % 360;
-            if (shoulder_roll < -90) shoulder_roll = -90;
-            if (shoulder_roll > 90) shoulder_roll = 90;
-            glutPostRedisplay();
-            break;
         case '3':
-        case '#':
-            shoulder_yaw1 = (shoulder_yaw1 + (key == '3' ? 1 : -1) * 5) % 360;
-            if (shoulder_yaw1 > 90) shoulder_yaw1 = 90;
-            if (shoulder_yaw1 < 0) shoulder_yaw1 = 0;
-            shoulder_yaw2 = shoulder_yaw1;
-            glutPostRedisplay();
-            break;
-        case '4':
-        case '$':
-            finger1 = (finger1 + (key == '4' ? 1 : -1) * 10) % 360;
-            if (finger1 < 0) finger1 = 0;
-            if (finger1 > 60) finger1 = 60;
+            draw_swept_surface(key);
             glutPostRedisplay();
             break;
     }
@@ -1017,15 +1102,15 @@ GLvoid motion(GLint x, GLint y)
     glutPostRedisplay();
 }
 
-int main(int argc, char** argv)
+void draw_swept_surface(int type)
 {
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(800, 600);
-    glutInitWindowPosition(100, 100);
-    glutCreateWindow(argv[0]);
+    vector<cross_sect_t> draw_pt_list;
+    vector<cross_sect_t> normal_list;
 
-    init();
+    vector<vector3> draw_pos_list;
+    vector<vector3> pos_spline;
+    vector<vector3> scale_factors;
+    vector<vector3> scale_spline;
 
     draw_pos_list.push_back(vector3(0,0,0));
     draw_pos_list.push_back(vector3(0,0,-3));
@@ -1035,12 +1120,13 @@ int main(int argc, char** argv)
     draw_pos_list.push_back(vector3(0,0,-14));
     pos_spline = Catmull_Rom(draw_pos_list, tangents, false);
 
+
     scale_factors.push_back(vector3(1.0, 0, 0));
     scale_factors.push_back(vector3(0.7, 0, 0));
     scale_factors.push_back(vector3(0.6, 0, 0));
     scale_factors.push_back(vector3(0.4, 0, 0));
-    scale_factors.push_back(vector3(0.2, 0, 0));
-    scale_factors.push_back(vector3(0.1, 0, 0));
+    scale_factors.push_back(vector3(0.0, 0, 0));
+    scale_factors.push_back(vector3(0.0, 0, 0));
     scale_spline = Catmull_Rom(scale_factors, tangents, false);
 
     vector<vector3> pts;
@@ -1099,14 +1185,34 @@ int main(int argc, char** argv)
     draw_pt_list.push_back(Catmull_Rom(pts, tangents));
     draw_pt_list.push_back(Catmull_Rom(pts2, tangents));
     */
+    /*
     draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
     draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
     draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
     draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
     draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
     draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
-    cout << Catmull_Rom(pts, tangents).size() << endl;
-    cout << Catmull_Rom(pts2, tangents).size() << endl;
+    */
+    cout << "NCS " << Natural_Cubic_Spline(pts2, tangents, true).size() << endl;
+
+    vector<vector3> (*func)(const vector<vector3>&, vector<vector3>&, bool, float);
+    switch (type)
+    {
+        default:
+        case '1':
+            func = Catmull_Rom;
+            break;
+
+        case '2':
+            func = B_Spline;
+            break;
+
+        case '3':
+            func = Natural_Cubic_Spline;
+            break;
+    }
+    for (int i = 0; i < 6; ++i)
+        draw_pt_list.push_back(func(pts, tangents, true, 0.01));
 
     {
         vector<vector<vector3> > result;
@@ -1129,6 +1235,9 @@ int main(int argc, char** argv)
         }
         cout << "end " << scale_spline.size() << endl;
         cout << "end " << result.front().size() << endl;
+
+        surfaces.clear();
+        surface_normals.clear();
 
         for (int len_idx = 0; len_idx < result.front().size(); ++len_idx)
         {
@@ -1168,6 +1277,19 @@ int main(int argc, char** argv)
         surfaces.push_back(c);
     }
     */
+}
+
+int main(int argc, char** argv)
+{
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
+    glutInitWindowSize(800, 600);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow(argv[0]);
+
+    init();
+
+    draw_swept_surface(1);
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
