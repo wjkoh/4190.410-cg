@@ -389,6 +389,46 @@ vector<vector3> B_Subdivision(const vector<vector3>& pt, vector<vector3>& tangen
     return result;
 }
 
+vector<vector3> Interpolating_Subdivision(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+{
+    assert(pt.size() >= 4);
+
+    float pieces = 1.0 / resolution;
+    float piece_res = 1.0 / (pieces / (closed ? (float)pt.size() : (float)(pt.size() - 3)));
+
+    tangents.clear();
+    vector<vector3> result = pt;
+    while (result.size() < pieces)
+    {
+        int max_idx = (closed ? result.size() - 1: result.size() - 2);
+
+        vector<vector3> temp;
+        for (int i = 0; i <= max_idx; ++i)
+        {
+            vector3 b0 = result[(i-1) % result.size()];
+            vector3 b1 = result[i];
+            vector3 b2 = result[(i+1) % result.size()];
+            vector3 b3 = result[(i+2) % result.size()];
+
+            vector3 p = (-1*b0 + 9*b1 + 9*b2 -1*b3)/16;
+            temp.push_back(b1);
+            temp.push_back(p);
+        }
+        if (!closed)
+            temp.push_back(result.back());
+        result = temp;
+    }
+
+    tangents.clear();
+    for (int i = 0; i < result.size() + (closed ? 0 : -1); ++i)
+    {
+        tangents.push_back(normalize(result[(i+1) % result.size()] - result[i]));
+    }
+    if (!closed)
+        tangents.push_back(tangents.back());
+
+    return result;
+}
 
 // Function prototypes
 void set_cam_dist(float view_dist = view_distance);
@@ -1287,16 +1327,17 @@ void draw_swept_surface(int type)
         case '1':
             func = Catmull_Rom;
             break;
-
         case '2':
             func = B_Spline;
             break;
-
         case '3':
             func = Natural_Cubic_Spline;
             break;
         case '4':
             func = B_Subdivision;
+            break;
+        case '5':
+            func = Interpolating_Subdivision;
             break;
     }
 
