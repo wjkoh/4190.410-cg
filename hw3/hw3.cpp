@@ -46,6 +46,16 @@ const float INITIAL_FOV = 60.0;
 // Interpolating subdivision
 // UI
 
+
+bool g_2d_mode = false;
+int scr_width = 800;
+int scr_height = 600;
+float scr_mag = 100;
+
+int target_cs_idx = 0;
+int target_cp = 0;
+bool drag_cp = false;
+
 // Camera position
 vector3 cam_vec(0.0, 0.0, 5); // origin to camera
 vector3 cam_vec_start(0.0, 0.0, 5); // origin to camera
@@ -160,6 +170,18 @@ struct data
 bool wireframe_mode = false;
 vector<vector3> tangents;
 
+// draw text on screen
+void DrawText(int x, int y, string msg, void* font, vector3 Color)
+{
+    double FontWidth = 0.1;
+    glColor3f( Color[0], Color[1], Color[2] );
+
+	glRasterPos2i(x, y);
+    for ( int i = 0 ; i < msg.length(); ++i )
+    {
+        glutBitmapCharacter( font, msg[i] );
+    }
+}
 
 quaternionf_p Bezier_curve(float t, quaternionf_p b0, quaternionf_p b1, quaternionf_p b2, quaternionf_p b3)
 {
@@ -579,7 +601,10 @@ void init(void)
     glEnable(GL_LIGHT0);
     glEnable(GL_LIGHTING);
 
-    glEnable(GL_DEPTH_TEST);
+    if (g_2d_mode)
+        glDisable(GL_DEPTH_TEST);
+    else
+        glEnable(GL_DEPTH_TEST);
 
     // 두 번째 light
     GLfloat light1_ambient[] = {0.2, 0.2, 0.2, 1.0};
@@ -966,6 +991,102 @@ void draw_wall_e()
 
 void display(void)
 {
+    if (g_2d_mode)
+    {
+        glClearColor(1.0, 1.0, 1.0, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glMatrixMode(GL_MODELVIEW);
+
+        glColor3f(0, 0, 0);
+        glBegin(GL_LINES);
+        glVertex2f(scr_width/2, 0);
+        glVertex2f(scr_width/2, scr_height);
+        glVertex2f(0, scr_height/2);
+        glVertex2f(scr_width, scr_height/2);
+        glEnd();
+
+        stringstream ss;
+        ss << "cross-section #"; 
+        ss << target_cs_idx;
+        ss << "  magnifier:"; 
+        ss << scr_mag;
+        DrawText(10, 10, ss.str(), GLUT_BITMAP_8_BY_13, vector3(0, 0, 0));
+
+        {
+            stringstream ss;
+            ss << "cross-section type: ";
+            switch (g_data.curve_type)
+            {
+                case data::BSPLINE:
+                    ss << "B-Spline";
+                    break;
+                case data::INTERPOLATION:
+                    ss << "Catmull-Rom";
+                    break;
+                case data::NATURAL_CUBIC:
+                    ss << "Natural Cubic";
+                    break;
+                case data::B_SUBDIVISION:
+                    ss << "B Subdivision";
+                    break;
+                case data::INTERPOLATING_SUBDIVISION:
+                    ss << "Interpolating Subdivision";
+                    break;
+            }
+            DrawText(10, scr_height - 20, ss.str(), GLUT_BITMAP_8_BY_13, vector3(0, 0, 0));
+        }
+
+        {
+            stringstream ss;
+            ss << "sweep type: ";
+            switch (g_data.sweep_type)
+            {
+                case data::BSPLINE:
+                    ss << "B-Spline";
+                    break;
+                case data::INTERPOLATION:
+                    ss << "Catmull-Rom";
+                    break;
+                case data::NATURAL_CUBIC:
+                    ss << "Natural Cubic";
+                    break;
+                case data::B_SUBDIVISION:
+                    ss << "B Subdivision";
+                    break;
+                case data::INTERPOLATING_SUBDIVISION:
+                    ss << "Interpolating Subdivision";
+                    break;
+            }
+            DrawText(10, scr_height - 35, ss.str(), GLUT_BITMAP_8_BY_13, vector3(0, 0, 0));
+        }
+
+        glColor3f(0, 0, 0);
+        glPointSize(10.0);
+
+        glBegin(GL_POINTS);
+        cross_sect_t& cs = g_data.con_pts[target_cs_idx];
+        for (int j = 0; j < cs.size(); ++j)
+        {
+            cout << cs[j] << endl;
+            glVertex2f(scr_width/2 + cs[j][0]*scr_mag, scr_height/2 + cs[j][2]*scr_mag);
+        }
+        glEnd();
+
+        glBegin(GL_LINE_LOOP);
+        vector<vector3> tant;
+        vector<vector3> spline = Catmull_Rom(cs, tant, true, 0.01);
+        for (int j = 0; j < spline.size(); ++j)
+        {
+            glVertex2f(scr_width/2 + spline[j][0]*scr_mag, scr_height/2 + spline[j][2]*scr_mag);
+        }
+        glEnd();
+
+        glFlush();
+        glutSwapBuffers();
+        return;
+    }
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glMatrixMode(GL_MODELVIEW);
@@ -975,6 +1096,7 @@ void display(void)
         set_cam_dist(view_distance);
 
     glPushMatrix(); // top
+
 
     // rotate lights and objects together (stationary)
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -1084,19 +1206,36 @@ void set_cam_dist(float view_distance)
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(eye_pos[0], eye_pos[1], eye_pos[2], rot_origin[0], rot_origin[1], rot_origin[2], cam_up_vec[0], cam_up_vec[1], cam_up_vec[2]);
+    if (g_2d_mode)
+    {
+        //gluLookAt(0, 2, 0, 0, 0, 0, 0, 0, 1);
+    }
+    else
+        gluLookAt(eye_pos[0], eye_pos[1], eye_pos[2], rot_origin[0], rot_origin[1], rot_origin[2], cam_up_vec[0], cam_up_vec[1], cam_up_vec[2]);
 }
 
 void reshape(int w, int h)
 {
+    scr_width = w;
+    scr_height = h;
+
     glViewport(0, 0, (GLsizei)w, (GLsizei)h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(fov, (GLfloat)w/(GLfloat)h, 1.0, 20.0);
+
+    if (g_2d_mode)
+    {
+        gluOrtho2D (0, w, 0, h);
+    }
+    else
+    {
+        gluPerspective(fov, (GLfloat)w/(GLfloat)h, 1.0, 20.0);
+    }
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    set_cam_dist(view_distance);
+    if (!g_2d_mode)
+        set_cam_dist(view_distance);
 }
 
 double calculateAngle(double size, double distance)
@@ -1154,11 +1293,51 @@ void keyboard(unsigned char key, int x, int y)
                 glutPostRedisplay();
                 break;
             }
+        case 'e':
+            {
+                g_2d_mode = !g_2d_mode;
 
+                init();
+                GLint viewport[4];
+                glGetIntegerv(GL_VIEWPORT, viewport);
+                GLint width = viewport[2];
+                GLint height = viewport[3];
+
+                draw_swept_surface();
+                reshape(width, height);
+                glutPostRedisplay();
+                break;
+            }
+        case '+':
+        case '-':
+            {
+                if (g_2d_mode)
+                {
+                    target_cs_idx = target_cs_idx + (key == '+' ? 1 : -1);
+                    if (target_cs_idx < 0) target_cs_idx = 0;
+                    else if (target_cs_idx >= g_data.con_pts.size()) target_cs_idx = g_data.con_pts.size() - 1;
+                    glutPostRedisplay();
+                }
+                break;
+            }
             // Zoom in/out
         case 'z':
         case 'Z':
             {
+                if (g_2d_mode)
+                {
+                    if (key == 'z')
+                    {
+                        scr_mag -= 1.0;
+                        if (scr_mag < 1)
+                            scr_mag = 1;
+                    }
+                    else
+                        scr_mag += 1.0;
+                    glutPostRedisplay();
+                    break;
+                }
+
                 if (key == 'z')
                 {
                     fov -= 1.0;
@@ -1224,10 +1403,12 @@ void keyboard(unsigned char key, int x, int y)
         case '3':
         case '4':
         case '5':
+            {
             g_data.curve_type = static_cast<data::spline_t>(key - '0');
             draw_swept_surface();
             glutPostRedisplay();
             break;
+            }
         case '6': // Sweep func
         case '7':
         case '8':
@@ -1296,19 +1477,97 @@ GLvoid mouse(GLint button, GLint state, GLint x, GLint y)
         switch (button)
         {
             case GLUT_LEFT_BUTTON:
-                start_vec = screen_to_sphere(x, y);
-                cam_vec_start = cam_vec;
-                cam_up_vec_start = cam_up_vec;
+                if (g_2d_mode)
+                {
+                    int x_ = x;
+                    int y_ = scr_height - y;
+
+                    cross_sect_t& cs = g_data.con_pts[target_cs_idx];
+                    for (int j = 0; j < cs.size(); ++j)
+                    {
+                        int t_x = scr_width/2 + cs[j][0]*scr_mag;
+                        int t_y = scr_height/2 + cs[j][2]*scr_mag;
+
+                        cout << x_ << " " << y_ << endl;
+                        cout << t_x << " " << t_y << endl;
+
+                        if (abs(t_x - x_) < 10 && abs(t_y - y_) < 10)
+                        {
+                            drag_cp = true;
+                            target_cp = j;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    start_vec = screen_to_sphere(x, y);
+                    cam_vec_start = cam_vec;
+                    cam_up_vec_start = cam_up_vec;
+                }
                 break;
             case GLUT_RIGHT_BUTTON:
-                rot_origin = screen_to_object(x, y); // 새 위치를 origin으로
-                set_cam_dist(view_distance);
-                glutPostRedisplay();
-                break;
+                if (g_2d_mode)
+                {
+                    int x_ = x;
+                    int y_ = scr_height - y;
+
+                    int min_idx = 0;
+                    float min_dist = -1;
+
+                    bool add = true;
+                    cross_sect_t& cs = g_data.con_pts[target_cs_idx];
+                    for (int j = 0; j < cs.size(); ++j)
+                    {
+                        int t_x = scr_width/2 + cs[j][0]*scr_mag;
+                        int t_y = scr_height/2 + cs[j][2]*scr_mag;
+
+                        cout << x_ << " " << y_ << endl;
+                        cout << t_x << " " << t_y << endl;
+
+                        float dist = sqrt(pow((float)t_x - x_, 2) + pow((float)t_y - y_, 2));
+
+                        if (min_dist < 0)
+                        {
+                            min_dist = dist;
+                            min_idx = j;
+                        }
+
+                        if (dist < min_dist)
+                        {
+                            min_dist = dist;
+                            min_idx = j;
+                        }
+
+                        if (dist < 10)
+                        {
+                            target_cp = 0;
+                            cs.erase(cs.begin() + j);
+                            add = false;
+                            break;
+                        }
+                    }
+
+                    if (add)
+                    {
+                        vector3 t((float)(x_-scr_width/2.0)/scr_mag, 0, (float)(y_-scr_height/2.0)/scr_mag);
+                        cs.insert(cs.begin() + min_idx + 1, t);
+                    }
+                    glutPostRedisplay();
+                }
+                else
+                {
+                    rot_origin = screen_to_object(x, y); // 새 위치를 origin으로
+                    set_cam_dist(view_distance);
+                    glutPostRedisplay();
+                    break;
+                }
         }
     }
     else // GLUT_UP
     {
+        drag_cp = false;
+
         vector3 x, y, z;
         orthonormal_basis(cam_vec, cam_up_vec, x, y, z);
         cam_vec = z;
@@ -1318,6 +1577,19 @@ GLvoid mouse(GLint button, GLint state, GLint x, GLint y)
 
 GLvoid motion(GLint x, GLint y)
 {
+    if (g_2d_mode)
+    {
+        if (drag_cp)
+        {
+            int x_ = x;
+            int y_ = scr_height - y;
+
+            g_data.con_pts[target_cs_idx][target_cp].set((float)(x_-scr_width/2)/scr_mag, 0, (float)(y_-scr_height/2)/scr_mag);
+            glutPostRedisplay();
+        }
+        return;
+    }
+
     vector3 end_vec = screen_to_sphere(x, y);
 
     // Sphere의 좌표계를 View 좌표계와 일치
@@ -1401,6 +1673,9 @@ void draw_swept_surface()
     vector<cross_sect_t> tangent_list;
     for (int i = 0; i < g_data.con_pts.size(); ++i)
     {
+        if (g_data.con_pts[i].empty())
+            continue;
+
         draw_pt_list.push_back(func(g_data.con_pts[i], tangents, true, cross_resolution));
         if (!tangents.empty())
             tangent_list.push_back(tangents);
@@ -1499,7 +1774,7 @@ stringstream getline_and_ss(fstream& fs)
     return stringstream(temp);
 }
 
-void read_data_file(const string& fname = "data_screw.txt")
+void read_data_file(const string& fname = "test.txt")
 {
     fstream file(fname, fstream::in);
 
@@ -1567,7 +1842,7 @@ int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(800, 600);
+    glutInitWindowSize(scr_width, scr_height);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
 
