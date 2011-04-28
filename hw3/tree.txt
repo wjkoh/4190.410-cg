@@ -45,84 +45,84 @@ BSPLINE   # Curve type (BSPLINE or INTERPOLATION)
 0 1.5 0 # pos
 
 ########### The first frame
-0 1 0 # cp
-2 2 0
-1 0 0
-2 -2 0
-0 -1 0
--2 -2 0
--1 0 0
--2 2 0 # cp
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
 
 1.5 # scale
 0.0 0 1 0
 0 3 0 # pos
 
 ########### The first frame
-0 1 0 # cp
-2 2 0
-1 0 0
-2 -2 0
-0 -1 0
--2 -2 0
--1 0 0
--2 2 0 # cp
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
 
 1.0 # scale
 0.0 0 1 0
 0 4.5 0 # pos
 
 ########### The first frame
-0 1 0 # cp
-2 2 0
-1 0 0
-2 -2 0
-0 -1 0
--2 -2 0
--1 0 0
--2 2 0 # cp
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
 
 1.5 # scale
 0.0 0 1 0
 0 6 0 # pos
 
 ########### The first frame
-0 1 0 # cp
-2 2 0
-1 0 0
-2 -2 0
-0 -1 0
--2 -2 0
--1 0 0
--2 2 0 # cp
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
 
 1.0 # scale
 0.0 0 1 0
 0 7.5 0 # pos
 
 ########### The first frame
-0 1 0 # cp
-1 1 0
-1 0 0
-1 -1 0
-0 -1 0
--1 -1 0
--1 0 0
--1 1 0 # cp
+0 1 # cp
+1 1
+1 0
+1 -1
+0 -1
+-1 -1
+-1 0
+-1 1 # cp
 
 1.5 # scale
 0.0 0 1 0
 0 9 0 # pos
 
 ########### The first frame
-0 1 0 # cp
-1 1 0
-1 0 0
-1 -1 0
-0 -1 0
--1 -1 0
--1 0 0
--1 1 0 # cp
+0 1 # cp
+1 1
+1 0
+1 -1
+0 -1
+-1 -1
+-1 0
+-1 1 # cp
 
 0.1 # scale
 0.0 0 1 0
@@ -130,14 +130,14 @@ BSPLINE   # Curve type (BSPLINE or INTERPOLATION)
 
 ########### The Last frame
 # It doesn't show when using Catmull-Rom spline.
-0 1 0 # cp
-2 2 0
-1 0 0
-2 -2 0
-0 -1 0
--2 -2 0
--1 0 0
--2 2 0 # cp
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
 
 1.0 # scale
 0.0 0 1 0
