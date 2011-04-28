@@ -1,0 +1,116 @@
+BSPLINE   # Curve type (BSPLINE or INTERPOLATION)
+8         # The number of keyframes
+8         # The number of control points of the cross section.
+
+########### The first frame
+0 1 # cp
+1 1 # cp
+1 0
+1 -1
+0 -1
+-1 -1
+-1 0
+-1 1
+
+0.0 # scale
+0.0 0 0 0
+0 -2.1 0 # pos
+
+########### The first frame
+0 1 # cp
+1 1 # cp
+1 0
+1 -1
+0 -1
+-1 -1
+-1 0
+-1 1
+
+0.0 # scale
+0.0 0 0 0
+0 -1.7 0 # pos
+
+########### The first frame
+0 1 # cp
+1 1 # cp
+1 0
+1 -1
+0 -1
+-1 -1
+-1 0
+-1 1
+
+0.5 # scale
+0.0 0 0 0
+0 -1.2 0 # pos
+
+########### The first frame
+0 1 # cp
+1 1 # cp
+1 0
+1 -1
+0 -1
+-1 -1
+-1 0
+-1 1
+
+1.0 # scale
+0.0 0 0 0
+0 -0.7 0 # pos
+
+########### The first frame
+0 1 # cp
+1 1 # cp
+1 0
+1 -1
+0 -1
+-1 -1
+-1 0
+-1 1
+
+1.5 # scale
+0.0 0 0 0
+0 -0.5 0 # pos
+
+########### The first frame
+0 1 # cp
+1 1 # cp
+1 0
+1 -1
+0 -1
+-1 -1
+-1 0
+-1 1
+
+1.0 # scale
+0.0 0 0 0
+0 1.1 0 # pos
+
+########### The Last frame
+0 1 0 # cp
+2 2 0
+1 0 0
+2 -2 0
+0 -1 0
+-2 -2 0
+-1 0 0
+-2 2 0 # cp
+
+1.2 # scale
+0 0 0 0
+0 2.1 0 # pos
+
+########### The Last frame
+# It doesn't show when using Catmull-Rom spline.
+0 1 0 # cp
+2 2 0
+1 0 0
+2 -2 0
+0 -1 0
+-2 -2 0
+-1 0 0
+-2 2 0 # cp
+
+1.7 # scale
+0 0 0 0
+0 3.1 0 # pos
