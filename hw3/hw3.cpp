@@ -106,7 +106,7 @@ float big_elbow = 0;
 float big_finger1 = 30;
 
 // to make light stationary
-GLfloat light_position[] = {-3.0, 3.0, -5.0, 0.0};
+GLfloat light_position[] = {-3.0, 3.0, 5.0, 0.0};
 GLfloat light1_position[] = {1.0, 1.0, 1.0, 1.0};
 
 #include <set>
@@ -1068,7 +1068,6 @@ void display(void)
         cross_sect_t& cs = g_data.con_pts[target_cs_idx];
         for (int j = 0; j < cs.size(); ++j)
         {
-            cout << cs[j] << endl;
             glVertex2f(scr_width/2 + cs[j][0]*scr_mag, scr_height/2 + cs[j][2]*scr_mag);
         }
         glEnd();
@@ -1488,9 +1487,6 @@ GLvoid mouse(GLint button, GLint state, GLint x, GLint y)
                         int t_x = scr_width/2 + cs[j][0]*scr_mag;
                         int t_y = scr_height/2 + cs[j][2]*scr_mag;
 
-                        cout << x_ << " " << y_ << endl;
-                        cout << t_x << " " << t_y << endl;
-
                         if (abs(t_x - x_) < 10 && abs(t_y - y_) < 10)
                         {
                             drag_cp = true;
@@ -1521,9 +1517,6 @@ GLvoid mouse(GLint button, GLint state, GLint x, GLint y)
                     {
                         int t_x = scr_width/2 + cs[j][0]*scr_mag;
                         int t_y = scr_height/2 + cs[j][2]*scr_mag;
-
-                        cout << x_ << " " << y_ << endl;
-                        cout << t_x << " " << t_y << endl;
 
                         float dist = sqrt(pow((float)t_x - x_, 2) + pow((float)t_y - y_, 2));
 
@@ -1708,8 +1701,6 @@ void draw_swept_surface()
             }
 
         }
-        cout << "end " << scale_spline.size() << endl;
-        cout << "end " << result.front().size() << endl;
 
         surfaces.clear();
         surface_normals.clear();
@@ -1765,7 +1756,6 @@ stringstream getline_and_ss(fstream& fs)
     while (fs.good() && temp.empty())
     {
         getline(fs, temp);
-        cout << temp << endl;
 
         if (!temp.empty() && temp.front() == '#')
             temp.clear();
@@ -1780,7 +1770,7 @@ void read_data_file(const string& fname = "data.txt")
 
     string curve_type;
     getline_and_ss(file) >> curve_type;
-    cout << curve_type << endl;
+    //cout << curve_type << endl;
 
     g_data.curve_type = data::BSPLINE;
     if (curve_type == "INTERPOLATION")
@@ -1788,11 +1778,11 @@ void read_data_file(const string& fname = "data.txt")
 
     int num_of_keyframes = 0;
     getline_and_ss(file) >> num_of_keyframes;
-    cout << num_of_keyframes << endl;
+    //cout << num_of_keyframes << endl;
 
     int num_of_control_points = 0;
     getline_and_ss(file) >> num_of_control_points;
-    cout << num_of_control_points << endl;
+    //cout << num_of_control_points << endl;
 
     g_data.clear();
     for (int i = 0; i < num_of_keyframes; ++i)
@@ -1803,7 +1793,7 @@ void read_data_file(const string& fname = "data.txt")
             float x = 0;
             float z = 0;
             getline_and_ss(file) >> x >> z;
-            cout << "x " << x << " z " << z << endl;
+            //cout << "x " << x << " z " << z << endl;
 
             vector3 t(x, 0, z); // TODO: 내 구현은 현재 x-y 평면에 그리게 되어있다. 수정할 것.
             cs.push_back(t);
@@ -1812,13 +1802,13 @@ void read_data_file(const string& fname = "data.txt")
 
         float scale_factor;
         getline_and_ss(file) >> scale_factor;
-        cout << "scaling_factor " << scale_factor << endl;
+        //cout << "scaling_factor " << scale_factor << endl;
         g_data.scale_factor.push_back(vector3(scale_factor, 0, 0));
 
         float angle = 0;
         vector3 axis;
         getline_and_ss(file) >> angle >> axis[0] >> axis[1] >> axis[2];
-        cout << angle << " axis " << axis << endl;
+        //cout << angle << " axis " << axis << endl;
 
         g_data.angle.push_back(angle);
         g_data.axis.push_back(axis);
@@ -1829,7 +1819,7 @@ void read_data_file(const string& fname = "data.txt")
 
         vector3 pos;
         getline_and_ss(file) >> pos[0] >> pos[1] >> pos[2];
-        cout << "position " << pos << endl;
+        //cout << "position " << pos << endl;
         if (pos[2] >= 25)
             pos[2] -= 25;
         g_data.pos.push_back(pos);
