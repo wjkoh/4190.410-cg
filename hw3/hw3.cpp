@@ -1774,7 +1774,7 @@ stringstream getline_and_ss(fstream& fs)
     return stringstream(temp);
 }
 
-void read_data_file(const string& fname = "data_screw.txt")
+void read_data_file(const string& fname = "bowl.txt")
 {
     fstream file(fname, fstream::in);
 

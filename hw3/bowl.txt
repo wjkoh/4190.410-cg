@@ -1,5 +1,5 @@
 BSPLINE   # Curve type (BSPLINE or INTERPOLATION)
-8         # The number of keyframes
+7         # The number of keyframes
 8         # The number of control points of the cross section.
 
 ########### The first frame
@@ -14,7 +14,7 @@ BSPLINE   # Curve type (BSPLINE or INTERPOLATION)
 
 0.0 # scale
 0.0 0 0 0
-0 -2.1 0 # pos
+0 -0.7 0 # pos
 
 ########### The first frame
 0 1 # cp
@@ -28,21 +28,7 @@ BSPLINE   # Curve type (BSPLINE or INTERPOLATION)
 
 0.0 # scale
 0.0 0 0 0
-0 -1.7 0 # pos
-
-########### The first frame
-0 1 # cp
-1 1 # cp
-1 0
-1 -1
-0 -1
--1 -1
--1 0
--1 1
-
-0.5 # scale
-0.0 0 0 0
-0 -1.2 0 # pos
+0 -0.7 0 # pos
 
 ########### The first frame
 0 1 # cp
