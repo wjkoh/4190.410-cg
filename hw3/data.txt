@@ -1,21 +1,103 @@
 BSPLINE   # Curve type (BSPLINE or INTERPOLATION)
-2         # The number of keyframes
-2         # The number of control points of the cross section.
+7         # The number of keyframes
+8         # The number of control points of the cross section.
 
 ########### The first frame
-10 10     # The 2D position of the first control point within X-Z plane
-15 25     # The second control point
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
 
-1         # Scaling factor
-1.2 1 0 0 # The orientation as a rotation about (1,0,0) by angle 1.2
-10 50 30  # Position
+1.0 # scale
+0.8 0 1 0
+0 -1 0 # pos
 
-########### The second frame
-5 10      # the first control point
-10 15     # the second control point
+########### The first frame
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
 
-0.8       # The scaling factor at the second frame
-0.5 0 1 2 # The orientation of the second keyframe
-20 10 40  # The position of the second keyframe
+1.0 # scale
+0.8 0 1 0
+0 0 0 # pos
 
-########### The third frame
+########### The first frame
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
+
+0.7 # scale
+1.6 0 1 0
+0 1.5 0 # pos
+
+########### The first frame
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
+
+0.6 # scale
+2.4 0 1 0
+0 3 0 # pos
+
+########### The first frame
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
+
+0.4 # scale
+3.2 0 1 0
+0 4.5 0 # pos
+
+########### The first frame
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
+
+0.0 # scale
+4.0 0 1 0
+0 6 0 # pos
+
+
+########### The Last frame
+# It doesn't show when using Catmull-Rom spline.
+0 1 # cp
+2 2
+1 0
+2 -2
+0 -1
+-2 -2
+-1 0
+-2 2 # cp
+
+0.0 # scale
+4.0 0 1 0
+0 6 0 # pos
