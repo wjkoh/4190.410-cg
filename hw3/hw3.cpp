@@ -14,6 +14,9 @@
 
 #include <iostream>
 #include <limits>
+#include <string>
+#include <fstream>
+#include <sstream>
 using namespace std;
 
 #include <cmath>
@@ -101,9 +104,52 @@ GLfloat light1_position[] = {1.0, 1.0, 1.0, 1.0};
 typedef list<vector3> set_t;
 set_t g_vertices;
 
+/*
+struct cross_sec
+{
+    vector3 pos;
+    float angle;
+    vector3 axis;
+    float scale_factor;
+
+    vector<vector3> con_pts;
+};
+*/
+
+typedef vector<vector3> cross_sect_t;
+
+struct data
+{
+    enum {
+        BSPLINE = 1,
+        INTERPOLATION, // Catmull-Rom
+        NATURAL_CUBIC,
+        B_SUBDIVISION,
+        INTERPOLATING_SUBDIVISION,
+    } curve_type;
+    //vector<cross_sec> cross_secs; 
+
+    void clear()
+    {
+        pos.clear();
+        angle.clear();
+        axis.clear();
+        scale_factor.clear();
+        con_pts.clear();
+    }
+
+    vector<vector3> pos;
+    vector<float> angle;
+    vector<vector3> axis;
+    vector<quaternionf_p> orient;
+    vector<vector3> scale_factor;
+
+    vector<cross_sect_t> con_pts;
+} g_data;
 
 bool wireframe_mode = false;
 vector<vector3> tangents;
+
 
 quaternionf_p Bezier_curve(float t, quaternionf_p b0, quaternionf_p b1, quaternionf_p b2, quaternionf_p b3)
 {
@@ -156,7 +202,6 @@ vector3 B_spline_deriv(float t, vector3 b0, vector3 b1, vector3 b2, vector3 b3)
     return pt;
 } 
 
-typedef vector<vector3> cross_sect_t;
 
 vector<cross_sect_t> surfaces;
 vector<cross_sect_t> surface_normals;
@@ -199,8 +244,10 @@ vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt, vector<quater
     }
     return result;
 }
+
 vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
 {
+	assert(pt.size() >= 4);
     vector3 prev_tan = (pt[1] - pt.back()) / 2;
     if (!closed)
         prev_tan = (pt[2] - pt[0]) / 2;
@@ -310,12 +357,8 @@ vector<vector3> Natural_Cubic_Spline(const vector<vector3>& pt, vector<vector3>&
         conv_mat(i, k) = 1;
         k = (k + 1) % pt_size;
     }
-    cout << "before" << endl;
-    cout << conv_mat << endl;
     conv_mat /= 6;
-    cout << conv_mat << endl;
     conv_mat.inverse();
-    cout << conv_mat << endl;
 
     vector<vector3> cp;
     for (int i = 0; i < pt_size; ++i)
@@ -324,10 +367,8 @@ vector<vector3> Natural_Cubic_Spline(const vector<vector3>& pt, vector<vector3>&
         result.zero();
         for (int j = 0; j < pt_size; ++j)
         {
-            cout << conv_mat(i, j) << " " << pt[j] << endl;
             result += conv_mat(i, j) * pt[j];
         }
-        cout << "cp " << result << endl;
         cp.push_back(result);
     }
 
@@ -1130,7 +1171,7 @@ void keyboard(unsigned char key, int x, int y)
         case '3':
         case '4':
         case '5':
-            draw_swept_surface(key);
+            draw_swept_surface(key - '0');
             glutPostRedisplay();
             break;
         case 'w':
@@ -1232,10 +1273,11 @@ void draw_swept_surface(int type)
     vector<cross_sect_t> draw_pt_list;
     vector<cross_sect_t> normal_list;
 
-    vector<vector3> draw_pos_list;
     vector<vector3> pos_spline;
-    vector<vector3> scale_factors;
     vector<vector3> scale_spline;
+    /*
+    vector<vector3> draw_pos_list;
+    vector<vector3> scale_factors;
 
     draw_pos_list.push_back(vector3(0,0,0));
     draw_pos_list.push_back(vector3(0,0,-3));
@@ -1243,17 +1285,21 @@ void draw_swept_surface(int type)
     draw_pos_list.push_back(vector3(0,0,-9));
     draw_pos_list.push_back(vector3(0,0,-12));
     draw_pos_list.push_back(vector3(0,0,-14));
-    pos_spline = Catmull_Rom(draw_pos_list, tangents, false);
+    */
+    pos_spline = Catmull_Rom(g_data.pos, tangents, false);
 
 
+    /*
     scale_factors.push_back(vector3(1.0, 0, 0));
     scale_factors.push_back(vector3(0.7, 0, 0));
     scale_factors.push_back(vector3(0.6, 0, 0));
     scale_factors.push_back(vector3(0.4, 0, 0));
     scale_factors.push_back(vector3(0.0, 0, 0));
     scale_factors.push_back(vector3(0.0, 0, 0));
-    scale_spline = Catmull_Rom(scale_factors, tangents, false);
+    */
+    scale_spline = Catmull_Rom(g_data.scale_factor, tangents, false);
 
+    /*
     vector<vector3> pts;
     pts.push_back(vector3(0,1,0));
     pts.push_back(vector3(2,2,0));
@@ -1295,12 +1341,10 @@ void draw_swept_surface(int type)
     angle += PI / 8;
     quaternion_rotation_axis_angle(orient, axis, angle);
     orients.push_back(orient);
+	*/
 
-    vector<quaternionf_p> tant;
-    vector<quaternionf_p> ori_spline = Catmull_Rom(orients, tant, false);
-    for (int i = 0; i < ori_spline.size(); ++i)
-        cout << ori_spline[i] << endl;
-
+    vector<quaternionf_p> tant;  
+    vector<quaternionf_p> ori_spline = Catmull_Rom(g_data.orient, tant, false);
 
     /*
     draw_pt_list.push_back(Catmull_Rom(pts, tangents));
@@ -1318,33 +1362,33 @@ void draw_swept_surface(int type)
     draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
     draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
     */
-    cout << "NCS " << Natural_Cubic_Spline(pts2, tangents, true).size() << endl;
+    //cout << "NCS " << Natural_Cubic_Spline(pts2, tangents, true).size() << endl;
 
     vector<vector3> (*func)(const vector<vector3>&, vector<vector3>&, bool, float);
     switch (type)
     {
         default:
-        case '1':
+        case data::INTERPOLATION:
             func = Catmull_Rom;
             break;
-        case '2':
+        case data::BSPLINE:
             func = B_Spline;
             break;
-        case '3':
+        case data::NATURAL_CUBIC:
             func = Natural_Cubic_Spline;
             break;
-        case '4':
+        case data::B_SUBDIVISION:
             func = B_Subdivision;
             break;
-        case '5':
+        case data::INTERPOLATING_SUBDIVISION:
             func = Interpolating_Subdivision;
             break;
     }
 
     vector<cross_sect_t> tangent_list;
-    for (int i = 0; i < 6; ++i)
+    for (int i = 0; i < g_data.con_pts.size(); ++i)
     {
-        draw_pt_list.push_back(func(pts, tangents, true, 0.01));
+        draw_pt_list.push_back(func(g_data.con_pts[i], tangents, true, 0.01));
         if (!tangents.empty())
             tangent_list.push_back(tangents);
     }
@@ -1354,7 +1398,6 @@ void draw_swept_surface(int type)
         vector<vector<vector3> > result2;
         // cross section의 한 point 당
 		int j;
-        cout << draw_pt_list.front().size() << endl;
         for (int j = 0; j < draw_pt_list.front().size(); ++j)
         {
             vector<vector3> temp;
@@ -1427,6 +1470,83 @@ void draw_swept_surface(int type)
     */
 }
 
+stringstream getline_and_ss(fstream& fs)
+{
+    string temp;
+    while (fs.good() && temp.empty())
+    {
+        getline(fs, temp);
+        cout << temp << endl;
+
+        if (!temp.empty() && temp.front() == '#')
+            temp.clear();
+    }
+
+    return stringstream(temp);
+}
+
+void read_data_file(const string& fname = "data_screw.txt")
+{
+    fstream file(fname, fstream::in);
+
+    string curve_type;
+    getline_and_ss(file) >> curve_type;
+    cout << curve_type << endl;
+
+    g_data.curve_type = data::BSPLINE;
+    if (curve_type == "INTERPOLATION")
+        g_data.curve_type = data::INTERPOLATION;
+
+    int num_of_keyframes = 0;
+    getline_and_ss(file) >> num_of_keyframes;
+    cout << num_of_keyframes << endl;
+
+    int num_of_control_points = 0;
+    getline_and_ss(file) >> num_of_control_points;
+    cout << num_of_control_points << endl;
+
+    g_data.clear();
+    for (int i = 0; i < num_of_keyframes; ++i)
+    {
+        cross_sect_t cs;
+        for (int j = 0; j < num_of_control_points; ++j)
+        {
+            float x = 0;
+            float z = 0;
+            getline_and_ss(file) >> x >> z;
+            cout << "x " << x << " z " << z << endl;
+
+            vector3 t(x, z, 0); // TODO: 내 구현은 현재 x-y 평면에 그리게 되어있다. 수정할 것.
+            cs.push_back(t);
+        }
+        g_data.con_pts.push_back(cs);
+
+        float scale_factor;
+        getline_and_ss(file) >> scale_factor;
+        cout << "scaling_factor " << scale_factor << endl;
+        g_data.scale_factor.push_back(vector3(scale_factor, 0, 0));
+
+        float angle = 0;
+        vector3 axis;
+        getline_and_ss(file) >> angle >> axis[0] >> axis[1] >> axis[2];
+        cout << angle << " axis " << axis << endl;
+
+        g_data.angle.push_back(angle);
+        g_data.axis.push_back(axis);
+
+        quaternionf_p orient;
+        quaternion_rotation_axis_angle(orient, axis, angle);
+        g_data.orient.push_back(orient);
+
+        vector3 pos;
+        getline_and_ss(file) >> pos[0] >> pos[1] >> pos[2];
+        cout << "position " << pos << endl;
+        g_data.pos.push_back(pos);
+    }
+
+    file.close();
+}
+
 int main(int argc, char** argv)
 {
     glutInit(&argc, argv);
@@ -1435,9 +1555,10 @@ int main(int argc, char** argv)
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
 
+    read_data_file();
     init();
 
-    draw_swept_surface(1);
+    draw_swept_surface(g_data.curve_type);
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);

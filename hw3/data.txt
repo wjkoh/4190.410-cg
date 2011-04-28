@@ -1,0 +1,21 @@
+BSPLINE   # Curve type (BSPLINE or INTERPOLATION)
+2         # The number of keyframes
+2         # The number of control points of the cross section.
+
+########### The first frame
+10 10     # The 2D position of the first control point within X-Z plane
+15 25     # The second control point
+
+1         # Scaling factor
+1.2 1 0 0 # The orientation as a rotation about (1,0,0) by angle 1.2
+10 50 30  # Position
+
+########### The second frame
+5 10      # the first control point
+10 15     # the second control point
+
+0.8       # The scaling factor at the second frame
+0.5 0 1 2 # The orientation of the second keyframe
+20 10 40  # The position of the second keyframe
+
+########### The third frame
