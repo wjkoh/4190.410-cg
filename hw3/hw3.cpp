@@ -120,14 +120,20 @@ typedef vector<vector3> cross_sect_t;
 
 struct data
 {
-    enum {
+    enum spline_t
+    {
         BSPLINE = 1,
-        INTERPOLATION, // Catmull-Rom
-        NATURAL_CUBIC,
-        B_SUBDIVISION,
-        INTERPOLATING_SUBDIVISION,
-    } curve_type;
-    //vector<cross_sec> cross_secs; 
+        INTERPOLATION = 2, // Catmull-Rom
+        NATURAL_CUBIC = 3,
+        B_SUBDIVISION = 4,
+        INTERPOLATING_SUBDIVISION = 5,
+    };
+
+    data()
+        : curve_type(BSPLINE)
+          , sweep_type(INTERPOLATION)
+    {
+    }
 
     void clear()
     {
@@ -137,6 +143,10 @@ struct data
         scale_factor.clear();
         con_pts.clear();
     }
+
+    spline_t curve_type;
+    spline_t sweep_type;
+    //vector<cross_sec> cross_secs; 
 
     vector<vector3> pos;
     vector<float> angle;
@@ -207,7 +217,10 @@ vector<cross_sect_t> surfaces;
 vector<cross_sect_t> surface_normals;
 
 
-vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt, vector<quaternionf_p>& tangents, bool closed = false, float resolution = 0.01)
+vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt,
+                                  vector<quaternionf_p>& tangents,
+                                  bool closed = false,
+                                  float resolution = 0.01)
 {
     assert(pt.size() > 0);
 
@@ -226,10 +239,10 @@ vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt, vector<quater
 
         if (closed || (i > 0 && i < pt.size() - 2))
         {
-            quaternionf_p b0 = pt[i];
-            quaternionf_p b1 = b0 + prev_tan/3;
-            quaternionf_p b3 = pt[(i + 1) % pt.size()];
-            quaternionf_p b2 = b3 - tan/3;
+            const quaternionf_p& b0 = pt[i];
+            const quaternionf_p& b1 = b0 + prev_tan/3;
+            const quaternionf_p& b3 = pt[(i + 1) % pt.size()];
+            const quaternionf_p& b2 = b3 - tan/3;
 
             for (float t = 0; t < 1; t += piece_res)
             {
@@ -245,7 +258,10 @@ vector<quaternionf_p> Catmull_Rom(const vector<quaternionf_p>& pt, vector<quater
     return result;
 }
 
-vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+vector<vector3> Catmull_Rom(const vector<vector3>& pt,
+                            vector<vector3>& tangents,
+                            bool closed = false,
+                            float resolution = 0.01)
 {
 	assert(pt.size() >= 4);
     vector3 prev_tan = (pt[1] - pt.back()) / 2;
@@ -263,10 +279,10 @@ vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents
 
         if (closed || (i > 0 && i < pt.size() - 2))
         {
-            vector3 b0 = pt[i];
-            vector3 b1 = b0 + prev_tan/3;
-            vector3 b3 = pt[(i + 1) % pt.size()];
-            vector3 b2 = b3 - tan/3;
+            const vector3& b0 = pt[i];
+            const vector3& b1 = b0 + prev_tan/3;
+            const vector3& b3 = pt[(i + 1) % pt.size()];
+            const vector3& b2 = b3 - tan/3;
 
             for (float t = 0; t < 1; t += piece_res)
             {
@@ -282,7 +298,10 @@ vector<vector3> Catmull_Rom(const vector<vector3>& pt, vector<vector3>& tangents
     return result;
 }
 
-vector<vector3> B_Spline(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+vector<vector3> B_Spline(const vector<vector3>& pt,
+                         vector<vector3>& tangents,
+                         bool closed = false,
+                         float resolution = 0.01)
 {
     assert(pt.size() >= 4);
 
@@ -297,10 +316,10 @@ vector<vector3> B_Spline(const vector<vector3>& pt, vector<vector3>& tangents, b
     {
         //if (closed || (i > 0 && i < pt.size() - 2)) //???
         {
-            vector3 b0 = pt[i];
-            vector3 b1 = pt[(i+1) % pt.size()];
-            vector3 b2 = pt[(i+2) % pt.size()];
-            vector3 b3 = pt[(i+3) % pt.size()];
+            const vector3& b0 = pt[i];
+            const vector3& b1 = pt[(i+1) % pt.size()];
+            const vector3& b2 = pt[(i+2) % pt.size()];
+            const vector3& b3 = pt[(i+3) % pt.size()];
 
             for (float t = 0; t < 1; t += piece_res)
             {
@@ -315,9 +334,20 @@ vector<vector3> B_Spline(const vector<vector3>& pt, vector<vector3>& tangents, b
     return result;
 }
 
-vector<vector3> Natural_Cubic_Spline(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+vector<vector3> Natural_Cubic_Spline(const vector<vector3>& pt,
+                                     vector<vector3>& tangents,
+                                     bool closed = false,
+                                     float resolution = 0.01)
 {
-    int pt_size = pt.size();
+    vector<vector3> new_pts(pt);
+    if (!closed)
+    {
+        // zero vector 삽입
+        new_pts.insert(new_pts.begin(), vector3().zero());
+        new_pts.push_back(vector3().zero());
+    }
+
+    const int pt_size = new_pts.size();
     matrix_d conv_mat(pt_size, pt_size);
     conv_mat.zero();
 
@@ -329,21 +359,16 @@ vector<vector3> Natural_Cubic_Spline(const vector<vector3>& pt, vector<vector3>&
             if (i == 0)
             {
                 conv_mat(i, 0) = 1;
-                j = (j + 1) % pt_size;
                 conv_mat(i, 1) = -2;
-                j = (j + 1) % pt_size;
                 conv_mat(i, 2) = 1;
-                j = (j + 1) % pt_size;
             }
             else
             {
                 conv_mat(i, pt_size - 3) = 1;
-                j = (j + 1) % pt_size;
                 conv_mat(i, pt_size - 2) = -2;
-                j = (j + 1) % pt_size;
                 conv_mat(i, pt_size - 1) = 1;
-                j = (j + 1) % pt_size;
             }
+            j = (j + 1) % pt_size;
             continue;
         }
 
@@ -367,15 +392,23 @@ vector<vector3> Natural_Cubic_Spline(const vector<vector3>& pt, vector<vector3>&
         result.zero();
         for (int j = 0; j < pt_size; ++j)
         {
-            result += conv_mat(i, j) * pt[j];
+            result += conv_mat(i, j) * new_pts[j];
         }
         cp.push_back(result);
+    }
+    if (!closed)
+    {
+        cp.erase(cp.end() - 1);
+        cp.erase(cp.begin());
     }
 
     return B_Spline(cp, tangents, closed, resolution);
 }
 
-vector<vector3> B_Subdivision(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+vector<vector3> B_Subdivision(const vector<vector3>& pt,
+                              vector<vector3>& tangents,
+                              bool closed = false,
+                              float resolution = 0.01)
 {
     assert(pt.size() >= 4);
 
@@ -391,30 +424,33 @@ vector<vector3> B_Subdivision(const vector<vector3>& pt, vector<vector3>& tangen
         vector<vector3> temp;
         for (int i = 0; i <= max_idx; ++i)
         {
-            vector3 b0 = result[i];
-            vector3 b1 = result[(i+1) % result.size()];
-            vector3 b2 = result[(i+2) % result.size()];
-            vector3 b3 = result[(i+3) % result.size()];
+            const vector3& b0 = result[i];
+            const vector3& b1 = result[(i+1) % result.size()];
+            const vector3& b2 = result[(i+2) % result.size()];
+            const vector3& b3 = result[(i+3) % result.size()];
 
             if (i == 0)
             {
-                vector3 p0 = (4*b0 + 4*b1)/8;
-                vector3 p1 = (1*b0 + 6*b1 + 1*b2)/8;
-                vector3 p2 = (4*b1 + 4*b2)/8;
+                const vector3& p0 = (4*b0 + 4*b1)/8;
+                const vector3& p1 = (1*b0 + 6*b1 + 1*b2)/8;
+                const vector3& p2 = (4*b1 + 4*b2)/8;
                 temp.push_back(p0);
                 temp.push_back(p1);
                 temp.push_back(p2);
             }
-            vector3 p3 = (1*b1 + 6*b2 +1*b3)/8;
-            vector3 p4 = (4*b2 + 4*b3)/8;
+            const vector3& p3 = (1*b1 + 6*b2 +1*b3)/8;
+            const vector3& p4 = (4*b2 + 4*b3)/8;
             temp.push_back(p3);
+            temp.push_back(p4);
 
+            /*
             if (fabs(p4[0] - result.front()[0]) >= numeric_limits<float>::epsilon() ||
                 fabs(p4[1] - result.front()[1]) >= numeric_limits<float>::epsilon() ||
                 fabs(p4[2] - result.front()[2]) >= numeric_limits<float>::epsilon())
             {
                 temp.push_back(p4);
             }
+            */
         }
         result = temp;
     }
@@ -430,7 +466,10 @@ vector<vector3> B_Subdivision(const vector<vector3>& pt, vector<vector3>& tangen
     return result;
 }
 
-vector<vector3> Interpolating_Subdivision(const vector<vector3>& pt, vector<vector3>& tangents, bool closed = false, float resolution = 0.01)
+vector<vector3> Interpolating_Subdivision(const vector<vector3>& pt,
+                                          vector<vector3>& tangents,
+                                          bool closed = false,
+                                          float resolution = 0.01)
 {
     assert(pt.size() >= 4);
 
@@ -441,24 +480,38 @@ vector<vector3> Interpolating_Subdivision(const vector<vector3>& pt, vector<vect
     vector<vector3> result = pt;
     while (result.size() < pieces)
     {
-        int max_idx = (closed ? result.size() - 1: result.size() - 2);
+        int min_idx = (closed ? 0 : 1);
+        int max_idx = (closed ? result.size() - 1: result.size() - 3);
 
         vector<vector3> temp;
-        for (int i = 0; i <= max_idx; ++i)
-        {
-            vector3 b0 = result[(i-1) % result.size()];
-            vector3 b1 = result[i];
-            vector3 b2 = result[(i+1) % result.size()];
-            vector3 b3 = result[(i+2) % result.size()];
+        if (!closed && min_idx == 1)
+            temp.push_back(result[0]);
 
-            vector3 p = (-1*b0 + 9*b1 + 9*b2 -1*b3)/16;
+        for (int i = min_idx; i <= max_idx; ++i)
+        {
+            vector3& b0 = result[(i-1) % result.size()];
+            if (!closed && i - 1 < 0)
+                b0 = result[i];
+
+            const vector3& b1 = result[i];
+            const vector3& b2 = result[(i+1) % result.size()];
+            vector3& b3 = result[(i+2) % result.size()];
+            if (!closed && i + 2 >= result.size())
+                b3 = result.back();
+
+            const vector3& p = (-1*b0 + 9*b1 + 9*b2 -1*b3)/16;
             temp.push_back(b1);
             temp.push_back(p);
         }
         if (!closed)
-            temp.push_back(result.back());
+        {
+            for (int i = max_idx + 1; i < result.size(); ++i)
+                temp.push_back(result[i]);
+        }
         result = temp;
     }
+    result.erase(result.end() - 1);
+    result.erase(result.begin());
 
     tangents.clear();
     for (int i = 0; i < result.size() + (closed ? 0 : -1); ++i)
@@ -473,7 +526,7 @@ vector<vector3> Interpolating_Subdivision(const vector<vector3>& pt, vector<vect
 
 // Function prototypes
 void set_cam_dist(float view_dist = view_distance);
-void draw_swept_surface(int type);
+void draw_swept_surface();
 
 // Picking
 vector3d screen_to_object(int x, int y)
@@ -1166,14 +1219,30 @@ void keyboard(unsigned char key, int x, int y)
             // Rotate camera
             // 여러 관절 조종
             // (애니메이션 끄고 할 것)
-        case '1':
+        case '1': // Cross func
         case '2':
         case '3':
         case '4':
         case '5':
-            draw_swept_surface(key - '0');
+            g_data.curve_type = static_cast<data::spline_t>(key - '0');
+            draw_swept_surface();
             glutPostRedisplay();
             break;
+        case '6': // Sweep func
+        case '7':
+        case '8':
+        case '9':
+        case '0':
+            {
+            int type = key - '0';
+            if (type == 0)
+                type = 10;
+            type -= 5;
+            g_data.sweep_type = static_cast<data::spline_t>(type);
+            draw_swept_surface();
+            glutPostRedisplay();
+            break;
+            }
         case 'w':
             wireframe_mode = !wireframe_mode;
             glutPostRedisplay();
@@ -1268,111 +1337,28 @@ GLvoid motion(GLint x, GLint y)
     glutPostRedisplay();
 }
 
-void draw_swept_surface(int type)
+void draw_swept_surface()
 {
     vector<cross_sect_t> draw_pt_list;
     vector<cross_sect_t> normal_list;
 
     vector<vector3> pos_spline;
     vector<vector3> scale_spline;
-    /*
-    vector<vector3> draw_pos_list;
-    vector<vector3> scale_factors;
 
-    draw_pos_list.push_back(vector3(0,0,0));
-    draw_pos_list.push_back(vector3(0,0,-3));
-    draw_pos_list.push_back(vector3(0,0,-6));
-    draw_pos_list.push_back(vector3(0,0,-9));
-    draw_pos_list.push_back(vector3(0,0,-12));
-    draw_pos_list.push_back(vector3(0,0,-14));
-    */
-    pos_spline = Catmull_Rom(g_data.pos, tangents, false);
+    const float cross_resolution  = 0.01;
+    const float sweep_resolution  = 0.01;
 
+    vector<vector3> (*func)(const vector<vector3>&, vector<vector3>&, bool, float) = B_Spline;
+    vector<vector3> (*sweep_func)(const vector<vector3>&, vector<vector3>&, bool, float) = Catmull_Rom;
 
-    /*
-    scale_factors.push_back(vector3(1.0, 0, 0));
-    scale_factors.push_back(vector3(0.7, 0, 0));
-    scale_factors.push_back(vector3(0.6, 0, 0));
-    scale_factors.push_back(vector3(0.4, 0, 0));
-    scale_factors.push_back(vector3(0.0, 0, 0));
-    scale_factors.push_back(vector3(0.0, 0, 0));
-    */
-    scale_spline = Catmull_Rom(g_data.scale_factor, tangents, false);
-
-    /*
-    vector<vector3> pts;
-    pts.push_back(vector3(0,1,0));
-    pts.push_back(vector3(2,2,0));
-    pts.push_back(vector3(1,0,0));
-    pts.push_back(vector3(2,-2,0));
-    pts.push_back(vector3(0,-1,0));
-    pts.push_back(vector3(-2,-2,0));
-    pts.push_back(vector3(-1,0,0));
-    pts.push_back(vector3(-2,2,0));
-
-    vector<vector3> pts2;
-    pts2.push_back(vector3(2,2,0));
-    pts2.push_back(vector3(2,-2,0));
-    pts2.push_back(vector3(-2,-2,0));
-    pts2.push_back(vector3(-2,2,0));
-
-    quaternionf_p orient;
-    orient.identity();
-
-    vector<quaternionf_p> orients;
-    vector3 axis(0, 0, 1);
-    float angle = PI / 8;
-
-    orients.push_back(orient);
-    quaternion_rotation_axis_angle(orient, axis, angle);
-    orients.push_back(orient);
-    angle += PI / 8;
-    quaternion_rotation_axis_angle(orient, axis, angle);
-    orients.push_back(orient);
-    angle += PI / 8;
-    quaternion_rotation_axis_angle(orient, axis, angle);
-    orients.push_back(orient);
-    angle += PI / 8;
-    quaternion_rotation_axis_angle(orient, axis, angle);
-    orients.push_back(orient);
-    angle += PI / 8;
-    quaternion_rotation_axis_angle(orient, axis, angle);
-    orients.push_back(orient);
-    angle += PI / 8;
-    quaternion_rotation_axis_angle(orient, axis, angle);
-    orients.push_back(orient);
-	*/
-
-    vector<quaternionf_p> tant;  
-    vector<quaternionf_p> ori_spline = Catmull_Rom(g_data.orient, tant, false);
-
-    /*
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
-    draw_pt_list.push_back(Catmull_Rom(pts2, tangents));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
-    draw_pt_list.push_back(Catmull_Rom(pts2, tangents));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents));
-    draw_pt_list.push_back(Catmull_Rom(pts2, tangents));
-    */
-    /*
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
-    draw_pt_list.push_back(Catmull_Rom(pts, tangents, true));
-    */
-    //cout << "NCS " << Natural_Cubic_Spline(pts2, tangents, true).size() << endl;
-
-    vector<vector3> (*func)(const vector<vector3>&, vector<vector3>&, bool, float);
-    switch (type)
+    switch (g_data.curve_type)
     {
         default:
-        case data::INTERPOLATION:
-            func = Catmull_Rom;
-            break;
         case data::BSPLINE:
             func = B_Spline;
+            break;
+        case data::INTERPOLATION:
+            func = Catmull_Rom;
             break;
         case data::NATURAL_CUBIC:
             func = Natural_Cubic_Spline;
@@ -1385,10 +1371,37 @@ void draw_swept_surface(int type)
             break;
     }
 
+    switch (g_data.sweep_type)
+    {
+        case data::BSPLINE:
+            sweep_func = B_Spline;
+            break;
+        default:
+        case data::INTERPOLATION:
+            sweep_func = Catmull_Rom;
+            break;
+        case data::NATURAL_CUBIC:
+            sweep_func = Natural_Cubic_Spline;
+            break;
+        case data::B_SUBDIVISION:
+            sweep_func = B_Subdivision;
+            break;
+        case data::INTERPOLATING_SUBDIVISION:
+            sweep_func = Interpolating_Subdivision;
+            break;
+    }
+
+    pos_spline = sweep_func(g_data.pos, tangents, false, sweep_resolution);
+    scale_spline = sweep_func(g_data.scale_factor, tangents, false, sweep_resolution);
+
+    vector<quaternionf_p> tant;  
+    vector<quaternionf_p> ori_spline = Catmull_Rom(g_data.orient, tant, false, 0.005);
+
+
     vector<cross_sect_t> tangent_list;
     for (int i = 0; i < g_data.con_pts.size(); ++i)
     {
-        draw_pt_list.push_back(func(g_data.con_pts[i], tangents, true, 0.01));
+        draw_pt_list.push_back(func(g_data.con_pts[i], tangents, true, cross_resolution));
         if (!tangents.empty())
             tangent_list.push_back(tangents);
     }
@@ -1410,11 +1423,12 @@ void draw_swept_surface(int type)
                 if (!tangent_list.empty())
                     temp2.push_back(tangent_list[i][j % tangent_list[i].size()]);
             }
-            temp = Catmull_Rom(temp, tangents, false);
+            temp = sweep_func(temp, tangents, false, sweep_resolution);
             result.push_back(temp);
+
             if (!temp2.empty())
             {
-                temp2 = Catmull_Rom(temp2, tangents, false);
+                temp2 = sweep_func(temp2, tangents, false, sweep_resolution);
                 result2.push_back(temp2);
             }
 
@@ -1516,7 +1530,7 @@ void read_data_file(const string& fname = "data_screw.txt")
             getline_and_ss(file) >> x >> z;
             cout << "x " << x << " z " << z << endl;
 
-            vector3 t(x, z, 0); // TODO: 내 구현은 현재 x-y 평면에 그리게 되어있다. 수정할 것.
+            vector3 t(x, 0, z); // TODO: 내 구현은 현재 x-y 평면에 그리게 되어있다. 수정할 것.
             cs.push_back(t);
         }
         g_data.con_pts.push_back(cs);
@@ -1541,6 +1555,8 @@ void read_data_file(const string& fname = "data_screw.txt")
         vector3 pos;
         getline_and_ss(file) >> pos[0] >> pos[1] >> pos[2];
         cout << "position " << pos << endl;
+        if (pos[2] >= 25)
+            pos[2] -= 25;
         g_data.pos.push_back(pos);
     }
 
@@ -1558,7 +1574,7 @@ int main(int argc, char** argv)
     read_data_file();
     init();
 
-    draw_swept_surface(g_data.curve_type);
+    draw_swept_surface();
 
     glutDisplayFunc(display);
     glutReshapeFunc(reshape);
