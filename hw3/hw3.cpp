@@ -1074,7 +1074,30 @@ void display(void)
 
         glBegin(GL_LINE_LOOP);
         vector<vector3> tant;
-        vector<vector3> spline = Catmull_Rom(cs, tant, true, 0.01);
+
+        vector<vector3> (*func)(const vector<vector3>&, vector<vector3>&, bool, float) = Catmull_Rom;
+
+        switch (g_data.curve_type)
+        {
+            default:
+            case data::BSPLINE:
+                func = B_Spline;
+                break;
+            case data::INTERPOLATION:
+                func = Catmull_Rom;
+                break;
+            case data::NATURAL_CUBIC:
+                func = Natural_Cubic_Spline;
+                break;
+            case data::B_SUBDIVISION:
+                func = B_Subdivision;
+                break;
+            case data::INTERPOLATING_SUBDIVISION:
+                func = Interpolating_Subdivision;
+                break;
+        }
+
+        vector<vector3> spline = func(cs, tant, true, 0.01);
         for (int j = 0; j < spline.size(); ++j)
         {
             glVertex2f(scr_width/2 + spline[j][0]*scr_mag, scr_height/2 + spline[j][2]*scr_mag);
@@ -1750,26 +1773,41 @@ void draw_swept_surface()
     */
 }
 
-stringstream getline_and_ss(fstream& fs)
+string getline_and_ss(fstream& fs)
 {
     string temp;
     while (fs.good() && temp.empty())
     {
         getline(fs, temp);
 
-        if (!temp.empty() && temp.front() == '#')
-            temp.clear();
-    }
+        bool flag = true;
+        for (int i = 0; i < temp.size(); ++i)
+        {
+            if (!isspace(temp[i]))
+            {
+                flag = false;
+                break;
+            }
+        } 
+        if (flag) temp.clear();
 
-    return stringstream(temp);
+        if (!temp.empty() && temp[0] == '#')
+        {
+            temp.clear();
+        }
+    }
+    return temp;
 }
 
 void read_data_file(const string& fname = "data.txt")
 {
-    fstream file(fname, fstream::in);
+    fstream file(fname.c_str(), fstream::in);
 
     string curve_type;
-    getline_and_ss(file) >> curve_type;
+    {
+        stringstream ss(getline_and_ss(file));
+        ss >> curve_type;
+    }
     //cout << curve_type << endl;
 
     g_data.curve_type = data::BSPLINE;
@@ -1777,11 +1815,17 @@ void read_data_file(const string& fname = "data.txt")
         g_data.curve_type = data::INTERPOLATION;
 
     int num_of_keyframes = 0;
-    getline_and_ss(file) >> num_of_keyframes;
+    {
+        stringstream ss(getline_and_ss(file));
+        ss >> num_of_keyframes;
+    }
     //cout << num_of_keyframes << endl;
 
     int num_of_control_points = 0;
-    getline_and_ss(file) >> num_of_control_points;
+    {
+        stringstream ss(getline_and_ss(file));
+        ss >> num_of_control_points;
+    }
     //cout << num_of_control_points << endl;
 
     g_data.clear();
@@ -1792,7 +1836,10 @@ void read_data_file(const string& fname = "data.txt")
         {
             float x = 0;
             float z = 0;
-            getline_and_ss(file) >> x >> z;
+            {
+                stringstream ss(getline_and_ss(file));
+                ss >> x >> z;
+            }
             //cout << "x " << x << " z " << z << endl;
 
             vector3 t(x, 0, z); // TODO: 내 구현은 현재 x-y 평면에 그리게 되어있다. 수정할 것.
@@ -1801,13 +1848,19 @@ void read_data_file(const string& fname = "data.txt")
         g_data.con_pts.push_back(cs);
 
         float scale_factor;
-        getline_and_ss(file) >> scale_factor;
+        {
+            stringstream ss(getline_and_ss(file));
+            ss >> scale_factor;
+        }
         //cout << "scaling_factor " << scale_factor << endl;
         g_data.scale_factor.push_back(vector3(scale_factor, 0, 0));
 
         float angle = 0;
         vector3 axis;
-        getline_and_ss(file) >> angle >> axis[0] >> axis[1] >> axis[2];
+        {
+            stringstream ss(getline_and_ss(file));
+            ss >> angle >> axis[0] >> axis[1] >> axis[2];
+        }
         //cout << angle << " axis " << axis << endl;
 
         g_data.angle.push_back(angle);
@@ -1818,7 +1871,10 @@ void read_data_file(const string& fname = "data.txt")
         g_data.orient.push_back(orient);
 
         vector3 pos;
-        getline_and_ss(file) >> pos[0] >> pos[1] >> pos[2];
+        {
+            stringstream ss(getline_and_ss(file));
+            ss >> pos[0] >> pos[1] >> pos[2];
+        }
         //cout << "position " << pos << endl;
         if (pos[2] >= 25)
             pos[2] -= 25;
