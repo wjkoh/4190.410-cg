@@ -98,7 +98,7 @@ int elbow = 0;
 int finger1 = 30;
 float position_z = 0; // move
 
-// 큰 로봇팔
+// 큰 로봇팔 
 float big_rot = 0;
 float big_shoulder_yaw = 100;
 float big_elbow = 0;
