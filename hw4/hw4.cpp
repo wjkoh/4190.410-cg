@@ -18,6 +18,7 @@
 #include <fstream>
 #include <sstream>
 #include <queue>
+#include <map>
 using namespace std;
 
 #include <cmath>
@@ -43,7 +44,7 @@ const float INITIAL_FOV = 60.0;
 // 우상단->좌하단 드래그 시 문제
 //
 // normal vector 추가 -done
-// 각 면마다 다른 material 설정
+// 각 면마다 다른 material 설정 -done
 // show all용으로 g_vertices에 vertex 추가하기?
 // Triangle들의 CW, CCW 다시 체크
 
@@ -57,6 +58,9 @@ int target_cp = 0;
 bool drag_cp = false;
 
 // Camera position
+const vector3 INIT_CAM_VEC(0.0, 0.0, 5); // origin to camera
+const vector3 INIT_CAM_UP_VEC(0.0, 1.0, 0); // origin to camera
+
 vector3 cam_vec(0.0, 0.0, 5); // origin to camera
 vector3 cam_vec_start(0.0, 0.0, 5); // origin to camera
 
@@ -106,13 +110,16 @@ float big_finger1 = 30;
 
 // to make light stationary
 GLfloat light_position[] = {0.0, 1.0, 0.0, 0.0};
-GLfloat light1_position[] = {0.0, 1.0, 1.0, 1.0};
+GLfloat light1_position[] = {16.0, 16.0, 0.0, 1.0};
+GLfloat light2_position[] = {0.0, -1.0, 0.0, 0.0};
 
 #include <set>
 #include <list>
 typedef list<vector3> set_t;
 set_t g_vertices;
 
+bool swept_transparent = false;
+const float INIT_TRANSPARENCY = 0.5;
 float transparency = 0.5;
 
 vector3 mult_mat(int matrix, vector3 pt)
@@ -138,22 +145,65 @@ vector3 mult_mat(int matrix, vector3 pt)
 
 typedef quaternionf_p plane_t; // ax+by+cz+d=0 -> (a, b, c, d)
 
+class material_t
+{
+    public:
+        material_t()
+            : diffuse(vector4(0.8, 0.8, 0.8, 1.0)),
+            specular(vector4(0, 0, 0, 1)),
+            ambient(vector4(0.2, 0.2, 0.2, 1.0)),
+            shininess(0)
+    {
+    }
+
+        material_t(vector4 diffuse, vector4 specular, vector4 ambient, float shininess)
+            : diffuse(diffuse),
+            specular(specular),
+            ambient(ambient),
+            shininess(shininess)
+    {
+    }
+
+        void apply(bool transparent)
+        {
+            vector4 tmp(diffuse);
+            if (transparent)
+                tmp[3] = transparency;
+
+            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, tmp.data());
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, specular.data());
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, ambient.data());
+            glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, shininess);
+        }
+
+        vector4 diffuse;
+        vector4 specular;
+        vector4 ambient;
+        float shininess;
+};
+
+map<string, material_t> material_map;
+
 class triangle_t
 {
     public:
         triangle_t(const vector3& v0, const vector3& v1, const vector3& v2, bool cube = false)
-            : cube(cube)
+            : material_name(""),
+            cube(cube)
         {
             v[0] = v0;
             v[1] = v1;
             v[2] = v2;
 
             n[0] = n[1] = n[2] = get_normal_vector();
+            
+            if (cube) material_name = "cube";
         }
 
         triangle_t(const vector3& v0, const vector3& v1, const vector3& v2,
                    const vector3& n0, const vector3& n1, const vector3& n2, bool cube = false)
-            : cube(cube)
+            : material_name(""), 
+            cube(cube)
         {
             v[0] = v0;
             v[1] = v1;
@@ -162,6 +212,8 @@ class triangle_t
             n[0] = n0;
             n[1] = n1;
             n[2] = n2;
+
+            if (cube) material_name = "cube";
         }
 
         void set_normal(const vector3& n0, const vector3& n1, const vector3& n2)
@@ -173,6 +225,13 @@ class triangle_t
 
         void display() const
         {
+            if (!material_name.empty())
+            {
+                material_map[material_name].apply(cube);
+            }
+            else
+                material_t().apply(cube);
+
             for (int i = 0; i < 3; ++i)
             {
                 glNormal3fv(n[i].data());
@@ -188,6 +247,8 @@ class triangle_t
         }
 
         const vector3& operator[](int idx) const    { return v[idx]; }
+        vector3& operator[](int idx)                { return v[idx]; }
+
         bool operator<(const triangle_t& rhs) const { return this->area() < rhs.area(); }
 
         float area() const
@@ -200,12 +261,13 @@ class triangle_t
         vector3 v[3];   // 3 points of a triangle
         vector3 n[3];   // normal vector
         bool cube;      // cube polygon
+        string material_name;
 };
 
 ostream& operator<<(ostream& os, const triangle_t& t)
 {
-    os << t[0] << "| ";
-    os << t[1] << "| ";
+    os << t[0] << " | ";
+    os << t[1] << " | ";
     os << t[2] << endl;
     return os;
 }
@@ -260,7 +322,6 @@ vector<f_or_b_t> is_front_or_back(const triangle_t& plane, const triangle_t& pol
     plane_t p = triangle_to_plane(plane);
 
     int f_or_b[3] = {0};
-
     for (int i = 0; i < 3; ++i)
     {
         float det = dot(p.imaginary(), polygon[i]) + p.real();
@@ -273,6 +334,15 @@ vector<f_or_b_t> is_front_or_back(const triangle_t& plane, const triangle_t& pol
     }
 
     vector<f_or_b_t> result;
+
+    // 불투명 polygon 끼리는 쪼개지 않고 같은 node에 둔다.
+    // (leaf 일 때, 해당 node에서 더 내려가지 않고 쌓임.)
+    if (!plane.cube && !polygon.cube)
+    {
+        result.push_back(f_or_b_t(SAME, polygon));
+        return result;
+    }
+
     // 교점 0개 or 겹침
     if (f_or_b[0] == f_or_b[1] && f_or_b[1] == f_or_b[2])
     {
@@ -330,30 +400,30 @@ vector<f_or_b_t> is_front_or_back(const triangle_t& plane, const triangle_t& pol
     if (quad.size() == 5)
     {
         triangle_t tri1(quad[0].second, quad[1].second, quad[2].second,
-                        quad_normal[0], quad_normal[1], quad_normal[2] 
-                        );
+                        quad_normal[0], quad_normal[1], quad_normal[2], polygon.cube);
+        tri1.material_name = polygon.material_name;
         result.push_back(f_or_b_t(quad[1].first, tri1));
 
         triangle_t tri2(quad[0].second, quad[2].second, quad[3].second,
-                        quad_normal[0], quad_normal[2], quad_normal[3] 
-                       );
+                        quad_normal[0], quad_normal[2], quad_normal[3], polygon.cube);
+        tri2.material_name = polygon.material_name;
         result.push_back(f_or_b_t(quad[3].first, tri2));
 
         triangle_t tri3(quad[0].second, quad[3].second, quad[4].second,
-                        quad_normal[0], quad_normal[3], quad_normal[4] 
-                       );
+                        quad_normal[0], quad_normal[3], quad_normal[4], polygon.cube);
+        tri3.material_name = polygon.material_name;
         result.push_back(f_or_b_t(quad[4].first, tri3));
     }
     else if (quad.size() == 4)
     {
         triangle_t tri1(quad[0].second, quad[1].second, quad[2].second,
-                        quad_normal[0], quad_normal[1], quad_normal[2] 
-                        );
+                        quad_normal[0], quad_normal[1], quad_normal[2], polygon.cube);
+        tri1.material_name = polygon.material_name;
         result.push_back(f_or_b_t(quad[1].first, tri1));
 
         triangle_t tri2(quad[2].second, quad[3].second, quad[0].second,
-                        quad_normal[2], quad_normal[3], quad_normal[0] 
-                        );
+                        quad_normal[2], quad_normal[3], quad_normal[0], polygon.cube);
+        tri2.material_name = polygon.material_name;
         result.push_back(f_or_b_t(quad[3].first, tri2));
     }
     else
@@ -365,6 +435,7 @@ vector<f_or_b_t> is_front_or_back(const triangle_t& plane, const triangle_t& pol
     return result;
 }
 
+// BSP tree
 void add_tree(node_t* node, const triangle_t& triangle)
 {
     assert(node != NULL);
@@ -373,26 +444,6 @@ void add_tree(node_t* node, const triangle_t& triangle)
     {
         node->polygons.push_back(triangle);
         return;
-    }
-
-    // Cube의 polygon들로만 BSP
-    // 원래는 cube의 polygon이 나중에 들어오는 경우 polygons에 있는 polygon들을 다시 add_tree 해줘야 한다.
-    // 하지만 cube의 polygon들이 일반적으로 커서 먼저 들어오기 때문에 그냥 두었다.
-    if (!node->polygons.front().cube) // 보통 leaf 조건
-    {
-        /*
-        if (triangle.cube)
-        {
-            node->polygons.insert(node->polygons.begin(), triangle);
-            // polygons에 있는 polygon들 재처리
-            return;
-        }
-        else
-        */
-        {
-            node->polygons.push_back(triangle);
-            return;
-        }
     }
 
     vector<f_or_b_t> result = is_front_or_back(node->polygons.front(), triangle);
@@ -426,7 +477,8 @@ void traverse_tree(node_t* node, bool preorder)
     // find an eye location
     {
         plane_t p = triangle_to_plane(node->polygons.front());
-        float det = dot(p.imaginary(), cam_vec) + p.real();
+        vector3 eye_pos = rot_origin + cam_vec;
+        float det = dot(p.imaginary(), eye_pos) + p.real();
 
         preorder = true;
         if (det > numeric_limits<float>::epsilon())
@@ -445,66 +497,7 @@ void traverse_tree(node_t* node, bool preorder)
         const vector<triangle_t>& p = node->polygons;
         for (int i = 0; i < p.size(); ++i)
         {
-            const triangle_t& t = p[i];
-            if (t.cube)
-            {
-                GLfloat mat_specular[] = {1.0, 1.0, 1.0, 1.0};
-                GLfloat mat_diffuse[] = {0.0, 0.0, 255/255.0, transparency};
-                GLfloat mat_ambient[] = {0.1, 0.1, 0.1, 1.0};
-                //GLfloat mat_ambient[] = {0.0, 0.0, 255/255.0, 1.0};
-                //GLfloat mat_ambient[] = {25/255.0, 25/255.0, 112/255.0, 1.0};
-                //GLfloat mat_shininess[] = {128.0};
-
-                glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
-                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
-                glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_ambient);
-                //glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
-            }
-            else
-            {
-                /*
-                   GLfloat mat_specular[] = {0.774597, 0.774597, 0.77459797, 1.0};
-                   GLfloat mat_diffuse[] = {0.4, 0.4, 0.4, 1.0};
-                   GLfloat mat_ambient[] = {0.25, 0.25, 0.25, 1.0};
-                   GLfloat mat_shininess[] = {76.8};
-                   */
-
-                /*
-                // plastic
-                GLfloat mat_specular[] = {0.5, 0.5, 0.5, 1.0};
-                GLfloat mat_diffuse[] = {0.01, 0.01, 0.01, 1.0};
-                GLfloat mat_ambient[] = {0.0, 0.0, 0.0, 1.0};
-                GLfloat mat_shininess[] = {32};
-                */
-
-                // gold
-                GLfloat mat_specular[] = {0.628281, 0.555802, 0.366065, 1.0};
-                GLfloat mat_diffuse[] = {0.75164, 0.60648, 0.22648, 1.0};
-                GLfloat mat_ambient[] = {0.24725, 0.1995, 0.0745, 1.0};
-                GLfloat mat_shininess[] = {51.2};
-
-                /*
-                // brass
-                GLfloat mat_specular[] = {0.992157, 0.941176, 0.807843, 1.0};
-                GLfloat mat_diffuse[] = {0.780392, 0.568627, 0.113725, 1.0};
-                GLfloat mat_ambient[] = {0.329412, 0.223529, 0.027451, 1.0};
-                GLfloat mat_shininess[] = {27.8974};
-                */
-
-                /*
-                   GLfloat mat_specular[] = {0.773911, 0.773911, 0.773911, 1.0};
-                   GLfloat mat_diffuse[] = {0.2775, 0.2775, 0.2775, 1.0};
-                   GLfloat mat_ambient[] = {0.23125, 0.23125, 0.23125, 1.0};
-                   GLfloat mat_shininess[] = {89.6};
-                   */
-
-                glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, mat_specular);
-                glMaterialfv(GL_FRONT_AND_BACK, GL_SHININESS, mat_shininess);
-                glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, mat_diffuse);
-                glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, mat_ambient);
-            }
-
-            t.display();
+            p[i].display();
         }
         //blue += 50;
     }
@@ -972,61 +965,133 @@ void polygon(int i, int j, int k)
     triangle_list.push_back(triangle_t(vertices[i], vertices[j], vertices[k], true));
 }
 
-void polyhedron()
+void polygon(int i, int j, int k, int l, string name)
 {
-    double Pi = 3.141592653589793238462643383279502884197;
-    double phiaa  = 26.56505; /* phi needed for generation */
+    vector3 trans_vec(0, -5.5, 0);
+    //vector3 trans_vec(0, 0, 0);
 
-    float r = 1.5; /* any radius in which the polyhedron is inscribed */
-    double phia = Pi*phiaa/180.0; /* 2 sets of four points */
-    double theb = Pi*36.0/180.0;  /* offset second set 36 degrees */
-    double the72 = Pi*72.0/180;   /* step 72 degrees */
+    triangle_t t1(vertices[i], vertices[j], vertices[k], true);
+    t1.material_name = name;
 
-    vertices[0][0]=0.0;
-    vertices[0][1]=0.0;
-    vertices[0][2]=r;
+    t1[0] += trans_vec;
+    t1[1] += trans_vec;
+    t1[2] += trans_vec;
 
-    vertices[11][0]=0.0;
-    vertices[11][1]=0.0;
-    vertices[11][2]=-r;
-    double the = 0.0;
+    triangle_list.push_back(t1);
 
-    for(int i=1; i<6; i++)
+    triangle_t t2(vertices[k], vertices[l], vertices[i], true);
+    t2.material_name = name;
+
+    t2[0] += trans_vec;
+    t2[1] += trans_vec;
+    t2[2] += trans_vec;
+
+    triangle_list.push_back(t2);
+}
+
+void polyhedron(int num_of_faces = 20, float r = 1.5)
+{
+    /* r: any radius in which the polyhedron is inscribed */
+
+    if (num_of_faces == 20)
     {
-        vertices[i][0]=r*cos(the)*cos(phia);
-        vertices[i][1]=r*sin(the)*cos(phia);
-        vertices[i][2]=r*sin(phia);
-        the = the+the72;
-    }
-    the=theb;
-    for(int i=6; i<11; i++)
-    {
-        vertices[i][0]=r*cos(the)*cos(-phia);
-        vertices[i][1]=r*sin(the)*cos(-phia);
-        vertices[i][2]=r*sin(-phia);
-        the = the+the72;
-    }
+        double Pi = 3.141592653589793238462643383279502884197;
+        double phiaa  = 26.56505; /* phi needed for generation */
 
-    polygon(0,1,2);
-    polygon(0,2,3);
-    polygon(0,3,4);
-    polygon(0,4,5);
-    polygon(0,5,1);
-    polygon(11,6,7);
-    polygon(11,7,8);
-    polygon(11,8,9);
-    polygon(11,9,10);
-    polygon(11,10,6);
-    polygon(1,2,6);
-    polygon(2,3,7);
-    polygon(3,4,8);
-    polygon(4,5,9);
-    polygon(5,1,10);
-    polygon(6,7,2);
-    polygon(7,8,3);
-    polygon(8,9,4);
-    polygon(9,10,5);
-    polygon(10,6,1);
+        double phia = Pi*phiaa/180.0; /* 2 sets of four points */
+        double theb = Pi*36.0/180.0;  /* offset second set 36 degrees */
+        double the72 = Pi*72.0/180;   /* step 72 degrees */
+
+        vertices[0][0]=0.0;
+        vertices[0][1]=0.0;
+        vertices[0][2]=r;
+
+        vertices[11][0]=0.0;
+        vertices[11][1]=0.0;
+        vertices[11][2]=-r;
+        double the = 0.0;
+
+        for(int i=1; i<6; i++)
+        {
+            vertices[i][0]=r*cos(the)*cos(phia);
+            vertices[i][1]=r*sin(the)*cos(phia);
+            vertices[i][2]=r*sin(phia);
+            the = the+the72;
+        }
+
+        the=theb;
+        for(int i=6; i<11; i++)
+        {
+            vertices[i][0]=r*cos(the)*cos(-phia);
+            vertices[i][1]=r*sin(the)*cos(-phia);
+            vertices[i][2]=r*sin(-phia);
+            the = the+the72;
+        }
+
+        polygon(0,1,2);
+        polygon(0,2,3);
+        polygon(0,3,4);
+        polygon(0,4,5);
+        polygon(0,5,1);
+        polygon(11,6,7);
+        polygon(11,7,8);
+        polygon(11,8,9);
+        polygon(11,9,10);
+        polygon(11,10,6);
+        polygon(1,2,6);
+        polygon(2,3,7);
+        polygon(3,4,8);
+        polygon(4,5,9);
+        polygon(5,1,10);
+        polygon(6,7,2);
+        polygon(7,8,3);
+        polygon(8,9,4);
+        polygon(9,10,5);
+        polygon(10,6,1);
+    }
+    else if (num_of_faces == 4)
+    {
+        double Pi = 3.141592653589793238462643383279502884197;
+        double phiaa = 35.264391; /* the phi needed for generation */
+
+        double phia = Pi*phiaa/180.0; /* 2 sets of four points */
+        double phib = -phia;
+        double the90 = Pi*90.0/180.0;
+        double the = PI/4.0; //0.0;
+
+        for(int i=0; i<4; i++)
+        {
+            vertices[i][0]=r*cos(the)*cos(phia);
+            vertices[i][1]=r*sin(the)*cos(phia);
+            vertices[i][2]=r*sin(phia);
+            the = the+the90;
+        }
+
+        the = PI/4.0; //0.0;
+        for(int i=4; i<8; i++)
+        {
+            vertices[i][0]=r*cos(the)*cos(phib);
+            vertices[i][1]=r*sin(the)*cos(phib);
+            vertices[i][2]=r*sin(phib);
+            the = the+the90;
+        }
+
+        /* map vertices to 6 faces */
+        map<string, material_t>::iterator it = material_map.begin();
+        polygon(0,1,2,3, it->first); ++it;
+        if (it->first == "cube") ++it;
+        polygon(4,5,6,7, it->first); ++it;
+        if (it->first == "cube") ++it;
+        polygon(0,1,5,4, it->first); ++it;
+        if (it->first == "cube") ++it;
+        polygon(1,2,6,5, it->first); ++it;
+        if (it->first == "cube") ++it;
+        polygon(2,3,7,6, it->first); ++it;
+        if (it->first == "cube") ++it;
+        polygon(3,0,4,7, it->first); ++it;
+    }
+    else
+        assert(false);
 }
 
 void init(void)
@@ -1037,22 +1102,33 @@ void init(void)
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glShadeModel(GL_SMOOTH);
 
+    // Back-face culling
+    //glEnable(GL_CULL_FACE);
+    //glCullFace(GL_FRONT);
+    //glFrontFace(GL_CW);
+
     if (g_2d_mode)
         glDisable(GL_DEPTH_TEST);
     else
         glEnable(GL_DEPTH_TEST);
 
+    // Two-side lighting
+    //glLightModelf(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+   
     // Global ambient light
     GLfloat lmodel_ambient[] = {0.4, 0.4, 0.4, 1.0};
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, lmodel_ambient);
 
+
     // 첫 번째 light
-    GLfloat mat_diffuse[] = {1.0, 193/255.0, 37/255.0, 1.0};
-    GLfloat mat_ambient[] = {25/255.0, 25/255.0, 112/255.0, 1.0};
     /*
+    //GLfloat mat_diffuse[] = {1.0, 193/255.0, 37/255.0, 1.0};
+    GLfloat mat_diffuse[] = {1.0, 165/255.0, 0/255.0, 1.0}; // orange
+    GLfloat mat_ambient[] = {0/255.0, 0/255.0, 128/255.0, 1.0}; // navy?
+    //GLfloat mat_ambient[] = {25/255.0, 25/255.0, 112/255.0, 1.0};
+    */
     GLfloat mat_diffuse[] = {1.0, 1.0, 1.0, 1.0};
     GLfloat mat_ambient[] = {0.2, 0.2, 0.2, 1.0};
-    */
     GLfloat mat_specular[] = {1.0, 1.0, 1.0, 1.0};
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, mat_ambient);
@@ -1066,10 +1142,8 @@ void init(void)
     // 두 번째 light
     GLfloat light1_diffuse[] = {1.0, 1.0, 1.0, 1.0};
     GLfloat light1_ambient[] = {0.2, 0.2, 0.2, 1.0};
-    //GLfloat light1_diffuse[] = {1.0, 193/255.0, 37/255.0, 1.0};
-    //GLfloat light1_ambient[] = {25/255.0, 25/255.0, 112/255.0, 1.0};
     GLfloat light1_specular[] = {1.0, 1.0, 1.0, 1.0};
-    GLfloat spot_direction[] = {0.0, -1.0, -1.0};
+    GLfloat spot_direction[] = {-1.0, -1.0, 0.0};
 
     glLightfv(GL_LIGHT1, GL_AMBIENT, light1_ambient);
     glLightfv(GL_LIGHT1, GL_DIFFUSE, light1_diffuse);
@@ -1083,6 +1157,26 @@ void init(void)
     glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 90.0);
     glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0);
     glEnable(GL_LIGHT1);
+
+    {
+    // 세 번째 light
+    GLfloat mat_diffuse[] = {1.0, 1.0, 1.0, 1.0};
+    GLfloat mat_ambient[] = {0.2, 0.2, 0.2, 1.0};
+    GLfloat mat_specular[] = {1.0, 1.0, 1.0, 1.0};
+
+    glLightfv(GL_LIGHT2, GL_AMBIENT, mat_ambient);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, mat_diffuse);
+    glLightfv(GL_LIGHT2, GL_SPECULAR, mat_specular);
+    glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
+
+    glEnable(GL_LIGHT2);
+    }
+
+    // Turn off directional lights
+#if 0
+    glDisable(GL_LIGHT0);
+    glDisable(GL_LIGHT2);
+#endif
 }
 
 void idle(void)
@@ -1573,6 +1667,7 @@ void display(void)
     }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glPolygonMode(GL_FRONT_AND_BACK, wireframe_mode ? GL_LINE : GL_FILL);
 
     glMatrixMode(GL_MODELVIEW);
     if (first_run)
@@ -1581,16 +1676,17 @@ void display(void)
         set_cam_dist(view_distance);
 
     // rotate lights and objects together (stationary)
-    //glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    //glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
-
-    glPolygonMode(GL_FRONT_AND_BACK, wireframe_mode ? GL_LINE : GL_FILL);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glLightfv(GL_LIGHT1, GL_POSITION, light1_position);
+    glLightfv(GL_LIGHT2, GL_POSITION, light2_position);
 
     glPushMatrix(); // top
 
     if (first_run)
     {
         // SWEPT SURFACES
+        string mat_name("gold");
+
         triangle_list.clear();
         triangle_list.reserve(2 * surfaces.size() * surfaces.front().size() + 12); // reserve 20812, actual 20604
 
@@ -1604,123 +1700,50 @@ void display(void)
                 const vector3& x = surfaces[i+1][j];
                 const vector3& y = surfaces[i][j];
                 const vector3& z = surfaces[i][(j+1)%surfaces[i].size()];
-                triangle_t tmp1(x, y, z);
+                triangle_t tmp1(z, y, x); // 왜 내가 생각하는 거랑 CCW가 반대인거지?
                 if (!surface_normals.empty())
-                    tmp1.set_normal(surface_normals[i+1][j],
-                                    surface_normals[i][j],
-                                    surface_normals[i][(j+1)%surface_normals[i].size()]);
+                {
+                    const vector3& x = surface_normals[i+1][j];
+                    const vector3& y = surface_normals[i][j];
+                    const vector3& z = surface_normals[i][(j+1)%surface_normals[i].size()];
+                    tmp1.set_normal(z, y, x);
+                }
+                tmp1.material_name = mat_name;
+                tmp1.cube = swept_transparent;
                 triangle_list.push_back(tmp1);
 
                 const vector3& d = surfaces[i][(j+1)%surfaces[i].size()];
                 const vector3& e = surfaces[i+1][(j+1)%surfaces[i+1].size()];
                 const vector3& f = surfaces[i+1][j];
-                triangle_t tmp2(d, e, f);
+                triangle_t tmp2(f, e, d); // 왜 내가 생각하는 거랑 CCW가 반대인거지?
                 if (!surface_normals.empty())
-                    tmp2.set_normal(surface_normals[i][(j+1)%surface_normals[i].size()],
-                                    surface_normals[i+1][(j+1)%surface_normals[i+1].size()],
-                                    surface_normals[i+1][j]);
+                {
+                    const vector3& d = surface_normals[i][(j+1)%surface_normals[i].size()];
+                    const vector3& e = surface_normals[i+1][(j+1)%surface_normals[i+1].size()];
+                    const vector3& f = surface_normals[i+1][j];
+                    tmp2.set_normal(f, e, d);
+                }
+                tmp2.material_name = mat_name;
+                tmp2.cube = swept_transparent;
                 triangle_list.push_back(tmp2);
             }
         }
 
         // A TRANSLUCENT CUBE
-        float l = 1.5;
+        polyhedron(4);
 
-        /*
-        // bottom
-        {
-            vector3 x(l, -l, l);
-            vector3 y(-l, -l, -l);
-            vector3 z(l, -l, -l);
-            triangle_list.push_back(triangle_t(x, y, z, true));
+        // A TRANSLUCENT ICOSAHEDRON
+        polyhedron(20);
 
-            vector3 a(l, -l, l);
-            vector3 b(-l, -l, l);
-            vector3 c(-l, -l, -l);
-            triangle_list.push_back(triangle_t(a, b, c, true));
-        }
-
-        //top
-        {
-            vector3 x(l, l, l);
-            vector3 y(-l, l, -l);
-            vector3 z(l, l, -l);
-            triangle_list.push_back(triangle_t(x, z, y, true));
-
-            vector3 a(l, l, l);
-            vector3 b(-l, l, l);
-            vector3 c(-l, l, -l);
-            triangle_list.push_back(triangle_t(a, c, b, true));
-        }
-
-        // side
-        {
-            vector3 x(-l, l, l);
-            vector3 y(l, -l, l);
-            vector3 z(-l, -l, l);
-            triangle_list.push_back(triangle_t(x, z, y, true));
-        }
-
-        {
-            vector3 x(-l, l, l);
-            vector3 y(l, l, l);
-            vector3 z(l, -l, l);
-            triangle_list.push_back(triangle_t(x, z, y, true));
-        }
-
-        // side
-        {
-            vector3 x(-l, l, -l);
-            vector3 y(l, -l, -l);
-            vector3 z(-l, -l, -l);
-            triangle_list.push_back(triangle_t(x, y, z, true));
-        }
-
-        {
-            vector3 x(-l, l, -l);
-            vector3 y(l, l, -l);
-            vector3 z(l, -l, -l);
-            triangle_list.push_back(triangle_t(x, y, z, true));
-        }
-
-        // side
-        {
-            vector3 x(-l, -l, l);
-            vector3 y(-l, l, -l);
-            vector3 z(-l, -l, -l);
-            triangle_list.push_back(triangle_t(x, y, z, true));
-        }
-
-        {
-            vector3 x(-l, -l, l);
-            vector3 y(-l, l, l);
-            vector3 z(-l, l, -l);
-            triangle_list.push_back(triangle_t(x, y, z, true));
-        }
-
-        // side
-        {
-            vector3 x(l, -l, l);
-            vector3 y(l, l, -l);
-            vector3 z(l, -l, -l);
-            triangle_list.push_back(triangle_t(x, z, y, true));
-        }
-
-        {
-            vector3 x(l, -l, l);
-            vector3 y(l, l, l);
-            vector3 z(l, l, -l);
-            triangle_list.push_back(triangle_t(x, z, y, true));
-        }
-        */
-
-        polyhedron();
-
+        // Sort by size
         sort(triangle_list.rbegin(), triangle_list.rend()); // sort into descending order
 
+        // Build a BSP tree
         root.clear();
         for (int i = 0; i < triangle_list.size(); ++i)
+        {
             add_tree(&root, triangle_list[i]);
+        }
     }
 
     // Draw swept surface and a cube
@@ -1748,6 +1771,7 @@ void display(void)
     }
 
     glEnd();
+    glDisable(GL_BLEND);
 
     /*
     // FLOOR
@@ -1890,6 +1914,9 @@ void keyboard(unsigned char key, int x, int y)
             {
                 // reset variables
                 fov = INITIAL_FOV;
+                rot_origin.zero();
+                cam_vec = INIT_CAM_VEC;
+                cam_up_vec = INIT_CAM_UP_VEC;
                 view_distance = INITIAL_VIEW_DISTANCE;
 
                 GLint viewport[4];
@@ -2037,14 +2064,22 @@ void keyboard(unsigned char key, int x, int y)
             wireframe_mode = !wireframe_mode;
             glutPostRedisplay();
             break;
+
+            // HW 4
         case 'o':
             depth_ordering = !depth_ordering;
             glutPostRedisplay();
             break;
         case 't':
-            transparency += 0.05;
-            if (transparency > 1)
-                transparency = 0;
+        case 'T':
+            transparency += (key == 't' ? 1 : -1) * 0.05;
+            transparency = cml::clamp(transparency, 0.0f, 1.0f);
+            glutPostRedisplay();
+            break;
+        case 'f':
+            swept_transparent = !swept_transparent;
+            transparency = INIT_TRANSPARENCY;
+            draw_swept_surface();
             glutPostRedisplay();
             break;
     }
@@ -2232,8 +2267,8 @@ void draw_swept_surface()
     vector<vector3> pos_spline;
     vector<vector3> scale_spline;
 
-    const float cross_resolution  = 0.01;
-    const float sweep_resolution  = 0.01;
+    const float cross_resolution  = 0.04;
+    const float sweep_resolution  = 0.04;
 
     vector<vector3> (*func)(const vector<vector3>&, vector<vector3>&, bool, float) = B_Spline;
     vector<vector3> (*sweep_func)(const vector<vector3>&, vector<vector3>&, bool, float) = Catmull_Rom;
@@ -2490,6 +2525,72 @@ int main(int argc, char** argv)
     glutInitWindowSize(scr_width, scr_height);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
+
+    // chrome
+    material_t& chrome = material_map["chrome"];
+    chrome.specular = vector4(0.774597, 0.774597, 0.77459797, 1.0);
+    chrome.diffuse = vector4(0.4, 0.4, 0.4, 1.0);
+    chrome.ambient = vector4(0.25, 0.25, 0.25, 1.0);
+    chrome.shininess = 76.8;
+
+    // plastic (red)
+    material_t& plastic = material_map["plastic"];
+    plastic.ambient = vector4(0.0, 0.0, 0.0, 1.0);
+    plastic.diffuse = vector4(0.5, 0.0, 0.0, 1.0);
+    plastic.specular = vector4(0.7, 0.6, 0.6, 1.0);
+    plastic.shininess = 32;
+
+    // gold
+    material_t& gold = material_map["gold"];
+    gold.specular = vector4(0.628281, 0.555802, 0.366065, 1.0);
+    gold.diffuse = vector4(0.75164, 0.60648, 0.22648, 1.0);
+    gold.ambient = vector4(0.24725, 0.1995, 0.0745, 1.0);
+    gold.shininess = 51.2;
+
+    // silver
+    material_t& silver = material_map["silver"];
+    silver.ambient = vector4(0.19225,  0.19225,  0.19225, 1.0);
+    silver.diffuse = vector4(0.50754,  0.50754,  0.50754, 1.0);
+    silver.specular = vector4(0.508273, 0.508273, 0.508273,1.0);
+    silver.shininess = 51.2;
+    
+    /*
+    // polished silver
+    silver.specular = vector4(0.773911, 0.773911, 0.773911, 1.0);
+    silver.diffuse = vector4(0.2775, 0.2775, 0.2775, 1.0);
+    silver.ambient = vector4(0.23125, 0.23125, 0.23125, 1.0);
+    silver.shininess = 89.6;
+    */
+
+    // jade
+    material_t& jade = material_map["jade"];
+    jade.ambient = vector4(0.135, 0.2225, 0.1575, 1.0);
+    jade.diffuse = vector4(0.54, 0.89, 0.63, 1.0);
+    jade.specular = vector4(0.316228, 0.316228, 0.316228, 1.0);
+    jade.shininess = 12.8;
+
+	//23:Rubber(White)
+    material_t& rubber = material_map["rubber"];
+    rubber.ambient = vector4(0.05, 0.05, 0.05, 1.0);
+    rubber.diffuse = vector4(0.5, 0.5, 0.5, 1.0);
+    rubber.specular = vector4(0.7, 0.7, 0.7, 1.0);
+    rubber.shininess = 10.0;
+    
+    // brass
+    material_t& brass = material_map["brass"];
+    brass.specular = vector4(0.992157, 0.941176, 0.807843, 1.0);
+    brass.diffuse = vector4(0.780392, 0.568627, 0.113725, 1.0);
+    brass.ambient = vector4(0.329412, 0.223529, 0.027451, 1.0);
+    brass.shininess = 27.8974;
+
+    // translucent cube material
+    material_t& cube = material_map["cube"];
+    cube.specular = vector4(1.0, 1.0, 1.0, 1.0);
+    cube.diffuse = vector4(0.0, 0.0, 255/255.0, transparency);
+    cube.ambient = vector4(0.1, 0.1, 0.1, 1.0);
+    //cube.ambient = vector4(0.0, 0.0, 255/255.0, 1.0);
+    //cube.ambient = vector4(25/255.0, 25/255.0, 112/255.0, 1.0);
+    cube.shininess = 128.0;
 
     read_data_file();
     init();

@@ -3,7 +3,7 @@ hw4: hw4.cpp
 	g++ -o hw4 hw4.cpp \
 		-I. \
 		-I/opt/local/include -L/opt/local/lib \
-		-framework OpenGL -framework GLUT -lGLEW
+		-framework OpenGL -framework GLUT #-lGLEW
 	./hw4
 
 win:
