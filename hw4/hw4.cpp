@@ -129,8 +129,8 @@ typedef list<vector3> set_t;
 set_t g_vertices;
 
 bool swept_transparent = false;
-const float INIT_TRANSPARENCY = 0.5;
-float transparency = 0.5;
+const float INIT_TRANSPARENCY = 0.7;
+float transparency = INIT_TRANSPARENCY;
 
 vector3 mult_mat(int matrix, vector3 pt)
 {
@@ -1062,9 +1062,8 @@ void polygon(int i_, int j, int k, int l, const string& name)
     t2.material_name = name;
     result.push_back(t2);
 
-    // Triangle tesselation
-    // N이 3 이상이 되면 안 됨.
-    const int N = 6;
+    // Triangle tessellation
+    const int N = 5;
     for (int i = 0; i < N; ++i)
     {
         list<triangle_t> tmp;
@@ -1295,7 +1294,7 @@ void init(void)
     {
     vector3 spot_direction;
     float exponent = 2;
-    float cutoff = 90;
+    float cutoff = 180; // 90은 Mac과 Win에서 서로 다르게 보임
     float const_att = 1.1;
 
     // 네 번째 light
@@ -2460,8 +2459,8 @@ GLvoid motion(GLint x, GLint y)
     glutPostRedisplay();
 }
 
-const float cross_resolution  = 0.04;
-const float sweep_resolution  = 0.04;
+const float cross_resolution  = 0.03;
+const float sweep_resolution  = 0.03;
 
 void draw_swept_surface()
 {
