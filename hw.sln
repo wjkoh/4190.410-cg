@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hw3", "hw3\hw3.vcxproj", "{
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hw4", "hw4\hw4.vcxproj", "{223FD88A-C6D4-483D-B0B8-2FF8C6CB66B4}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "hw5", "hw5\hw5.vcxproj", "{C56638C6-2BCD-4AF1-B35C-C5AC17C61D33}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -31,6 +33,10 @@ Global
 		{223FD88A-C6D4-483D-B0B8-2FF8C6CB66B4}.Debug|Win32.Build.0 = Debug|Win32
 		{223FD88A-C6D4-483D-B0B8-2FF8C6CB66B4}.Release|Win32.ActiveCfg = Release|Win32
 		{223FD88A-C6D4-483D-B0B8-2FF8C6CB66B4}.Release|Win32.Build.0 = Release|Win32
+		{C56638C6-2BCD-4AF1-B35C-C5AC17C61D33}.Debug|Win32.ActiveCfg = Debug|Win32
+		{C56638C6-2BCD-4AF1-B35C-C5AC17C61D33}.Debug|Win32.Build.0 = Debug|Win32
+		{C56638C6-2BCD-4AF1-B35C-C5AC17C61D33}.Release|Win32.ActiveCfg = Release|Win32
+		{C56638C6-2BCD-4AF1-B35C-C5AC17C61D33}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
