@@ -53,4 +53,4 @@ const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);
 #define _D_
 #endif
 
-#endif
+#endif // _COMMON_H_

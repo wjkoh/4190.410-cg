@@ -155,7 +155,5 @@ class light : public object // point, directional, area
     private:
         vector3 dir;
 };
-/*
-*/
 
 #endif //_OBJECT_H_

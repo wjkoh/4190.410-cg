@@ -8,7 +8,7 @@ class scene
 {
     public:
         scene()
-            : g_amb_light(0.4, 0.4, 0.4)
+            : g_amb_light(0.7, 0.7, 0.7)
         {}
 
         //octree tree;
@@ -54,7 +54,7 @@ class ray_tree_node
         }
 
         ++depth;
-        if (depth > 1024)
+        if (depth > 256)
             return;
 
         if (flag)
@@ -63,13 +63,16 @@ class ray_tree_node
             transparency = (*min_i)->mat.transparency;
 
             local_illu = ((*min_i)->mat.ambient)*s.g_amb_light;
-            for_each(lights.begin(), lights.end(), [=, &local_illu](const light& lit) { local_illu += (*min_i)->calc_local_illu(pt, lit, in_ray.dir); });
+			vector3 tmp_illu = local_illu;
+            for_each(lights.begin(), lights.end(), [=, &tmp_illu](const light& lit) { tmp_illu += (*min_i)->calc_local_illu(pt, lit, in_ray.dir); });
+			local_illu = tmp_illu;
+
             //local_illu[0] = min(1.0f, local_illu[0]);
             //local_illu[1] = min(1.0f, local_illu[1]);
             //local_illu[2] = min(1.0f, local_illu[2]);
 
             auto result = (*min_i)->calc_intersect(in_ray, min_dist);
-            if (result.first.flag)
+            //if (result.first.flag)
             {
                 r = shared_ptr<ray_tree_node>(new ray_tree_node(s, result.first, depth)); // reflection
                 r->process(s, result.first, depth);
@@ -115,7 +118,7 @@ vector3 traverse_tree(shared_ptr<ray_tree_node> node, int depth = 0)
 
 class ray_tracer
 {
-    static const float res = 0.01;
+    static const int res = 100; // 0.01
 
     public:
         void run(int img_width, int img_height, const scene& s)
@@ -125,7 +128,7 @@ class ray_tracer
                 for (int j = 0; j < img_width; ++j)
                 {
                     //cout << "(" << j << ", " << i << ")" << endl;
-                    const point3 ray_org((-img_width/2 + j)*res, (img_height/2 - i)*res, 0);
+                    const point3 ray_org((-img_width/2 + j)*0.01, (img_height/2 - i)*0.01, 0);
 
                     // calculate an intensity of light
                     shared_ptr<ray_tree_node> root(new ray_tree_node(s, ray(ray_org)));
