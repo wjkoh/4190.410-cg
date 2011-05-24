@@ -1,20 +1,16 @@
 #include "common.h"
 
-#include <iostream>
-#include <vector>
-using namespace std;
-
-#include "ray_tracer.h"
-
 #ifdef __APPLE__
 #  include <GLUT/glut.h>
 #else
 #  include <GL/glut.h>
 #endif
 
-ray_tracer rt;
-int scr_width = 800;
-int scr_height = 600;
+#include <iostream>
+#include <vector>
+using namespace std;
+
+#include "ray_tracer.h"
 
 void init(void)
 {
@@ -23,9 +19,6 @@ void init(void)
 
 void reshape(int w, int h)
 {
-    scr_width = w;
-    scr_height = h;
-
     glViewport(0, 0, (GLsizei)w, (GLsizei)h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
@@ -35,18 +28,21 @@ void reshape(int w, int h)
     glLoadIdentity();
 }
 
-void display(void)
+// Ray Tracer
+ray_tracer rt;
+
+void display()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
 
     //glPointSize(10.0);
     glBegin(GL_POINTS);
-    for (int i = 0; i < scr_height; ++i)
+    for (int i = 0; i < IMG_HEIGHT; ++i)
     {
-        for (int j = 0; j < scr_width; ++j)
+        for (int j = 0; j < IMG_WIDTH; ++j)
         {
-            glColor3fv(rt.image[j][scr_height - 1 - i].data()); // image[][] - upper left origin, OpenGL - lower left origin
+            glColor3fv(rt.image[j][IMG_HEIGHT - 1 - i].data()); // image[][] - upper left origin, OpenGL - lower left origin
             glVertex2f(j, i);
         }
     }
@@ -58,22 +54,34 @@ void display(void)
 
 int main(int argc, char** argv)
 {
+    // Ray Tracing
     scene s;
-    s.objs.push_back(shared_ptr<object>(new sphere(vector3(0.0, 0, -1))));
-    s.objs.front()->mat.diffuse = vector3(0.7, 0.0, 0.0);
-    s.objs.push_back(shared_ptr<object>(new sphere(vector3(-0.5, 0, -3.0))));
-    s.objs.back()->mat.diffuse = vector3(0.0, 0.0, 1.0);
+
+    shared_ptr<object> sphere1(new sphere(vector3(0.0, 0, -1)));
+    sphere1->mat.diffuse = vector3(0.7, 0.0, 0.0);
+    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+    sphere1->mat.transparency = 1.0;
+    sphere1->mat.shininess = 20;
+    s.objs.push_back(sphere1);
+
+    shared_ptr<object> sphere2(new sphere(vector3(-1.5, 0, -2.0)));
+    sphere2->mat.diffuse = vector3(0.0, 0.0, 0.7);
+    sphere2->mat.specular = vector3(1.0, 1.0, 1.0);
+    sphere2->mat.transparency = 1.0;
+    sphere2->mat.shininess = 20;
+    s.objs.push_back(sphere2);
+    
     s.lights.push_back(light());
     s.lights.push_back(light(vector3(2, 0, 0)));
     s.lights.push_back(light(vector3(-1, -2, 0)));
+    s.lights.push_back(light(vector3(0, 2, -1)));
 
-    scr_width = 800;
-    scr_height = 600;
-    rt.run(800, 600, s);
+    rt.run(IMG_WIDTH, IMG_HEIGHT, s);
 
+    // OpenGL & GLUT
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
-    glutInitWindowSize(scr_width, scr_height);
+    glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
+    glutInitWindowSize(IMG_WIDTH, IMG_HEIGHT);
     glutInitWindowPosition(100, 100);
     glutCreateWindow(argv[0]);
 

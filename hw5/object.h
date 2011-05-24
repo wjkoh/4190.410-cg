@@ -52,21 +52,18 @@ class object
 
         virtual ~object() {}
 
-        virtual float get_hit_dist(const ray& ray) const = 0;
+        virtual std::pair<float, float> get_hit_dist(const ray& ray) const = 0;
         virtual vector3 get_normal(const point3& pt) const  = 0; // Phong shading
         point3 get_pos() const { return pos; }
 
         vector3 calc_local_illu(const point3& pt, const light& light, const vector3& v) const;
 
         // intersect with ray
-        std::pair<ray, ray> calc_intersect(const ray& in_ray, const float dist)
+        std::pair<ray, ray> calc_intersect(const ray& in_ray, const float dist, bool from_in_to_out)
         {
-            //const float s = get_hit_dist(ray);
             const point3 pt = in_ray*dist;
-            const point3 pt2 = in_ray*(dist + 0.000001);
-
-            vector3 n = get_normal(pt);
             const vector3& u = in_ray.dir;
+            vector3 n = get_normal(pt);
 
             float out_refr_idx = refr_idx;
             /*
@@ -77,16 +74,28 @@ class object
             }
             */
 
+            if (from_in_to_out)
+            {
+                out_refr_idx = REFR_AIR;
+                n = -n;
+            }
+
             vector3 refl = get_reflect(n, u);
             const vector3 refr = get_refract(n, u, in_ray.refr_idx, out_refr_idx);
 
             ray refl_ray(pt, refl, in_ray.refr_idx);
-            ray refr_ray(pt2, refr, out_refr_idx);
+            ray refr_ray(pt, refr, out_refr_idx);
 
-            if (dot(in_ray.dir, pt - pos) >= 0)
+            if (from_in_to_out || dot(in_ray.dir, pt - pos) >= 0)
             {
                 refl_ray.flag = false;
             }
+            
+            if (fabs(dot(n, u)) <= EPS_F)
+            {
+                refr_ray.flag = false;
+            }
+
             return std::make_pair(refl_ray, refr_ray);
         }
 
@@ -103,17 +112,18 @@ class sphere : public object
         sphere() : object(), r(1.0) {}
         sphere(const vector3& pos) : object(pos), r(1.0) {}
 
-        float get_hit_dist(const ray& ray) const
+        std::pair<float, float> get_hit_dist(const ray& ray) const
         {
             //std::cout << ray.org << " " << ray.dir << std::endl;
 
             const vector3 d_p = pos - ray.org;
             const float det = pow(r, 2) - (d_p - dot(ray.dir, d_p)*ray.dir).length_squared();
             if (det < -EPS_F)
-                return -1.0;
+                return std::make_pair(-1.0, -1.0);
 
             float x = dot(ray.dir, d_p) - sqrt(det);
-            return dot(ray.dir, d_p) - sqrt(det); // + 는 outgoing
+            float y = dot(ray.dir, d_p) + sqrt(det);
+            return std::make_pair(x, y) ; // + 는 outgoing
         }
 
         vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); }
@@ -142,11 +152,11 @@ class light : public object // point, directional, area
             : object(pos), intensity(1.0, 1.0, 1.0)
         {}
 
-        float get_hit_dist(const ray& ray) const
+        std::pair<float, float> get_hit_dist(const ray& ray) const
         {
             const float s = length(pos - ray.org);
-            if (s < -EPS_F) return -1.0;
-            return s;
+            if (s < -EPS_F) return std::make_pair(-1.0, -1.0);
+            return std::make_pair(s, s);
         }
 
         vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); }

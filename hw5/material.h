@@ -10,10 +10,10 @@ class material
     public:
         material()
             : diffuse(vector3(0.8, 0.8, 0.8)),
-            specular(vector3(0.8, 0.8, 0.8)),
+            specular(vector3(1.0, 1.0, 1.0)),
             ambient(vector3(0.2, 0.2, 0.2)),
             shininess(10),
-            transparency(0.4)
+            transparency(1.0)
     {
     }
 

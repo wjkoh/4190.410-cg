@@ -45,9 +45,12 @@ inline vector3 operator*(const vector3& lhs, const vector3& rhs)
 }
 
 const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);
+const int IMG_WIDTH = 800;
+const int IMG_HEIGHT = 600;
+const int MAX_DEPTH = 1024;
 
 // for debugging
-#if 0
+#if 1
 #define _D_ cout << __FILE__ << " " << __LINE__ << endl;
 #else
 #define _D_
