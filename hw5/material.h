@@ -2,8 +2,6 @@
 #define _MATERIAL_H_
 
 #include "common.h"
-#include <map>
-#include <string>
 
 class material
 {
@@ -13,16 +11,18 @@ class material
             specular(vector3(1.0, 1.0, 1.0)),
             ambient(vector3(0.2, 0.2, 0.2)),
             shininess(10),
-            transparency(1.0)
+            transparency(1.0),
+            reflection(0.5)
     {
     }
 
-        material(vector3 diffuse, vector3 specular, vector3 ambient, float shininess, float transparency)
+        material(vector3 diffuse, vector3 specular, vector3 ambient, float shininess, float transparency, float reflection = 0.5)
             : diffuse(diffuse),
             specular(specular),
             ambient(ambient),
             shininess(shininess),
-            transparency(transparency)
+            transparency(transparency),
+            reflection(reflection)
     {
     }
 
@@ -31,6 +31,7 @@ class material
         vector3 ambient;
         float shininess;
         float transparency;
+        float reflection;
 };
 
 //std::map<std::string, material> material_map;

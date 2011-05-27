@@ -1,0 +1,151 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BACKGND_COLOR	common.h	/^const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);$/;"	v
+CXX	Makefile	/^CXX=g++-mp-4.5$/;"	m
+DEBUG_MODE	common.h	/^static bool DEBUG_MODE = false;$/;"	v
+EPS_D	common.h	/^const double EPS_D = std::numeric_limits<double>::epsilon();$/;"	v
+EPS_F	common.h	/^const float EPS_F = 4*std::numeric_limits<float>::epsilon();$/;"	v
+FABS_EPS_F	common.h	/^const double FABS_EPS_F = std::numeric_limits<float>::epsilon();$/;"	v
+IMG_HEIGHT	common.h	/^const int IMG_HEIGHT = 600;$/;"	v
+IMG_WIDTH	common.h	/^const int IMG_WIDTH = 800;$/;"	v
+JITTER	common.h	/^const int JITTER = 3;$/;"	v
+JITTER_ANGLE_DEG	common.h	/^const float JITTER_ANGLE_DEG = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
+JITTER_ANGLE_DEG_R	common.h	/^const float JITTER_ANGLE_DEG_R = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
+JITTER_REFL_ON	common.h	/^#define JITTER_REFL_ON /;"	d
+JITTER_REFR_ON	common.h	/^#define JITTER_REFR_ON /;"	d
+MAX_DEPTH	common.h	/^const int MAX_DEPTH = 10;$/;"	v
+REFR_AIR	common.h	/^const float REFR_AIR = 1.000277;$/;"	v
+REFR_GLASS	common.h	/^const float REFR_GLASS = 1.510;$/;"	v
+REFR_WATER	common.h	/^const float REFR_WATER = 1.3330;$/;"	v
+RES	common.h	/^const float RES = 0.01;$/;"	v
+X	common.h	/^const vector3 X = vector3().cardinal(0);$/;"	v
+Y	common.h	/^const vector3 Y = vector3().cardinal(1);$/;"	v
+Z	common.h	/^const vector3 Z = vector3().cardinal(2);$/;"	v
+_COMMON_H_	common.h	/^#define _COMMON_H_$/;"	d
+_D_	common.h	/^#define _D_ /;"	d
+_D_	common.h	/^#define _D_$/;"	d
+_MATERIAL_H_	material.h	/^#define _MATERIAL_H_$/;"	d
+_OBJECT_H_	object.h	/^#define _OBJECT_H_$/;"	d
+_POLYHEDRON_H_	polyhedron.h	/^#define _POLYHEDRON_H_$/;"	d
+_RAY_TRACKER_H_	ray_tracer.h	/^#define _RAY_TRACKER_H_$/;"	d
+_TRIANGLE_H_	triangle.h	/^#define _TRIANGLE_H_$/;"	d
+ambient	material.h	/^        vector3 ambient;$/;"	m	class:material
+area	triangle.h	/^        float area() const$/;"	f	class:triangle
+calc_local_illu	object.cpp	/^vector3 object::calc_local_illu(const point3& pt, const vector3& n, const light& light, const vector3& u) const$/;"	f	class:object
+calc_reflect_refract	object.h	/^        std::pair<ray, ray> calc_reflect_refract(const intersect_info& info)$/;"	f	class:object
+check	object.h	/^        virtual intersect_info check(const ray& in_ray) { return check(in_ray, get_hit_dist(in_ray)); }$/;"	f	class:object
+check	object.h	/^        virtual intersect_info check(const ray& in_ray, std::pair<float, float> dist)$/;"	f	class:object
+check	polyhedron.h	/^        virtual intersect_info check(const ray& in_ray, std::pair<float, float>)$/;"	f	class:polyhedron
+code	object.h	/^        int code; \/\/ for subpixel ray index(code)$/;"	m	class:ray
+cube	polyhedron.h	/^typedef polyhedron<6> cube;$/;"	t
+diffuse	material.h	/^        vector3 diffuse;$/;"	m	class:material
+dir	object.h	/^        vector3 dir;$/;"	m	class:light
+dir	object.h	/^        vector3 dir;$/;"	m	class:ray
+display	hw5.cpp	/^void display()$/;"	f
+dist	object.h	/^    float dist; \/\/ ray.org + dist*ray.dir$/;"	m	struct:intersect_info
+flag	object.h	/^        bool flag; \/\/ valid\/invalid$/;"	m	class:ray
+from_in_to_out	object.h	/^    bool from_in_to_out;$/;"	m	struct:intersect_info
+g_amb_light	ray_tracer.h	/^        vector3 g_amb_light;$/;"	m	class:scene
+get_barycentric_coord	triangle.h	/^        std::pair<float, float> get_barycentric_coord(const vector3& p) const$/;"	f	class:triangle
+get_hit_dist	object.h	/^        std::pair<float, float> get_hit_dist(const ray& ray) const$/;"	f	class:light
+get_hit_dist	object.h	/^        std::pair<float, float> get_hit_dist(const ray& ray) const$/;"	f	class:sphere
+get_hit_dist	triangle.h	/^        std::pair<float, float> get_hit_dist(const ray& ray) const$/;"	f	class:triangle
+get_normal	object.h	/^        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); }$/;"	f	class:light
+get_normal	object.h	/^        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); }$/;"	f	class:sphere
+get_normal	triangle.h	/^        vector3 get_normal(const point3&) const$/;"	f	class:triangle
+get_plane	triangle.h	/^        plane_t get_plane() const$/;"	f	class:triangle
+get_pos	object.h	/^        point3 get_pos() const { return pos; }$/;"	f	class:object
+get_pt	object.h	/^    point3 get_pt() const { return (intersect ? in_ray*dist : point3()); }$/;"	f	struct:intersect_info
+get_reflect	common.h	/^inline vector3 get_reflect(const vector3& n, const vector3& u)$/;"	f
+get_refract	common.h	/^inline vector3 get_refract(const vector3& n, const vector3& u, const float refr_idx_in, const float refr_idx_refr)$/;"	f
+icosahedron	polyhedron.h	/^typedef polyhedron<20> icosahedron;$/;"	t
+image	ray_tracer.h	/^        vector3 image[IMG_WIDTH][IMG_HEIGHT];$/;"	m	class:ray_tracer
+in_ray	object.h	/^    ray in_ray;$/;"	m	struct:intersect_info
+in_ray	ray_tracer.h	/^    ray in_ray;$/;"	m	class:ray_tree_node
+init	hw5.cpp	/^void init(void)$/;"	f
+intensity	object.h	/^        vector3 intensity;$/;"	m	class:light
+intersect	object.h	/^    bool intersect;$/;"	m	struct:intersect_info
+intersect_info	object.h	/^    intersect_info(const ray& in_ray)$/;"	f	struct:intersect_info
+intersect_info	object.h	/^struct intersect_info$/;"	s
+is_sphere	object.h	/^        virtual bool is_sphere() const { return false; }$/;"	f	class:object
+is_sphere	object.h	/^        virtual bool is_sphere() const { return true; }$/;"	f	class:sphere
+light	object.h	/^        light()$/;"	f	class:light
+light	object.h	/^        light(const vector3& pos)$/;"	f	class:light
+light	object.h	/^class light : public object \/\/ point, directional, area$/;"	c
+lights	ray_tracer.h	/^        vector<light> lights;$/;"	m	class:scene
+lights	ray_tracer.h	/^    vector<light> lights; \/\/ shadow rays (light vector)$/;"	m	class:ray_tree_node
+local_illu	ray_tracer.h	/^    vector3 local_illu;$/;"	m	class:ray_tree_node
+main	hw5.cpp	/^int main(int argc, char** argv)$/;"	f
+mat	object.h	/^        material mat;$/;"	m	class:object
+material	material.h	/^        material()$/;"	f	class:material
+material	material.h	/^        material(vector3 diffuse, vector3 specular, vector3 ambient, float shininess, float transparency, float reflection = 0.5)$/;"	f	class:material
+material	material.h	/^class material$/;"	c
+matrix	common.h	/^typedef cml::matrix44f_c matrix;$/;"	t
+matrixd	common.h	/^typedef cml::matrixd_c matrixd;$/;"	t
+n	triangle.h	/^        vector3 n[3];   \/\/ normal vector$/;"	m	class:triangle
+normal	object.h	/^    vector3 normal;$/;"	m	struct:intersect_info
+object	object.h	/^        object(const vector3& pos = vector3(0, 0, -1))$/;"	f	class:object
+object	object.h	/^class object$/;"	c
+objs	ray_tracer.h	/^        vector<shared_ptr<object> > objs;$/;"	m	class:scene
+operator *	common.h	/^inline vector3 operator*(const vector3& lhs, const vector3& rhs)$/;"	f
+operator *	object.h	/^        point3 operator*(const float s) const { return org + s*dir; }$/;"	f	class:ray
+operator <<	object.h	/^inline std::ostream& operator<<(std::ostream& os, const ray& r)$/;"	f
+operator <<	triangle.h	/^inline std::ostream& operator<<(std::ostream& os, const triangle& t)$/;"	f
+operator []	triangle.h	/^        const vector3& operator[](int idx) const    { return v[idx]; }$/;"	f	class:triangle
+operator []	triangle.h	/^        vector3& operator[](int idx)                { return v[idx]; }$/;"	f	class:triangle
+org	object.h	/^        vector3 org;$/;"	m	class:ray
+plane_t	triangle.h	/^typedef quaterniond_p plane_t; \/\/ ax+by+cz+d=0 -> (a, b, c, d)$/;"	t
+point3	common.h	/^typedef vector3 point3;$/;"	t
+polygon	polyhedron.h	/^        void polygon(int i, int j, int k, int l = -1)$/;"	f	class:polyhedron
+polyhedron	polyhedron.cpp	/^polyhedron<20>::polyhedron(const vector3& pos, float r)$/;"	f	class:polyhedron
+polyhedron	polyhedron.cpp	/^polyhedron<6>::polyhedron(const vector3& pos, float r)$/;"	f	class:polyhedron
+polyhedron	polyhedron.h	/^class polyhedron : public sphere$/;"	c
+pos	object.h	/^        point3 pos;$/;"	m	class:object
+process	ray_tracer.h	/^    void process(const scene& s, const ray& in_ray, int depth)$/;"	f	class:ray_tree_node
+quaterniond_p	common.h	/^typedef cml::quaterniond_p quaterniond_p;$/;"	t
+quaternionf_p	common.h	/^typedef cml::quaternionf_p quaternionf_p;$/;"	t
+r	object.h	/^        float r; \/\/ radius$/;"	m	class:sphere
+r	polyhedron.h	/^        float r; \/\/ radius$/;"	m	class:polyhedron
+r	ray_tracer.h	/^    shared_ptr<ray_tree_node> r;$/;"	m	class:ray_tree_node
+ray	object.h	/^        ray(const point3& org, const vector3& dir = -Z, float refr_idx = REFR_AIR)$/;"	f	class:ray
+ray	object.h	/^class ray$/;"	c
+ray_tracer	ray_tracer.h	/^class ray_tracer$/;"	c
+ray_tree_node	ray_tracer.h	/^    ray_tree_node(const scene& s, const ray& in_ray, int depth = 0)$/;"	f	class:ray_tree_node
+ray_tree_node	ray_tracer.h	/^class ray_tree_node$/;"	c
+reflection	material.h	/^        float reflection;$/;"	m	class:material
+reflection	ray_tracer.h	/^    float reflection;$/;"	m	class:ray_tree_node
+refr_idx	object.h	/^        float refr_idx;$/;"	m	class:object
+refr_idx	object.h	/^        float refr_idx;$/;"	m	class:ray
+reshape	hw5.cpp	/^void reshape(int w, int h)$/;"	f
+rt	hw5.cpp	/^ray_tracer rt;$/;"	v
+run	ray_tracer.h	/^        void run(int img_width, int img_height, const scene& s)$/;"	f	class:ray_tracer
+scene	ray_tracer.h	/^        scene()$/;"	f	class:scene
+scene	ray_tracer.h	/^class scene$/;"	c
+set_normal	triangle.h	/^        void set_normal(const vector3& n0, const vector3& n1, const vector3& n2)$/;"	f	class:triangle
+set_vertex	triangle.h	/^        void set_vertex(const vector3& v0, const vector3& v1, const vector3& v2)$/;"	f	class:triangle
+shininess	material.h	/^        float shininess;$/;"	m	class:material
+specular	material.h	/^        vector3 specular;$/;"	m	class:material
+specular	ray_tracer.h	/^    vector3 specular;$/;"	m	class:ray_tree_node
+sphere	object.h	/^        sphere() : object(), r(1.0) {}$/;"	f	class:sphere
+sphere	object.h	/^        sphere(const vector3& pos) : object(pos), r(1.0) {}$/;"	f	class:sphere
+sphere	object.h	/^class sphere : public object$/;"	c
+split	triangle.cpp	/^list<triangle> triangle::split() const$/;"	f	class:triangle
+t	ray_tracer.h	/^    shared_ptr<ray_tree_node> t;$/;"	m	class:ray_tree_node
+transparency	material.h	/^        float transparency;$/;"	m	class:material
+transparency	ray_tracer.h	/^    float transparency;$/;"	m	class:ray_tree_node
+traverse_tree	ray_tracer.h	/^vector3 traverse_tree(shared_ptr<ray_tree_node> node, int depth = 0)$/;"	f
+triangle	triangle.h	/^        triangle(const vector3& v0, const vector3& v1, const vector3& v2)$/;"	f	class:triangle
+triangle	triangle.h	/^        triangle(const vector3& v0, const vector3& v1, const vector3& v2,$/;"	f	class:triangle
+triangle	triangle.h	/^class triangle : public object$/;"	c
+triangles	polyhedron.h	/^        std::vector<triangle> triangles;$/;"	m	class:polyhedron
+v	triangle.h	/^        vector3 v[3];   \/\/ 3 points of a triangle$/;"	m	class:triangle
+vector3	common.h	/^typedef cml::vector3f vector3;$/;"	t
+vector3d	common.h	/^typedef cml::vector3d vector3d;$/;"	t
+vector4	common.h	/^typedef cml::vector4f vector4;$/;"	t
+vertices	polyhedron.h	/^        vector3 vertices[12]; \/* 12 vertices with x, y, z coordinates *\/$/;"	m	class:polyhedron
+~object	object.h	/^        virtual ~object() {}$/;"	f	class:object
+~ray_tree_node	ray_tracer.h	/^    ~ray_tree_node()$/;"	f	class:ray_tree_node
