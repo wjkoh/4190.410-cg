@@ -64,7 +64,8 @@ const int LENS_WIDTH = 10; // 사실은 aperture size
 const int LENS_HEIGHT = 10;
 const float RES = 0.01;
 const int MAX_DEPTH = 10;
-const int JITTER = 2;
+const int JITTER = 2; // JITTER*JITTER 개의 subpixel ray
+const int SHADOW_RAY = 3; // SHADOW_RAY*SHADOW_RAY 개의 shadow ray
 const float JITTER_ANGLE_DEG = 5; // 주의! int면 rad()에서 0이 나온다.
 const float JITTER_ANGLE_DEG_R = 5; // 주의! int면 rad()에서 0이 나온다.
 

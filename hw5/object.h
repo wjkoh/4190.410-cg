@@ -233,15 +233,55 @@ class light : public object // point, directional, area
 {
     public:
         light()
-            : object(vector3(0, 3, -1)), intensity(1.0, 1.0, 1.0)
-        {}
+            : object(vector3(0, 3, -1)), intensity(1.0, 1.0, 1.0), side_len(1.5)
+        {
+            dir = vector3().zero() - get_pos();
+        }
         light(const vector3& pos)
-            : object(pos), intensity(1.0, 1.0, 1.0)
-        {}
+            : object(pos), intensity(1.0, 1.0, 1.0), side_len(1.5)
+        {
+            dir = vector3().zero() - get_pos();
+        }
 
-        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); }
+        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); } // TODO: area light는 triangle처럼 바꿔야 하지 않을까?
+
+        point3 get_jittered_pos(int idx) const 
+        {
+            using namespace std;
+            assert(idx >= 0 && idx < SHADOW_RAY*SHADOW_RAY);
+
+            const point3 center = get_pos();
+            const float half_len = side_len/2.0;
+            const float space = side_len/(float)SHADOW_RAY;
+
+            vector3 x_vec;
+            if (fabs(dot(dir, Z)) < 1 - FABS_EPS_F)
+                x_vec = unit_cross(dir, Z);
+            else
+                x_vec = unit_cross(dir, Y);
+            vector3 y_vec = unit_cross(x_vec, dir);
+
+            // left top
+            const point3 lt = center - x_vec*half_len + y_vec*half_len;
+
+            // lt --> x_pos
+            // |
+            // V
+            // y_pos
+            const int x_pos = idx % SHADOW_RAY;
+            const int y_pos = idx / SHADOW_RAY;
+
+            const point3 cof = lt + x_pos*space*x_vec - y_pos*space*y_vec;
+
+            const float x_random = ((float)rand()/(float)RAND_MAX) - 0.5;
+            const float y_random = ((float)rand()/(float)RAND_MAX) - 0.5;
+
+            const point3 jittered = cof + space*x_random*x_vec + space*y_random*y_vec;
+            return jittered;
+        }
 
         vector3 intensity;
+        vector3 dir;
 
     protected:
         std::pair<float, float> get_hit_dist(const ray& ray) const
@@ -253,7 +293,7 @@ class light : public object // point, directional, area
         }
 
     private:
-        vector3 dir;
+        float side_len;
 };
 
 #endif //_OBJECT_H_

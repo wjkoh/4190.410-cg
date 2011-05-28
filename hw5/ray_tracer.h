@@ -64,11 +64,30 @@ class ray_tree_node
             DEBUG_MODE = true;
             for (auto i = s.lights.begin(); i != s.lights.end(); ++i)
             {
-                ray ray1(pt, i->get_pos() - pt); // shadow ray
+                // soft shadows
+                int hit_count = 0;
+                for (int j = 0; j < SHADOW_RAY*SHADOW_RAY; ++j)
+                {
+                    point3 ray_pt = i->get_jittered_pos(j);
+                    vector3 ray_vec = ray_pt - pt;
+                    float ray_dist = ray_vec.length();
 
-                auto result = find_if(s.objs.begin(), s.objs.end(), [ray1](std::shared_ptr<object> obj) { return obj->check(ray1).intersect; });
-                if (result == s.objs.end())
+                    ray ray1(pt, ray_vec); // shadow ray
+                    auto result = find_if(s.objs.begin(), s.objs.end(),
+                                          [ray1, ray_dist](std::shared_ptr<object> obj)
+                                          {
+                                          intersect_info info = obj->check(ray1);
+                                          return info.intersect && info.dist < ray_dist;
+                                          });
+                    if (result == s.objs.end())
+                        ++hit_count;
+                }
+
+                if (hit_count > 0)
+                {
                     lights.push_back(*i);
+                    lights.back().intensity *= (float)hit_count/((float)SHADOW_RAY*SHADOW_RAY);
+                }
             }
             DEBUG_MODE = false;
 

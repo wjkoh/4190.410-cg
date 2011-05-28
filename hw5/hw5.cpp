@@ -13,10 +13,10 @@ using namespace std;
 // triangle -done
 // illumination, shadow oversampling -done
 // cube, icosahedron -done
-// DOF, jitter
+// DOF, jitter -done
+// area light, soft shadow -done
 // motion blur
 // light attenuation
-// area light, soft shadow
 // viewpoint change
 // quad
 // octree or BSP
@@ -126,9 +126,11 @@ int main(int argc, char** argv)
     ico1->mat.reflection = 0.5;
     s.objs.push_back(ico1);
     
-    s.lights.push_back(light(vector3(0, 0, -1)));
+    s.lights.push_back(light(vector3(0, 0, 5)));
+    s.lights.back().dir = vector3(0, 0, -1);
     s.lights.push_back(light(vector3(1, 5, -2)));
-    s.lights.push_back(light(vector3(0, 0, 7)));
+    s.lights.back().dir = vector3(0, -1, 0);
+    //s.lights.push_back(light(vector3(0, 0, 7)));
     //s.lights.push_back(light(vector3(-1, -2, 0)));
     //s.lights.push_back(light(vector3(0, 2, -1)));
 

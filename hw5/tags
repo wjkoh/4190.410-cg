@@ -4,6 +4,8 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
+A	Makefile	/^A=$(wildcard *.h)$/;"	m
+B	Makefile	/^B=$(wildcard *.cpp)$/;"	m
 BACKGND_COLOR	common.h	/^const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);$/;"	v
 CXX	Makefile	/^CXX=ccache g++-mp-4.5$/;"	m
 CXXFLAGS	Makefile	/^CXXFLAGS = -std=c++0x \\$/;"	m
@@ -15,7 +17,7 @@ FABS_EPS_F	common.h	/^const double FABS_EPS_F = std::numeric_limits<float>::epsi
 IMG_HEIGHT	common.h	/^const int IMG_HEIGHT = 600;$/;"	v
 IMG_WIDTH	common.h	/^const int IMG_WIDTH = 800;$/;"	v
 INC	Makefile	/^INC=. \/opt\/local\/include$/;"	m
-JITTER	common.h	/^const int JITTER = 6;$/;"	v
+JITTER	common.h	/^const int JITTER = 2; \/\/ JITTER*JITTER 개의 subpixel ray$/;"	v
 JITTER_ANGLE_DEG	common.h	/^const float JITTER_ANGLE_DEG = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_ANGLE_DEG_R	common.h	/^const float JITTER_ANGLE_DEG_R = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_REFL_ON	common.h	/^#define JITTER_REFL_ON /;"	d
@@ -29,6 +31,7 @@ REFR_AIR	common.h	/^const float REFR_AIR = 1.000277;$/;"	v
 REFR_GLASS	common.h	/^const float REFR_GLASS = 1.510;$/;"	v
 REFR_WATER	common.h	/^const float REFR_WATER = 1.3330;$/;"	v
 RES	common.h	/^const float RES = 0.01;$/;"	v
+SHADOW_RAY	common.h	/^const int SHADOW_RAY = 3; \/\/ SHADOW_RAY*SHADOW_RAY 개의 shadow ray$/;"	v
 X	common.h	/^const vector3 X = vector3().cardinal(0);$/;"	v
 Y	common.h	/^const vector3 Y = vector3().cardinal(1);$/;"	v
 Z	common.h	/^const vector3 Z = vector3().cardinal(2);$/;"	v
@@ -61,7 +64,8 @@ get_barycentric_coord	triangle.h	/^        std::pair<float, float> get_barycentr
 get_hit_dist	object.h	/^        std::pair<float, float> get_hit_dist(const ray& ray) const$/;"	f	class:light
 get_hit_dist	object.h	/^        std::pair<float, float> get_hit_dist(const ray& ray) const$/;"	f	class:sphere
 get_hit_dist	triangle.h	/^        std::pair<float, float> get_hit_dist(const ray& ray) const$/;"	f	class:triangle
-get_normal	object.h	/^        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); }$/;"	f	class:light
+get_jittered_pos	object.h	/^        point3 get_jittered_pos(int idx) const $/;"	f	class:light
+get_normal	object.h	/^        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); } \/\/ TODO: area light는 triangle처럼 바꿔야 하지 않을까?$/;"	f	class:light
 get_normal	object.h	/^        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); }$/;"	f	class:sphere
 get_normal	triangle.h	/^        vector3 get_normal(const point3&) const$/;"	f	class:triangle
 get_plane	triangle.h	/^        plane_t get_plane() const$/;"	f	class:triangle
@@ -141,6 +145,7 @@ set_pos	polyhedron.h	/^        virtual void set_pos(const point3& new_pos) { pos
 set_pos	triangle.h	/^        void set_pos(const point3& new_pos)$/;"	f	class:triangle
 set_vertex	triangle.h	/^        void set_vertex(const vector3& v0, const vector3& v1, const vector3& v2)$/;"	f	class:triangle
 shininess	material.h	/^        float shininess;$/;"	m	class:material
+side_len	object.h	/^        float side_len;$/;"	m	class:light
 specular	material.h	/^        vector3 specular;$/;"	m	class:material
 specular	ray_tracer.h	/^    vector3 specular;$/;"	m	class:ray_tree_node
 sphere	object.h	/^        sphere() : object(), r(1.0) {}$/;"	f	class:sphere

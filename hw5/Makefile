@@ -7,6 +7,9 @@ CXXFLAGS = -std=c++0x \
 INC=. /opt/local/include
 LIB=/opt/local/lib
 
+A=$(wildcard *.h)
+B=$(wildcard *.cpp)
+
 #hw5: $(OBJS)
 #	$(CXX) $(CXXFLAGS) $(OBJS) -o $@
 #
@@ -15,7 +18,10 @@ LIB=/opt/local/lib
 #%.o: %.cpp
 #	$(CXX) $(CXXFLAGS) -I$(INC) -L$(LIB) -c $< -o $@
 
-hw5: hw5.cpp
+all: hw5
+	open -a Terminal.app ./hw5
+
+hw5: hw5.cpp $(A) $(B)
 	ctags *
 	# Assuming GLEW was installed to /opt/local
 	# -ftree-vectorize is on -O3
@@ -25,12 +31,10 @@ hw5: hw5.cpp
 		-ffast-math -ftree-vectorize -ftree-vectorizer-verbose=1 \
 		-I. -I/opt/local/include -L/opt/local/lib \
 		-framework OpenGL -framework GLUT #-lGLEW
-	open -a Terminal.app ./hw5
 
 win:
 	cl /Fohello-gl-dummy.obj /c hello-gl-dummy.c
 	link /out:hello-gl-dummy.exe hello-gl-dummy.obj \
 		opengl32.lib glut32.lib glew32.lib
 
-.PHONY: hw5
-
+.PHONY: all
