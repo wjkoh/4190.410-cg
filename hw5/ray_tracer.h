@@ -1,5 +1,5 @@
-#ifndef _RAY_TRACKER_H_
-#define _RAY_TRACKER_H_
+#ifndef _RAY_TRACER_H_
+#define _RAY_TRACER_H_
 
 #include "common.h"
 #include "object.h"
@@ -13,9 +13,18 @@ class scene
             : g_amb_light(0.4, 0.4, 0.4)
         {}
 
+        void move_scene(const vector3& delta = vector3(0, 0, 0))
+        {
+            for (auto i = objs.begin(); i != objs.end(); ++i)
+                (*i)->set_pos((*i)->get_pos() + c_o_lens + delta);
+
+            for (auto i = lights.begin(); i != lights.end(); ++i)
+                i->set_pos(i->get_pos() + c_o_lens + delta);
+        }
+
         //octree tree;
-        vector<shared_ptr<object> > objs;
-        vector<light> lights;
+        std::vector<std::shared_ptr<object> > objs;
+        std::vector<light> lights;
         vector3 g_amb_light;
 };
 
@@ -57,7 +66,7 @@ class ray_tree_node
             {
                 ray ray1(pt, i->get_pos() - pt); // shadow ray
 
-                auto result = find_if(s.objs.begin(), s.objs.end(), [ray1](shared_ptr<object> obj) { return obj->check(ray1).intersect; });
+                auto result = find_if(s.objs.begin(), s.objs.end(), [ray1](std::shared_ptr<object> obj) { return obj->check(ray1).intersect; });
                 if (result == s.objs.end())
                     lights.push_back(*i);
             }
@@ -73,13 +82,13 @@ class ray_tree_node
             auto result = (*min_i)->calc_reflect_refract(min_info);
             if (result.first.flag)
             {
-                r = shared_ptr<ray_tree_node>(new ray_tree_node(s, result.first, depth)); // reflection
+                r = std::shared_ptr<ray_tree_node>(new ray_tree_node(s, result.first, depth)); // reflection
                 r->process(s, result.first, depth);
             }
 
             if (result.second.flag)
             {
-                t = shared_ptr<ray_tree_node>(new ray_tree_node(s, result.second, depth)); // refraction
+                t = std::shared_ptr<ray_tree_node>(new ray_tree_node(s, result.second, depth)); // refraction
                 t->process(s, result.second, depth);
             }
         }
@@ -94,9 +103,9 @@ class ray_tree_node
     }
 
     ray in_ray;
-    shared_ptr<ray_tree_node> t;
-    shared_ptr<ray_tree_node> r;
-    vector<light> lights; // shadow rays (light vector)
+    std::shared_ptr<ray_tree_node> t;
+    std::shared_ptr<ray_tree_node> r;
+    std::vector<light> lights; // shadow rays (light std::vector)
 
     vector3 local_illu;
 
@@ -105,9 +114,9 @@ class ray_tree_node
     float reflection;
 };
 
-vector3 traverse_tree(shared_ptr<ray_tree_node> node, int depth = 0)
+inline vector3 traverse_tree(std::shared_ptr<ray_tree_node> node, int depth = 0)
 {
-    if (node.get() == NULL) return BACKGND_COLOR; //vector3().zero();
+    if (node.get() == NULL) return BACKGND_COLOR;
 
     ++depth;
     vector3 int_t = traverse_tree(node->t, depth);
@@ -128,60 +137,7 @@ vector3 traverse_tree(shared_ptr<ray_tree_node> node, int depth = 0)
 class ray_tracer
 {
     public:
-        void run(int img_width, int img_height, const scene& s)
-        {
-            const float term = RES / (float)JITTER;
-
-            /* initialize random seed: */
-            srand(time(NULL));
-            
-            cout << (float)rand() / (float)RAND_MAX << endl;
-            for (int i = 0; i < img_height; ++i)
-            {
-                cout << "(" << i << ")" << endl;
-                for (int j = 0; j < img_width; ++j)
-                {
-                    vector3 intensity;
-                    intensity.zero();
-                    
-                    // Randomly shuffle jitter codes
-                    vector<int> codes;
-                    {
-                    int idx = 0;
-                    std::generate_n(back_inserter(codes), JITTER*JITTER, [&idx]() { return idx++; });
-                    }
-                    std::random_shuffle(codes.begin(), codes.end());
-
-                    for (int k = 0; k < JITTER*JITTER; ++k)
-                    {
-                        int off_x = k % JITTER;
-                        int off_y = k / JITTER;
-
-                        // 아래 코드 하나로 합치지 말 것!
-                        float x_random = ((float)rand()/(float)RAND_MAX)*term;
-                        float y_random = ((float)rand()/(float)RAND_MAX)*term;
-
-                        const point3 ray_org((-img_width/2 + j)*RES + off_x*term + x_random, (img_height/2 - i)*RES - off_y*term - y_random, 0);
-
-                        //ray ray1(ray_org, normalize(ray_org - vector3(0, 0, 6))); // perspective
-                        ray ray1(ray_org);
-                        ray1.code = codes[k];
-
-                        // calculate an intensity of light
-                        shared_ptr<ray_tree_node> root(new ray_tree_node(s, ray1));
-                        root->process(s, ray1, 0);
-
-                        // traverse a tree
-                        intensity += traverse_tree(root);
-                    }
-                    intensity /= JITTER*JITTER;
-                    
-                    // calculate an intensity of light
-                    image[j][i] = intensity;
-                }
-            }
-        }
-
+        void run(int img_width, int img_height, scene& s);
         vector3 image[IMG_WIDTH][IMG_HEIGHT];
 };
 

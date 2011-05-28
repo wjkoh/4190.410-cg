@@ -71,7 +71,9 @@ class object
 
         virtual bool is_sphere() const { return false; }
         virtual vector3 get_normal(const point3& pt) const = 0; // Phong shading
+
         point3 get_pos() const { return pos; }
+        virtual void set_pos(const point3& new_pos) { pos = new_pos; }
 
         // get_hit_dist 함수를 상위 클래스 것으로 사용할 수 있게 하기 위해 분리
         virtual intersect_info check(const ray& in_ray) { return check(in_ray, get_hit_dist(in_ray)); }
@@ -192,6 +194,7 @@ class object
 
     protected:
         virtual std::pair<float, float> get_hit_dist(const ray& ray) const = 0;
+
         point3 pos;
         float refr_idx;
 };

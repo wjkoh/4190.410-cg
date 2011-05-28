@@ -19,18 +19,20 @@ typedef cml::quaterniond_p quaterniond_p;
 typedef cml::matrix44f_c matrix;
 typedef cml::matrixd_c matrixd;
 
-//
+// typedefs
 typedef vector3 point3;
 
 #include <limits>
 const double FABS_EPS_F = std::numeric_limits<float>::epsilon();
-const float EPS_F = 4*std::numeric_limits<float>::epsilon();
+const float EPS_F = 20*std::numeric_limits<float>::epsilon();
 const double EPS_D = std::numeric_limits<double>::epsilon();
 
+// Axes
 const vector3 X = vector3().cardinal(0);
 const vector3 Y = vector3().cardinal(1);
 const vector3 Z = vector3().cardinal(2);
 
+// Refractive indexes
 const float REFR_AIR = 1.000277;
 const float REFR_GLASS = 1.510;
 const float REFR_WATER = 1.3330;
@@ -58,14 +60,21 @@ inline vector3 operator*(const vector3& lhs, const vector3& rhs)
 const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);
 const int IMG_WIDTH = 800;
 const int IMG_HEIGHT = 600;
+const int LENS_WIDTH = 10; // 사실은 aperture size
+const int LENS_HEIGHT = 10;
 const float RES = 0.01;
 const int MAX_DEPTH = 10;
-const int JITTER = 3;
+const int JITTER = 2;
 const float JITTER_ANGLE_DEG = 5; // 주의! int면 rad()에서 0이 나온다.
 const float JITTER_ANGLE_DEG_R = 5; // 주의! int면 rad()에서 0이 나온다.
 
+const vector3 C_O_IMG_PLANE(0, 0, 0);
+static vector3 c_o_lens(0, 0, -1.0);
+
+// Function On/Off
 #define JITTER_REFR_ON 0
 #define JITTER_REFL_ON 0
+#define DOF_ON 1
 
 // for debugging
 #include <cassert>

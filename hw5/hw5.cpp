@@ -13,10 +13,13 @@ using namespace std;
 // triangle -done
 // illumination, shadow oversampling -done
 // cube, icosahedron -done
-// DOF
+// DOF, jitter
 // motion blur
 // light attenuation
 // area light, soft shadow
+// viewpoint change
+// quad
+// octree or BSP
 
 void init(void)
 {
@@ -48,8 +51,12 @@ void display()
     {
         for (int j = 0; j < IMG_WIDTH; ++j)
         {
+#if DOF_ON
+            glColor3fv(rt.image[IMG_WIDTH - 1 - j][i].data());
+#else
             // image[][] - upper left origin, OpenGL - lower left origin
             glColor3fv(rt.image[j][IMG_HEIGHT - 1 - i].data());
+#endif
             glVertex2f(j, i);
         }
     }
@@ -64,29 +71,29 @@ int main(int argc, char** argv)
     // Ray Tracing
     scene s;
 
-    shared_ptr<object> sphere1(new sphere(vector3(1.0, 0, -1.2)));
+    shared_ptr<object> sphere1(new sphere(vector3(1.0, 1.0, -0.0)));
     sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
     sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
     sphere1->mat.transparency = 0.2;
     sphere1->mat.shininess = 100;
     s.objs.push_back(sphere1);
 
-    shared_ptr<object> sphere2(new sphere(vector3(-1.5, 0, -3.7)));
+    shared_ptr<object> sphere2(new sphere(vector3(-1.5, 0, -1.0)));
     sphere2->mat.diffuse = vector3(0.0, 0.0, 1.0);
     sphere2->mat.specular = vector3(1.0, 1.0, 1.0);
     sphere2->mat.transparency = 1.0;
     sphere2->mat.shininess = 20;
     s.objs.push_back(sphere2);
 
-    shared_ptr<object> triangle1(new triangle(vector3(2.0, 0, -5.0), vector3(0.0, 2.0, -5.0), vector3(-2.0, 0, -5.0)));
+    shared_ptr<object> triangle1(new triangle(vector3(2.0, 0, -3.0), vector3(0.0, 2.0, -3.0), vector3(-2.0, 0, -3.0)));
     triangle1->mat.diffuse = vector3(0.0, 1.0, 0.0);
     triangle1->mat.specular = vector3(0.2, 0.2, 0.2);
     triangle1->mat.transparency = 0.5;
     triangle1->mat.shininess = 20;
     s.objs.push_back(triangle1);
 
-    const float floor_y = -2.0;
-    const float floor_y_up = 2.0;
+    const float floor_y = -1.5;
+    const float floor_y_up = 0.0;
     {
     shared_ptr<object> triangle1(new triangle(vector3(10.0, floor_y + floor_y_up, -10.0), vector3(-10.0, floor_y + floor_y_up, -10.0), vector3(-10.0, floor_y, 10.0)));
     triangle1->mat.diffuse = vector3(1.0, 1.0, 1.0);
@@ -104,23 +111,24 @@ int main(int argc, char** argv)
     s.objs.push_back(triangle1);
     }
 
-    shared_ptr<object> cube1(new cube(vector3(1.0, 2.0, -1.0), 1));
+    shared_ptr<object> cube1(new cube(vector3(1.0, 2.0, -2.0), 1));
     cube1->mat.diffuse = vector3(1.0, 1.0, 1.0);
     cube1->mat.specular = vector3(1.0, 1.0, 1.0);
     cube1->mat.transparency = 1.0;
     cube1->mat.shininess = 20;
     s.objs.push_back(cube1);
 
-    shared_ptr<object> ico1(new icosahedron(vector3(0.0, 0.0, -1.4), 1));
+    shared_ptr<object> ico1(new icosahedron(vector3(0.0, -1.0, -0.5), 1));
     ico1->mat.diffuse = vector3(0.0, 1.0, 0.0);
     ico1->mat.specular = vector3(1.0, 1.0, 1.0);
     ico1->mat.transparency = 0.1;
     ico1->mat.shininess = 100;
-    ico1->mat.reflection = 0.0;
-    //s.objs.push_back(ico1);
+    ico1->mat.reflection = 0.5;
+    s.objs.push_back(ico1);
     
-    s.lights.push_back(light(vector3(0, 0, 6)));
-    s.lights.push_back(light(vector3(1, 5, 0)));
+    s.lights.push_back(light(vector3(0, 0, -1)));
+    s.lights.push_back(light(vector3(1, 5, -2)));
+    s.lights.push_back(light(vector3(0, 0, 7)));
     //s.lights.push_back(light(vector3(-1, -2, 0)));
     //s.lights.push_back(light(vector3(0, 2, -1)));
 

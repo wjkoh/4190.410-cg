@@ -38,26 +38,7 @@ polyhedron<20>::polyhedron(const vector3& pos, float r)
         the = the+the72;
     }
 
-    polygon(0,1,2);
-    polygon(0,2,3);
-    polygon(0,3,4);
-    polygon(0,4,5);
-    polygon(0,5,1);
-    polygon(7,6,11);
-    polygon(8,7,11);
-    polygon(9,8,11);
-    polygon(10,9,11);
-    polygon(6,10,11);
-    polygon(6,2,1);
-    polygon(7,3,2);
-    polygon(8,4,3);
-    polygon(9,5,4);
-    polygon(10,1,5);
-    polygon(6,7,2);
-    polygon(7,8,3);
-    polygon(8,9,4);
-    polygon(9,10,5);
-    polygon(10,6,1);
+    make_polygon();
 }
 
 template<>
@@ -90,10 +71,5 @@ polyhedron<6>::polyhedron(const vector3& pos, float r)
     }
 
     /* map vertices to 6 faces */
-    polygon(0,1,2,3);
-    polygon(7,6,5,4);
-    polygon(4,5,1,0);
-    polygon(5,6,2,1);
-    polygon(6,7,3,2);
-    polygon(7,4,0,3);
+    make_polygon();
 }

@@ -5,19 +5,26 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
 BACKGND_COLOR	common.h	/^const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);$/;"	v
-CXX	Makefile	/^CXX=g++-mp-4.5$/;"	m
+CXX	Makefile	/^CXX=ccache g++-mp-4.5$/;"	m
+CXXFLAGS	Makefile	/^CXXFLAGS = -std=c++0x \\$/;"	m
 DEBUG_MODE	common.h	/^static bool DEBUG_MODE = false;$/;"	v
+DOF_ON	common.h	/^#define DOF_ON /;"	d
 EPS_D	common.h	/^const double EPS_D = std::numeric_limits<double>::epsilon();$/;"	v
-EPS_F	common.h	/^const float EPS_F = 4*std::numeric_limits<float>::epsilon();$/;"	v
+EPS_F	common.h	/^const float EPS_F = 20*std::numeric_limits<float>::epsilon();$/;"	v
 FABS_EPS_F	common.h	/^const double FABS_EPS_F = std::numeric_limits<float>::epsilon();$/;"	v
 IMG_HEIGHT	common.h	/^const int IMG_HEIGHT = 600;$/;"	v
 IMG_WIDTH	common.h	/^const int IMG_WIDTH = 800;$/;"	v
-JITTER	common.h	/^const int JITTER = 3;$/;"	v
+INC	Makefile	/^INC=. \/opt\/local\/include$/;"	m
+JITTER	common.h	/^const int JITTER = 6;$/;"	v
 JITTER_ANGLE_DEG	common.h	/^const float JITTER_ANGLE_DEG = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_ANGLE_DEG_R	common.h	/^const float JITTER_ANGLE_DEG_R = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_REFL_ON	common.h	/^#define JITTER_REFL_ON /;"	d
 JITTER_REFR_ON	common.h	/^#define JITTER_REFR_ON /;"	d
+LENS_HEIGHT	common.h	/^const int LENS_HEIGHT = 10;$/;"	v
+LENS_WIDTH	common.h	/^const int LENS_WIDTH = 10; \/\/ 사실은 aperture size$/;"	v
+LIB	Makefile	/^LIB=\/opt\/local\/lib$/;"	m
 MAX_DEPTH	common.h	/^const int MAX_DEPTH = 10;$/;"	v
+OBJS	Makefile	/^OBJS = hw5.o object.o triangle.o polyhedron.o$/;"	m
 REFR_AIR	common.h	/^const float REFR_AIR = 1.000277;$/;"	v
 REFR_GLASS	common.h	/^const float REFR_GLASS = 1.510;$/;"	v
 REFR_WATER	common.h	/^const float REFR_WATER = 1.3330;$/;"	v
@@ -31,7 +38,7 @@ _D_	common.h	/^#define _D_$/;"	d
 _MATERIAL_H_	material.h	/^#define _MATERIAL_H_$/;"	d
 _OBJECT_H_	object.h	/^#define _OBJECT_H_$/;"	d
 _POLYHEDRON_H_	polyhedron.h	/^#define _POLYHEDRON_H_$/;"	d
-_RAY_TRACKER_H_	ray_tracer.h	/^#define _RAY_TRACKER_H_$/;"	d
+_RAY_TRACER_H_	ray_tracer.h	/^#define _RAY_TRACER_H_$/;"	d
 _TRIANGLE_H_	triangle.h	/^#define _TRIANGLE_H_$/;"	d
 ambient	material.h	/^        vector3 ambient;$/;"	m	class:material
 area	triangle.h	/^        float area() const$/;"	f	class:triangle
@@ -76,21 +83,24 @@ is_sphere	object.h	/^        virtual bool is_sphere() const { return true; }$/;"
 light	object.h	/^        light()$/;"	f	class:light
 light	object.h	/^        light(const vector3& pos)$/;"	f	class:light
 light	object.h	/^class light : public object \/\/ point, directional, area$/;"	c
-lights	ray_tracer.h	/^        vector<light> lights;$/;"	m	class:scene
-lights	ray_tracer.h	/^    vector<light> lights; \/\/ shadow rays (light vector)$/;"	m	class:ray_tree_node
+lights	ray_tracer.h	/^        std::vector<light> lights;$/;"	m	class:scene
+lights	ray_tracer.h	/^    std::vector<light> lights; \/\/ shadow rays (light std::vector)$/;"	m	class:ray_tree_node
 local_illu	ray_tracer.h	/^    vector3 local_illu;$/;"	m	class:ray_tree_node
 main	hw5.cpp	/^int main(int argc, char** argv)$/;"	f
+make_polygon	polyhedron.h	/^inline void polyhedron<20>::make_polygon()$/;"	f	class:polyhedron
+make_polygon	polyhedron.h	/^inline void polyhedron<6>::make_polygon()$/;"	f	class:polyhedron
 mat	object.h	/^        material mat;$/;"	m	class:object
 material	material.h	/^        material()$/;"	f	class:material
 material	material.h	/^        material(vector3 diffuse, vector3 specular, vector3 ambient, float shininess, float transparency, float reflection = 0.5)$/;"	f	class:material
 material	material.h	/^class material$/;"	c
 matrix	common.h	/^typedef cml::matrix44f_c matrix;$/;"	t
 matrixd	common.h	/^typedef cml::matrixd_c matrixd;$/;"	t
+move_scene	ray_tracer.h	/^        void move_scene(const vector3& delta = vector3(0, 0, 0))$/;"	f	class:scene
 n	triangle.h	/^        vector3 n[3];   \/\/ normal vector$/;"	m	class:triangle
 normal	object.h	/^    vector3 normal;$/;"	m	struct:intersect_info
 object	object.h	/^        object(const vector3& pos = vector3(0, 0, -1))$/;"	f	class:object
 object	object.h	/^class object$/;"	c
-objs	ray_tracer.h	/^        vector<shared_ptr<object> > objs;$/;"	m	class:scene
+objs	ray_tracer.h	/^        std::vector<std::shared_ptr<object> > objs;$/;"	m	class:scene
 operator *	common.h	/^inline vector3 operator*(const vector3& lhs, const vector3& rhs)$/;"	f
 operator *	object.h	/^        point3 operator*(const float s) const { return org + s*dir; }$/;"	f	class:ray
 operator <<	object.h	/^inline std::ostream& operator<<(std::ostream& os, const ray& r)$/;"	f
@@ -110,7 +120,7 @@ quaterniond_p	common.h	/^typedef cml::quaterniond_p quaterniond_p;$/;"	t
 quaternionf_p	common.h	/^typedef cml::quaternionf_p quaternionf_p;$/;"	t
 r	object.h	/^        float r; \/\/ radius$/;"	m	class:sphere
 r	polyhedron.h	/^        float r; \/\/ radius$/;"	m	class:polyhedron
-r	ray_tracer.h	/^    shared_ptr<ray_tree_node> r;$/;"	m	class:ray_tree_node
+r	ray_tracer.h	/^    std::shared_ptr<ray_tree_node> r;$/;"	m	class:ray_tree_node
 ray	object.h	/^        ray(const point3& org, const vector3& dir = -Z, float refr_idx = REFR_AIR)$/;"	f	class:ray
 ray	object.h	/^class ray$/;"	c
 ray_tracer	ray_tracer.h	/^class ray_tracer$/;"	c
@@ -122,10 +132,13 @@ refr_idx	object.h	/^        float refr_idx;$/;"	m	class:object
 refr_idx	object.h	/^        float refr_idx;$/;"	m	class:ray
 reshape	hw5.cpp	/^void reshape(int w, int h)$/;"	f
 rt	hw5.cpp	/^ray_tracer rt;$/;"	v
-run	ray_tracer.h	/^        void run(int img_width, int img_height, const scene& s)$/;"	f	class:ray_tracer
+run	ray_tracer.cpp	/^void ray_tracer::run(int img_width, int img_height, scene& s)$/;"	f	class:ray_tracer
 scene	ray_tracer.h	/^        scene()$/;"	f	class:scene
 scene	ray_tracer.h	/^class scene$/;"	c
 set_normal	triangle.h	/^        void set_normal(const vector3& n0, const vector3& n1, const vector3& n2)$/;"	f	class:triangle
+set_pos	object.h	/^        virtual void set_pos(const point3& new_pos) { pos = new_pos; }$/;"	f	class:object
+set_pos	polyhedron.h	/^        virtual void set_pos(const point3& new_pos) { pos = new_pos; make_polygon(); }$/;"	f	class:polyhedron
+set_pos	triangle.h	/^        void set_pos(const point3& new_pos)$/;"	f	class:triangle
 set_vertex	triangle.h	/^        void set_vertex(const vector3& v0, const vector3& v1, const vector3& v2)$/;"	f	class:triangle
 shininess	material.h	/^        float shininess;$/;"	m	class:material
 specular	material.h	/^        vector3 specular;$/;"	m	class:material
@@ -134,10 +147,10 @@ sphere	object.h	/^        sphere() : object(), r(1.0) {}$/;"	f	class:sphere
 sphere	object.h	/^        sphere(const vector3& pos) : object(pos), r(1.0) {}$/;"	f	class:sphere
 sphere	object.h	/^class sphere : public object$/;"	c
 split	triangle.cpp	/^list<triangle> triangle::split() const$/;"	f	class:triangle
-t	ray_tracer.h	/^    shared_ptr<ray_tree_node> t;$/;"	m	class:ray_tree_node
+t	ray_tracer.h	/^    std::shared_ptr<ray_tree_node> t;$/;"	m	class:ray_tree_node
 transparency	material.h	/^        float transparency;$/;"	m	class:material
 transparency	ray_tracer.h	/^    float transparency;$/;"	m	class:ray_tree_node
-traverse_tree	ray_tracer.h	/^vector3 traverse_tree(shared_ptr<ray_tree_node> node, int depth = 0)$/;"	f
+traverse_tree	ray_tracer.h	/^inline vector3 traverse_tree(std::shared_ptr<ray_tree_node> node, int depth = 0)$/;"	f
 triangle	triangle.h	/^        triangle(const vector3& v0, const vector3& v1, const vector3& v2)$/;"	f	class:triangle
 triangle	triangle.h	/^        triangle(const vector3& v0, const vector3& v1, const vector3& v2,$/;"	f	class:triangle
 triangle	triangle.h	/^class triangle : public object$/;"	c

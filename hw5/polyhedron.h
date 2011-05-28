@@ -47,12 +47,14 @@ class polyhedron : public sphere
         }
 
         //vector3 get_normal(const point3& pt) const { assert(false); return (pt - pos).normalize(); }
+        virtual void set_pos(const point3& new_pos) { pos = new_pos; make_polygon(); }
+
+        void make_polygon();
 
         void polygon(int i, int j, int k, int l = -1)
         {
             triangle t(vertices[i], vertices[j], vertices[k]);
             //t.mat = mat;
-            std::cout << mat.transparency << std::endl;
 
             t[0] += pos;
             t[1] += pos;
@@ -76,6 +78,44 @@ class polyhedron : public sphere
         vector3 vertices[12]; /* 12 vertices with x, y, z coordinates */
         float r; // radius
 };
+
+template<>
+inline void polyhedron<20>::make_polygon()
+{
+    triangles.clear();
+    polygon(0,1,2);
+    polygon(0,2,3);
+    polygon(0,3,4);
+    polygon(0,4,5);
+    polygon(0,5,1);
+    polygon(7,6,11);
+    polygon(8,7,11);
+    polygon(9,8,11);
+    polygon(10,9,11);
+    polygon(6,10,11);
+    polygon(6,2,1);
+    polygon(7,3,2);
+    polygon(8,4,3);
+    polygon(9,5,4);
+    polygon(10,1,5);
+    polygon(6,7,2);
+    polygon(7,8,3);
+    polygon(8,9,4);
+    polygon(9,10,5);
+    polygon(10,6,1);
+}
+
+template<>
+inline void polyhedron<6>::make_polygon()
+{
+    triangles.clear();
+    polygon(0,1,2,3);
+    polygon(7,6,5,4);
+    polygon(4,5,1,0);
+    polygon(5,6,2,1);
+    polygon(6,7,3,2);
+    polygon(7,4,0,3);
+}
 
 // typpedefs
 typedef polyhedron<6> cube;

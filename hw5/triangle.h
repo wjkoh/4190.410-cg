@@ -11,23 +11,17 @@ class triangle : public object
     public:
         triangle(const vector3& v0, const vector3& v1, const vector3& v2)
         {
-            v[0] = v0;
-            v[1] = v1;
-            v[2] = v2;
+            set_vertex(v0, v1, v2);
 
-            n[0] = n[1] = n[2] = get_normal(v[0]);
+            vector3 n = get_normal(v[0]);
+            set_normal(n, n, n);
         }
 
         triangle(const vector3& v0, const vector3& v1, const vector3& v2,
                    const vector3& n0, const vector3& n1, const vector3& n2)
         {
-            v[0] = v0;
-            v[1] = v1;
-            v[2] = v2;
-
-            n[0] = n0;
-            n[1] = n1;
-            n[2] = n2;
+            set_vertex(v0, v1, v2);
+            set_normal(n0, n1, n2);
         }
 
         void set_vertex(const vector3& v0, const vector3& v1, const vector3& v2)
@@ -35,6 +29,7 @@ class triangle : public object
             v[0] = v0;
             v[1] = v1;
             v[2] = v2;
+            pos = (v0 + v1 + v2)/3.0;
         }
 
         void set_normal(const vector3& n0, const vector3& n1, const vector3& n2)
@@ -59,6 +54,15 @@ class triangle : public object
 
         const vector3& operator[](int idx) const    { return v[idx]; }
         vector3& operator[](int idx)                { return v[idx]; }
+
+        void set_pos(const point3& new_pos)
+        {
+            vector3 delta = new_pos - pos;
+            v[0] += delta;
+            v[1] += delta;
+            v[2] += delta;
+            pos = new_pos;
+        }
 
         /*
         bool operator<(const triangle& rhs) const
