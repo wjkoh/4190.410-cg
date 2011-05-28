@@ -75,6 +75,7 @@ class ray_tree_node
                     ray ray1(pt, ray_vec); // shadow ray
                     auto result = find_if(s.objs.begin(), s.objs.end(),
                                           [ray1, ray_dist](std::shared_ptr<object> obj)
+                                          -> bool
                                           {
                                           intersect_info info = obj->check(ray1);
                                           return info.intersect && info.dist < ray_dist;
@@ -96,7 +97,17 @@ class ray_tree_node
             reflection = (*min_i)->mat.reflection;
 
             local_illu = ((*min_i)->mat.ambient)*s.g_amb_light;
-            for_each(lights.begin(), lights.end(), [=, &local_illu](const light& lit) { local_illu += (*min_i)->calc_local_illu(pt, normal, lit, in_ray.dir); });
+            {
+                vector3 tmp_illu; // VS2010
+                tmp_illu.zero();
+                for_each(lights.begin(), lights.end(),
+                         [=, &tmp_illu](const light& lit)
+                         {
+                         tmp_illu += (*min_i)->calc_local_illu(pt, normal, lit, in_ray.dir);
+                         }
+                        );
+                local_illu += tmp_illu;
+            }
 
             auto result = (*min_i)->calc_reflect_refract(min_info);
             if (result.first.flag)

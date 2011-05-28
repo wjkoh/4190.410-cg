@@ -57,7 +57,7 @@ void display()
             // image[][] - upper left origin, OpenGL - lower left origin
             glColor3fv(rt.image[j][IMG_HEIGHT - 1 - i].data());
 #endif
-            glVertex2f(j, i);
+            glVertex2f(j + 0.5, i + 0.5);
         }
     }
     glEnd();

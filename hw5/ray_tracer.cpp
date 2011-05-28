@@ -23,12 +23,15 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
     srand(time(NULL));
 
     //cout << (float)rand() / (float)RAND_MAX << endl;
+#pragma omp parallel for
     for (int i = 0; i < img_height; ++i)
     {
         if (i % 100 == 0)
         {
             cout << endl;
-            cout << "(" << i << ")";
+            stringstream ss;
+            ss << "(" << i << ")";
+            cout << ss.str();
         }
         else
         {
@@ -36,7 +39,6 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
             cout.flush();
         }
 
-#pragma omp parallel for
         for (int j = 0; j < img_width; ++j)
         {
             vector3 intensity;
