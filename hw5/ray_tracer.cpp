@@ -1,3 +1,4 @@
+#include <omp.h>
 #include "ray_tracer.h"
 using namespace std;
 
@@ -35,25 +36,36 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
             cout.flush();
         }
 
+#pragma omp parallel for
         for (int j = 0; j < img_width; ++j)
         {
             vector3 intensity;
             intensity.zero();
 
-            // Randomly shuffle jitter codes
             vector<int> codes;
+            vector<int> lens_positions;
+            for (int k = 0; k < JITTER*JITTER; ++k)
+            {
+                codes.push_back(k);
+                lens_positions.push_back(k);
+            }
+
+            // Randomly shuffle jitter codes
+            /*
             {
                 int idx = 0;
                 std::generate_n(back_inserter(codes), JITTER*JITTER, [&idx]() { return idx++; });
             }
+            */
             std::random_shuffle(codes.begin(), codes.end());
 
             // Randomly shuffle lens position
-            vector<int> lens_positions;
+            /*
             {
                 int idx = 0;
                 std::generate_n(back_inserter(lens_positions), JITTER*JITTER, [&idx]() { return idx++; });
             }
+            */
             std::random_shuffle(lens_positions.begin(), lens_positions.end());
 
             // DOF
