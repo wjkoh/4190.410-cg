@@ -73,13 +73,13 @@ class ray_tree_node
                     float ray_dist = ray_vec.length();
 
                     ray ray1(pt, ray_vec); // shadow ray
-                    auto result = find_if(s.objs.begin(), s.objs.end(),
-                                          [ray1, ray_dist](std::shared_ptr<object> obj)
-                                          -> bool
-                                          {
-                                          intersect_info info = obj->check(ray1);
-                                          return info.intersect && info.dist < ray_dist;
-                                          });
+                    auto result = std::find_if(s.objs.begin(), s.objs.end(),
+                                               [ray1, ray_dist](std::shared_ptr<object> obj)
+                                               -> bool
+                                               {
+                                               intersect_info info = obj->check(ray1);
+                                               return info.intersect && info.dist < ray_dist;
+                                               });
                     if (result == s.objs.end())
                         ++hit_count;
                 }
@@ -100,12 +100,12 @@ class ray_tree_node
             {
                 vector3 tmp_illu; // VS2010
                 tmp_illu.zero();
-                for_each(lights.begin(), lights.end(),
-                         [=, &tmp_illu](const light& lit)
-                         {
-                         tmp_illu += (*min_i)->calc_local_illu(pt, normal, lit, in_ray.dir);
-                         }
-                        );
+                std::for_each(lights.begin(), lights.end(),
+                              [=, &tmp_illu](const light& lit)
+                              {
+                              tmp_illu += (*min_i)->calc_local_illu(pt, normal, lit, in_ray.dir);
+                              }
+                             );
                 local_illu += tmp_illu;
             }
 
