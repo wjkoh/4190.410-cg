@@ -10,15 +10,17 @@ class triangle : public object
 {
     public:
         triangle(const vector3& v0, const vector3& v1, const vector3& v2)
+            : object((v0 + v1 + v2)/3.0)
         {
             set_vertex(v0, v1, v2);
 
-            vector3 n = get_normal(v[0]);
+            vector3 n = get_normal(v[0], 0.0);
             set_normal(n, n, n);
         }
 
         triangle(const vector3& v0, const vector3& v1, const vector3& v2,
                    const vector3& n0, const vector3& n1, const vector3& n2)
+            : object((v0 + v1 + v2)/3.0)
         {
             set_vertex(v0, v1, v2);
             set_normal(n0, n1, n2);
@@ -39,23 +41,23 @@ class triangle : public object
             n[2] = n2;
         }
 
-        vector3 get_normal(const point3&) const
+        vector3 get_normal(const point3&, const float time) const
         {
             vector3 ba = v[0] - v[1];
             vector3 bc = v[2] - v[1];
             return unit_cross(bc, ba);
         }
 
-        plane_t get_plane() const
+        plane_t get_plane(const float time) const
         {
-            vector3 normal = get_normal(v[0]);
+            vector3 normal = get_normal(v[0], time);
             return plane_t(normal, -dot(normal, v[1])); // 0, 1, 2 아무거나 상관없음
         }
 
         const vector3& operator[](int idx) const    { return v[idx]; }
         vector3& operator[](int idx)                { return v[idx]; }
 
-        void set_pos(const point3& new_pos)
+        virtual void set_pos(const point3& new_pos)
         {
             vector3 delta = new_pos - pos;
             v[0] += delta;
@@ -105,9 +107,9 @@ class triangle : public object
             return std::make_pair(u, v);
         }
 
-        std::pair<float, float> get_hit_dist(const ray& ray) const
+        std::pair<float, float> get_hit_dist(const ray& ray, const float time) const
         {
-            const plane_t plane = get_plane();
+            const plane_t plane = get_plane(time);
             double s = -(plane.real() + dot(plane.imaginary(), ray.org))/dot(plane.imaginary(), ray.dir);
             if (fabs(s) <= FABS_EPS_F) s = 0.0;
 

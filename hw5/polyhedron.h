@@ -11,12 +11,12 @@ class polyhedron : public sphere
     public:
         polyhedron(const vector3& pos, float r = 1.5);
 
-        virtual intersect_info check(const ray& in_ray, std::pair<float, float>)
+        virtual intersect_info check(const ray& in_ray, const float time, std::pair<float, float>)
         {
             intersect_info result(in_ray);
 
             // check a bounding sphere first
-            if (!sphere::check(in_ray, sphere::get_hit_dist(in_ray)).intersect)
+            if (!sphere::check(in_ray, time, sphere::get_hit_dist(in_ray, time)).intersect)
             {
                 result.intersect = false;
                 return result;
@@ -26,7 +26,7 @@ class polyhedron : public sphere
             result.dist = std::numeric_limits<float>::max();
             for (auto i = triangles.begin(); i != triangles.end(); ++i)
             {
-                intersect_info tmp_info = i->check(in_ray);
+                intersect_info tmp_info = i->check(in_ray, time);
                 if (tmp_info.intersect && tmp_info.dist < result.dist)
                 {
                     result = tmp_info;
@@ -46,7 +46,7 @@ class polyhedron : public sphere
             return result;
         }
 
-        //vector3 get_normal(const point3& pt) const { assert(false); return (pt - pos).normalize(); }
+        //vector3 get_normal(const point3& pt) const { assert(false); return (pt - get_pos(time)).normalize(); }
         virtual void set_pos(const point3& new_pos) { pos = new_pos; make_polygon(); }
 
         void make_polygon();

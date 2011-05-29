@@ -15,7 +15,6 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
     //float o = (c_o_lens - c_o_img_plane).length();
     vector3 center_line = normalize(c_o_lens - C_O_IMG_PLANE);
     c_o_lens = o_*center_line;
-    std::cout << "LENS " << c_o_lens << std::endl;
     s.move_scene(vector3(0, 0, -1.5));
 #endif
 
@@ -105,9 +104,13 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
 #endif
                 ray1.code = codes[k];
 
+                float interval = 1.0/(float)(JITTER*JITTER);
+                float interval_rand = ((float)rand()/(float)RAND_MAX); // 0.0~1.0
+                float time = (codes[k] + interval_rand)*interval;
+
                 // calculate an intensity of light
                 shared_ptr<ray_tree_node> root(new ray_tree_node(s, ray1));
-                root->process(s, ray1, 0);
+                root->process(s, ray1, time);
 
                 // traverse a tree
                 intensity += traverse_tree(root);

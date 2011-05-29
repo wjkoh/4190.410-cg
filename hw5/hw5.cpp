@@ -6,6 +6,8 @@ using namespace std;
 #else
 #  include <GL/glut.h>
 #endif
+#include "CImg.h"
+using namespace cimg_library;
 
 #include "ray_tracer.h"
 
@@ -15,11 +17,14 @@ using namespace std;
 // cube, icosahedron -done
 // DOF, jitter -done
 // area light, soft shadow -done
-// motion blur
+// motion blur -done
+//
 // light attenuation
-// viewpoint change
+// changing viewpoint
 // quad
 // octree or BSP
+// moves global variable
+// makes pos member var. private
 
 void init(void)
 {
@@ -83,6 +88,7 @@ int main(int argc, char** argv)
     sphere2->mat.specular = vector3(1.0, 1.0, 1.0);
     sphere2->mat.transparency = 1.0;
     sphere2->mat.shininess = 20;
+    sphere2->move_dir = vector3(0, 2.5, 0);
     s.objs.push_back(sphere2);
 
     shared_ptr<object> triangle1(new triangle(vector3(2.0, 0, -3.0), vector3(0.0, 2.0, -3.0), vector3(-2.0, 0, -3.0)));
@@ -135,6 +141,29 @@ int main(int argc, char** argv)
     //s.lights.push_back(light(vector3(0, 2, -1)));
 
     rt.run(IMG_WIDTH, IMG_HEIGHT, s);
+
+    // Save as an image file
+    CImg<unsigned char> img(IMG_WIDTH, IMG_HEIGHT, 1, 3, 0);
+    cimg_forXY(img, x, y)
+    {
+        for (int i = 0; i < 3; ++i)
+            img(x, y, i) = min(rt.image[IMG_WIDTH - 1 - x][IMG_HEIGHT -1 - y][i]*255.0, 255.0);
+    }
+
+    time_t rawtime;
+    struct tm* timeinfo;
+    char buffer[80];
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer, 80, "%Y-%m-%d_%H.%M.%S", timeinfo);
+    string date_time(buffer);
+    
+#ifdef __APPLE__
+    img.save_png(("img_" + date_time + ".png").c_str());
+#else
+    img.save_bmp(("img_" + date_time + ".bmp").c_str());
+#endif
 
     // OpenGL & GLUT
     glutInit(&argc, argv);

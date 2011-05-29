@@ -62,22 +62,22 @@ class light;
 class object
 {
     public:
-        object(const vector3& pos = vector3(0, 0, -1))
-            : pos(pos), refr_idx(REFR_GLASS)
+        object(const vector3& pos, const vector3& move_dir = vector3(0, 0, 0))
+            : pos(pos), refr_idx(REFR_GLASS), move_dir(move_dir)//, time(0)
         {
         }
 
         virtual ~object() {}
 
         virtual bool is_sphere() const { return false; }
-        virtual vector3 get_normal(const point3& pt) const = 0; // Phong shading
+        virtual vector3 get_normal(const point3& pt, const float time) const = 0; // Phong shading
 
-        point3 get_pos() const { return pos; }
+        point3 get_pos(float time) const { return pos + move_dir*time; }
         virtual void set_pos(const point3& new_pos) { pos = new_pos; }
 
         // get_hit_dist 함수를 상위 클래스 것으로 사용할 수 있게 하기 위해 분리
-        virtual intersect_info check(const ray& in_ray) { return check(in_ray, get_hit_dist(in_ray)); }
-        virtual intersect_info check(const ray& in_ray, std::pair<float, float> dist)
+        virtual intersect_info check(const ray& in_ray, float time) { return check(in_ray, time, get_hit_dist(in_ray, time)); }
+        virtual intersect_info check(const ray& in_ray, float time, std::pair<float, float> dist)
         {
             intersect_info result(in_ray);
 
@@ -110,7 +110,7 @@ class object
             {
                 point3 pt = in_ray*dist.second;
 
-                bool is_dir_outward = dot(in_ray.dir, get_normal(pt)) >= -EPS_F;
+                bool is_dir_outward = dot(in_ray.dir, get_normal(pt, time)) >= -EPS_F;
 
                 result.intersect = !is_dir_outward;
                 result.dist = dist.first;
@@ -123,7 +123,7 @@ class object
                 }
 
             if (result.intersect)
-                result.normal = get_normal(result.get_pt());
+                result.normal = get_normal(result.get_pt(), time);
             return result;
         }
 
@@ -175,7 +175,7 @@ class object
             ray refr_ray(pt, refr, out_refr_idx);
             refr_ray.code = in_ray.code;
 
-            if (from_in_to_out)// || (is_sphere() && dot(in_ray.dir, pt - pos) >= 0))
+            if (from_in_to_out)// || (is_sphere() && dot(in_ray.dir, pt - get_pos(time)) >= 0))
             {
                 refl_ray.flag = false;
             }
@@ -191,27 +191,28 @@ class object
         vector3 calc_local_illu(const point3& pt, const vector3& normal, const light& light, const vector3& v) const;
 
         material mat;
+        vector3 move_dir;
 
     protected:
-        virtual std::pair<float, float> get_hit_dist(const ray& ray) const = 0;
+        virtual std::pair<float, float> get_hit_dist(const ray& ray, const float time) const = 0;
 
-        point3 pos;
         float refr_idx;
+        float time;
+        point3 pos; // 절대 그냥 접근하지 말 것!! 반드시 get_pos(time) 사용.
 };
 
 class sphere : public object
 {
     public:
-        sphere() : object(), r(1.0) {}
         sphere(const vector3& pos) : object(pos), r(1.0) {}
 
-        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); }
+        vector3 get_normal(const point3& pt, const float time) const { return (pt - get_pos(time)).normalize(); }
         virtual bool is_sphere() const { return true; }
         
     protected:
-        std::pair<float, float> get_hit_dist(const ray& ray) const
+        std::pair<float, float> get_hit_dist(const ray& ray, const float time) const
         {
-            const vector3 d_p = pos - ray.org;
+            const vector3 d_p = get_pos(time) - ray.org;
             float det = pow(r, 2) - (d_p - dot(ray.dir, d_p)*ray.dir).length_squared();
             if (det < -EPS_F) return std::make_pair(-1.0, -1.0);
             else if (fabs(det) <= FABS_EPS_F) det = 0.0;
@@ -235,22 +236,22 @@ class light : public object // point, directional, area
         light()
             : object(vector3(0, 3, -1)), intensity(1.0, 1.0, 1.0), side_len(1.5)
         {
-            dir = vector3().zero() - get_pos();
+            dir = vector3().zero() - get_pos(0.0);
         }
         light(const vector3& pos)
             : object(pos), intensity(1.0, 1.0, 1.0), side_len(1.5)
         {
-            dir = vector3().zero() - get_pos();
+            dir = vector3().zero() - get_pos(0.0);
         }
 
-        vector3 get_normal(const point3& pt) const { return (pt - pos).normalize(); } // TODO: area light는 triangle처럼 바꿔야 하지 않을까?
+        vector3 get_normal(const point3& pt, const float time) const { return (pt - get_pos(time)).normalize(); } // TODO: area light는 triangle처럼 바꿔야 하지 않을까?
 
-        point3 get_jittered_pos(int idx) const 
+        point3 get_jittered_pos(int idx, const float time) const 
         {
             using namespace std;
             assert(idx >= 0 && idx < SHADOW_RAY*SHADOW_RAY);
 
-            const point3 center = get_pos();
+            const point3 center = get_pos(time);
             const float half_len = side_len/2.0;
             const float space = side_len/(float)SHADOW_RAY;
 
@@ -284,9 +285,9 @@ class light : public object // point, directional, area
         vector3 dir;
 
     protected:
-        std::pair<float, float> get_hit_dist(const ray& ray) const
+        std::pair<float, float> get_hit_dist(const ray& ray, const float time) const
         {
-            float s = length(pos - ray.org);
+            float s = length(get_pos(time) - ray.org);
             if (s < -EPS_F) return std::make_pair(-1.0, -1.0);
             if (fabs(s) <= FABS_EPS_F) s = 0.0;
             return std::make_pair(s, s);

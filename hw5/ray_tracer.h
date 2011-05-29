@@ -10,22 +10,23 @@ class scene
 {
     public:
         scene()
-            : g_amb_light(0.4, 0.4, 0.4)
+            : g_amb_light(0.4, 0.4, 0.4), time(0.0)
         {}
 
         void move_scene(const vector3& delta = vector3(0, 0, 0))
         {
             for (auto i = objs.begin(); i != objs.end(); ++i)
-                (*i)->set_pos((*i)->get_pos() + c_o_lens + delta);
+                (*i)->set_pos((*i)->get_pos(0.0) + c_o_lens + delta);
 
             for (auto i = lights.begin(); i != lights.end(); ++i)
-                i->set_pos(i->get_pos() + c_o_lens + delta);
+                i->set_pos(i->get_pos(0.0) + c_o_lens + delta);
         }
 
         //octree tree;
         std::vector<std::shared_ptr<object> > objs;
         std::vector<light> lights;
         vector3 g_amb_light;
+        float time; // 0.0 ~1.0
 };
 
 class ray_tree_node
@@ -36,14 +37,14 @@ class ray_tree_node
     {
     }
 
-    void process(const scene& s, const ray& in_ray, int depth)
+    void process(const scene& s, const ray& in_ray, float time, int depth = 0)
     {
         auto min_i = s.objs.end();
         intersect_info min_info(in_ray);
 
         for (auto i = s.objs.begin(); i != s.objs.end(); ++i)
         {
-            intersect_info tmp_info = (*i)->check(in_ray);
+            intersect_info tmp_info = (*i)->check(in_ray, time);
             if (tmp_info.intersect && tmp_info.dist < min_info.dist)
             {
                 min_i = i;
@@ -68,16 +69,16 @@ class ray_tree_node
                 int hit_count = 0;
                 for (int j = 0; j < SHADOW_RAY*SHADOW_RAY; ++j)
                 {
-                    point3 ray_pt = i->get_jittered_pos(j);
+                    point3 ray_pt = i->get_jittered_pos(j, time);
                     vector3 ray_vec = ray_pt - pt;
                     float ray_dist = ray_vec.length();
 
                     ray ray1(pt, ray_vec); // shadow ray
                     auto result = std::find_if(s.objs.begin(), s.objs.end(),
-                                               [ray1, ray_dist](std::shared_ptr<object> obj)
+                                               [ray1, ray_dist, time](std::shared_ptr<object> obj)
                                                -> bool
                                                {
-                                               intersect_info info = obj->check(ray1);
+                                               intersect_info info = obj->check(ray1, time);
                                                return info.intersect && info.dist < ray_dist;
                                                });
                     if (result == s.objs.end())
@@ -113,13 +114,13 @@ class ray_tree_node
             if (result.first.flag)
             {
                 r = std::shared_ptr<ray_tree_node>(new ray_tree_node(s, result.first, depth)); // reflection
-                r->process(s, result.first, depth);
+                r->process(s, result.first, time, depth);
             }
 
             if (result.second.flag)
             {
                 t = std::shared_ptr<ray_tree_node>(new ray_tree_node(s, result.second, depth)); // refraction
-                t->process(s, result.second, depth);
+                t->process(s, result.second, time, depth);
             }
         }
     }
@@ -160,9 +161,6 @@ inline vector3 traverse_tree(std::shared_ptr<ray_tree_node> node, int depth = 0)
             + (1-node->transparency)*(int_t)
             );
 }
-
-#include <ctime>
-#include <cstdlib>
 
 class ray_tracer
 {

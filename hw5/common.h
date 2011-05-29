@@ -2,6 +2,8 @@
 #define _COMMON_H_
 
 #include <algorithm>
+#include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <list>
 #include <map>

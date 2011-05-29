@@ -1,9 +1,9 @@
-#include <object.h>
+#include "object.h"
 
 vector3 object::calc_local_illu(const point3& pt, const vector3& n, const light& light, const vector3& u) const
 {
-    const float light_dist = ((light.get_pos() - pt)*0.2).length_squared();
-    const vector3 l = normalize(light.get_pos() - pt);
+    const float light_dist = ((light.get_pos(0.0) - pt)*0.2).length_squared();
+    const vector3 l = normalize(light.get_pos(0.0) - pt);
     const vector3 v = -u;
     const vector3 r = 2*dot(n, l)*n - l;
 
