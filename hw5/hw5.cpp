@@ -25,6 +25,7 @@ using namespace cimg_library;
 // octree or BSP
 // moves global variable
 // makes pos member var. private
+// timer
 
 void init(void)
 {
@@ -139,8 +140,22 @@ int main(int argc, char** argv)
     //s.lights.push_back(light(vector3(0, 0, 7)));
     //s.lights.push_back(light(vector3(-1, -2, 0)));
     //s.lights.push_back(light(vector3(0, 2, -1)));
+   
+    time_t rawtime;
+    struct tm* timeinfo;
+    char buffer[80];
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer, 80, "%Y-%m-%d_%H.%M.%S", timeinfo);
+    cout << string(buffer) << endl;
 
     rt.run(IMG_WIDTH, IMG_HEIGHT, s);
+
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+    strftime(buffer, 80, "%Y-%m-%d_%H.%M.%S", timeinfo);
+    cout << string(buffer) << endl;
 
     // Save as an image file
     CImg<unsigned char> img(IMG_WIDTH, IMG_HEIGHT, 1, 3, 0);
@@ -150,17 +165,14 @@ int main(int argc, char** argv)
             img(x, y, i) = min(rt.image[IMG_WIDTH - 1 - x][IMG_HEIGHT -1 - y][i]*255.0, 255.0);
     }
 
-    time_t rawtime;
-    struct tm* timeinfo;
-    char buffer[80];
-
     time(&rawtime);
     timeinfo = localtime(&rawtime);
     strftime(buffer, 80, "%Y-%m-%d_%H.%M.%S", timeinfo);
     string date_time(buffer);
     
 #ifdef __APPLE__
-    img.save_png(("img_" + date_time + ".png").c_str());
+    img.save_bmp(("img_" + date_time + ".bmp").c_str());
+    //img.save_png(("img_" + date_time + ".png").c_str());
 #else
     img.save_bmp(("img_" + date_time + ".bmp").c_str());
 #endif
