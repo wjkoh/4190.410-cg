@@ -26,6 +26,7 @@ using namespace cimg_library;
 // moves global variable
 // makes pos member var. private
 // timer
+// command-line arguments
 
 void init(void)
 {

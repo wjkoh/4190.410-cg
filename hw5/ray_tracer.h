@@ -5,12 +5,13 @@
 #include "object.h"
 #include "triangle.h"
 #include "polyhedron.h"
+#include "octree.h"
 
 class scene
 {
     public:
         scene()
-            : g_amb_light(0.4, 0.4, 0.4), time(0.0)
+            : g_amb_light(0.4, 0.4, 0.4)
         {}
 
         void move_scene(const vector3& delta = vector3(0, 0, 0))
@@ -22,11 +23,10 @@ class scene
                 i->set_pos(i->get_pos(0.0) + c_o_lens + delta);
         }
 
-        //octree tree;
+        octree tree;
         std::vector<std::shared_ptr<object> > objs;
         std::vector<light> lights;
         vector3 g_amb_light;
-        float time; // 0.0 ~1.0
 };
 
 class ray_tree_node

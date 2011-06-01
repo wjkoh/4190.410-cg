@@ -28,6 +28,7 @@ inline std::ostream& operator<<(std::ostream& os, const ray& r)
     return os;
 }
 
+class object;
 struct intersect_info
 {
     intersect_info(const ray& in_ray)
@@ -52,6 +53,7 @@ struct intersect_info
     bool intersect;
 
     ray in_ray;
+    std::shared_ptr<object> obj;
     float dist; // ray.org + dist*ray.dir
     bool from_in_to_out;
 
@@ -59,7 +61,7 @@ struct intersect_info
 };
 
 class light;
-class object
+class object : public std::enable_shared_from_this<object>
 {
     public:
         object(const vector3& pos, const vector3& move_dir = vector3(0, 0, 0))
@@ -123,7 +125,10 @@ class object
                 }
 
             if (result.intersect)
+            {
+                result.obj = shared_from_this();
                 result.normal = get_normal(result.get_pt(), time);
+            }
             return result;
         }
 

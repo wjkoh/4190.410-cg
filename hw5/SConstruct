@@ -8,7 +8,7 @@ env = Environment(
                   LINKFLAGS=['-framework', 'OpenGL', '-framework', 'GLUT', '-fopenmp']
                  )
 
-srcs = ['hw5.cpp', 'ray_tracer.cpp', 'object.cpp', 'triangle.cpp', 'polyhedron.cpp']
+srcs = ['hw5.cpp', 'ray_tracer.cpp', 'object.cpp', 'triangle.cpp', 'polyhedron.cpp', 'octree.cpp']
 prog = env.Program('hw5', srcs)
 
 env.Command('tags', Glob('*.cpp *.h'), 'echo CTAGS && ctags *')

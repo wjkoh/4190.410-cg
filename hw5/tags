@@ -6,7 +6,9 @@
 !_TAG_PROGRAM_VERSION	5.8	//
 A	Makefile	/^A=$(wildcard *.h)$/;"	m
 B	Makefile	/^B=$(wildcard *.cpp)$/;"	m
+BACK	octree.h	/^    BACK$/;"	e	enum:__anon1
 BACKGND_COLOR	common.h	/^const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);$/;"	v
+BOTTOM	octree.h	/^    BOTTOM,$/;"	e	enum:__anon1
 BayertoRGB	CImg.h	/^    CImg<T>& BayertoRGB(const unsigned int interpolation_type=3) {$/;"	f	struct:cimg_library::CImg
 CImg	CImg.h	/^    CImg():_width(0),_height(0),_depth(0),_spectrum(0),_is_shared(false),_data(0) {}$/;"	f	struct:cimg_library::CImg
 CImg	CImg.h	/^    CImg(const CImg<T>& img) {$/;"	f	struct:cimg_library::CImg
@@ -81,6 +83,7 @@ FFT	CImg.h	/^    CImgList<T>& FFT(const bool invert=false) {$/;"	f	struct:cimg_l
 FFT	CImg.h	/^    CImgList<T>& FFT(const char axis, const bool invert=false) {$/;"	f	struct:cimg_library::CImgList
 FFT	CImg.h	/^    static void FFT(CImg<T>& real, CImg<T>& imag, const bool invert=false) {$/;"	f	struct:cimg_library::CImg
 FFT	CImg.h	/^    static void FFT(CImg<T>& real, CImg<T>& imag, const char axis, const bool invert=false) {$/;"	f	struct:cimg_library::CImg
+FRONT	octree.h	/^    FRONT,$/;"	e	enum:__anon1
 HSItoRGB	CImg.h	/^    CImg<T>& HSItoRGB() {$/;"	f	struct:cimg_library::CImg
 HSLtoRGB	CImg.h	/^    CImg<T>& HSLtoRGB() {$/;"	f	struct:cimg_library::CImg
 HSV_LUT256	CImg.h	/^    static const CImg<Tuchar>& HSV_LUT256() {$/;"	f	struct:cimg_library::CImg
@@ -93,6 +96,7 @@ JITTER_ANGLE_DEG	common.h	/^const float JITTER_ANGLE_DEG = 5; \/\/ 주의! int�
 JITTER_ANGLE_DEG_R	common.h	/^const float JITTER_ANGLE_DEG_R = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_REFL_ON	common.h	/^#define JITTER_REFL_ON /;"	d
 JITTER_REFR_ON	common.h	/^#define JITTER_REFR_ON /;"	d
+LEFT	octree.h	/^    LEFT,$/;"	e	enum:__anon1
 LENS_HEIGHT	common.h	/^const int LENS_HEIGHT = 10;$/;"	v
 LENS_WIDTH	common.h	/^const int LENS_WIDTH = 10; \/\/ 사실은 aperture size$/;"	v
 LIB	Makefile	/^LIB=\/opt\/local\/lib$/;"	m
@@ -124,8 +128,10 @@ RGBtoXYZ	CImg.h	/^    CImg<T>& RGBtoXYZ() {$/;"	f	struct:cimg_library::CImg
 RGBtoYCbCr	CImg.h	/^    CImg<T>& RGBtoYCbCr() {$/;"	f	struct:cimg_library::CImg
 RGBtoYUV	CImg.h	/^    CImg<T>& RGBtoYUV() {$/;"	f	struct:cimg_library::CImg
 RGBtoxyY	CImg.h	/^    CImg<T>& RGBtoxyY() {$/;"	f	struct:cimg_library::CImg
+RIGHT	octree.h	/^    RIGHT = 0,$/;"	e	enum:__anon1
 SHADOW_RAY	common.h	/^const int SHADOW_RAY = 3; \/\/ SHADOW_RAY*SHADOW_RAY 개의 shadow ray$/;"	v
 SVD	CImg.h	/^    const CImg<T>& SVD(CImg<t>& U, CImg<t>& S, CImg<t>& V, const bool sorting=true,$/;"	f	struct:cimg_library::CImg
+TOP	octree.h	/^    TOP,$/;"	e	enum:__anon1
 Tbool	CImg.h	/^    typedef typename cimg::superset<T,bool>::type Tbool;$/;"	t	struct:cimg_library::CImg
 Tbool	CImg.h	/^    typedef typename cimg::superset<T,bool>::type Tbool;$/;"	t	struct:cimg_library::CImgList
 Tchar	CImg.h	/^    typedef typename cimg::superset<T,char>::type Tchar;$/;"	t	struct:cimg_library::CImg
@@ -175,6 +181,7 @@ _LU	CImg.h	/^    CImg<T>& _LU(CImg<t>& indx, bool& d) {$/;"	f	struct:cimg_librar
 _MATERIAL_H_	material.h	/^#define _MATERIAL_H_$/;"	d
 _Magick_info	CImg.h	/^    } _Magick_info;$/;"	m	namespace:cimg_library::cimg	typeref:struct:cimg_library::cimg::Magick_info
 _OBJECT_H_	object.h	/^#define _OBJECT_H_$/;"	d
+_OCTREE_H_	octree.h	/^#define _OCTREE_H_$/;"	d
 _POLYHEDRON_H_	polyhedron.h	/^#define _POLYHEDRON_H_$/;"	d
 _RAY_TRACER_H_	ray_tracer.h	/^#define _RAY_TRACER_H_$/;"	d
 _TRIANGLE_H_	triangle.h	/^#define _TRIANGLE_H_$/;"	d
@@ -685,7 +692,10 @@ charT	CImg.h	/^    typedef typename cimg::last<T,char>::type charT;$/;"	t	struct
 charT	CImg.h	/^    typedef typename cimg::last<T,char>::type charT;$/;"	t	struct:cimg_library::CImgList
 check	object.h	/^        virtual intersect_info check(const ray& in_ray, float time) { return check(in_ray, time, get_hit_dist(in_ray, time)); }$/;"	f	class:object
 check	object.h	/^        virtual intersect_info check(const ray& in_ray, float time, std::pair<float, float> dist)$/;"	f	class:object
+check	octree.cpp	/^intersect_info octree_node::check(const ray& eye_ray, float time) const$/;"	f	class:octree_node
 check	polyhedron.h	/^        virtual intersect_info check(const ray& in_ray, const float time, std::pair<float, float>)$/;"	f	class:polyhedron
+check_objs	octree.cpp	/^intersect_info octree_node::check_objs(const ray& eye_ray, float time) const$/;"	f	class:octree_node
+child	octree.h	/^        octree_node* child[8];$/;"	m	class:octree_node
 cimg	CImg.h	/^  namespace cimg {$/;"	n	namespace:cimg_library
 cimg	CImg.h	/^namespace cimg {$/;"	n	namespace:cimg_library
 cimg_OS	CImg.h	/^#define cimg_OS /;"	d
@@ -1184,6 +1194,7 @@ distance_eikonal	CImg.h	/^    CImg<T>& distance_eikonal(const unsigned int nb_it
 div	CImg.h	/^    CImg<T>& div(const CImg<t>& img) {$/;"	f	struct:cimg_library::CImg
 div	CImg.h	/^    CImg<T>& div(const char *const expression) {$/;"	f	struct:cimg_library::CImg
 dot	CImg.h	/^    Tdouble dot(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
+dot_n_k	octree.h	/^        float dot_n_k(int face_num, const vector3& v) const { return (face_num > 2 ? -1 : 1) * v[face_num % 3]; }$/;"	f	class:octree_node
 doubleT	CImg.h	/^    typedef typename cimg::last<T,double>::type doubleT;$/;"	t	struct:cimg_library::CImg
 doubleT	CImg.h	/^    typedef typename cimg::last<T,double>::type doubleT;$/;"	t	struct:cimg_library::CImgList
 draw_arrow	CImg.h	/^    CImg<T>& draw_arrow(const int x0, const int y0,$/;"	f	struct:cimg_library::CImg
@@ -1396,6 +1407,7 @@ get_crop	CImg.h	/^    CImg<T> get_crop(const int x0, const int y0,$/;"	f	struct:
 get_crop_font	CImg.h	/^    CImgList<T> get_crop_font() const {$/;"	f	struct:cimg_library::CImgList
 get_cross	CImg.h	/^    CImg<_cimg_Tt> get_cross(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
 get_cut	CImg.h	/^    CImg<T> get_cut(const T value_min, const T value_max) const {$/;"	f	struct:cimg_library::CImg
+get_d_k	octree.h	/^        float get_d_k(int face_num) const$/;"	f	class:octree_node
 get_deriche	CImg.h	/^    CImg<Tfloat> get_deriche(const float sigma, const int order=0, const char axis='x', const bool cond=true) const {$/;"	f	struct:cimg_library::CImg
 get_diagonal	CImg.h	/^    CImg<T> get_diagonal() const {$/;"	f	struct:cimg_library::CImg
 get_dijkstra	CImg.h	/^    CImg<T> get_dijkstra(const unsigned int starting_node, const unsigned int ending_node, CImg<t>& previous) const {$/;"	f	struct:cimg_library::CImg
@@ -1523,6 +1535,7 @@ get_matrix_at	CImg.h	/^    CImg<T> get_matrix_at(const unsigned int x=0, const u
 get_max	CImg.h	/^    CImg<T> get_max(const T val) const {$/;"	f	struct:cimg_library::CImg
 get_max	CImg.h	/^    CImg<Tfloat> get_max(const char *const expression) const {$/;"	f	struct:cimg_library::CImg
 get_max	CImg.h	/^    CImg<_cimg_Tt> get_max(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
+get_mid	octree.h	/^        point3 get_mid() const { return (rt + lb)\/2.0; }$/;"	f	class:octree_node
 get_min	CImg.h	/^    CImg<T> get_min(const T val) const {$/;"	f	struct:cimg_library::CImg
 get_min	CImg.h	/^    CImg<Tfloat> get_min(const char *const expression) const {$/;"	f	struct:cimg_library::CImg
 get_min	CImg.h	/^    CImg<_cimg_Tt> get_min(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
@@ -1714,6 +1727,8 @@ is_key_sequence	CImg.h	/^    bool is_key_sequence(const unsigned int *const key_
 is_moved	CImg.h	/^    bool is_moved() const {$/;"	f	struct:cimg_library::CImgDisplay
 is_object3d	CImg.h	/^    bool is_object3d(const CImgList<tp>& primitives,$/;"	f	struct:cimg_library::CImg
 is_overlapped	CImg.h	/^    bool is_overlapped(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
+is_pt_in	octree.h	/^        bool is_pt_in(const point3& pt) const { return (pt <= rt && pt >= lb); }$/;"	f	class:octree_node
+is_ray_in	octree.h	/^        bool is_ray_in(const ray& eye_ray) const$/;"	f	class:octree_node
 is_resized	CImg.h	/^    bool is_resized() const {$/;"	f	struct:cimg_library::CImgDisplay
 is_sameC	CImg.h	/^    bool is_sameC(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
 is_sameC	CImg.h	/^    bool is_sameC(const unsigned int dc) const {$/;"	f	struct:cimg_library::CImg
@@ -2036,6 +2051,7 @@ label	CImg.h	/^    CImg<T>& label(const CImg<t>& connectivity_mask, const Tfloat
 label	CImg.h	/^    CImg<T>& label(const bool is_high_connectivity=false, const Tfloat tolerance=0) {$/;"	f	struct:cimg_library::CImg
 laplacian	CImg.h	/^    CImg<T>& laplacian() {$/;"	f	struct:cimg_library::CImg
 last	CImg.h	/^    template<typename t1, typename t2> struct last { typedef t2 type; };$/;"	s	namespace:cimg_library::cimg
+lb	octree.h	/^        point3 lb; \/\/ Left-bottom$/;"	m	class:octree_node
 level	CImg.h	/^      CImg<uintT> level, opcode;$/;"	m	struct:cimg_library::CImg::_cimg_math_parser
 light	object.h	/^        light()$/;"	f	class:light
 light	object.h	/^        light(const vector3& pos)$/;"	f	class:light
@@ -2319,12 +2335,17 @@ normalization	CImg.h	/^    unsigned int normalization() const {$/;"	f	struct:cim
 normalize	CImg.h	/^    CImg<T>& normalize() {$/;"	f	struct:cimg_library::CImg
 normalize	CImg.h	/^    CImg<T>& normalize(const T value_min, const T value_max) {$/;"	f	struct:cimg_library::CImg
 number_filename	CImg.h	/^    inline char* number_filename(const char *const filename, const int number, const unsigned int n, char *const string) {$/;"	f	namespace:cimg_library::cimg
+obj	object.h	/^    std::shared_ptr<object> obj;$/;"	m	struct:intersect_info
 object	object.h	/^        object(const vector3& pos, const vector3& move_dir = vector3(0, 0, 0))$/;"	f	class:object
-object	object.h	/^class object$/;"	c
+object	object.h	/^class object : public std::enable_shared_from_this<object>$/;"	c
 object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d() {$/;"	f	struct:cimg_library::CImg
 object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d(const CImgList<tp>& primitives) {$/;"	f	struct:cimg_library::CImg
 object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d(const CImgList<tp>& primitives,$/;"	f	struct:cimg_library::CImg
+objs	octree.h	/^        std::vector<std::shared_ptr<object>> objs; \/\/ objects in this cube$/;"	m	class:octree_node
 objs	ray_tracer.h	/^        std::vector<std::shared_ptr<object> > objs;$/;"	m	class:scene
+octree	octree.h	/^class octree$/;"	c
+octree_node	octree.h	/^        octree_node()$/;"	f	class:octree_node
+octree_node	octree.h	/^class octree_node$/;"	c
 offset	CImg.h	/^    int offset(const int x, const int y=0, const int z=0, const int c=0) const {$/;"	f	struct:cimg_library::CImg
 opcode	CImg.h	/^      CImg<uintT> level, opcode;$/;"	m	struct:cimg_library::CImg::_cimg_math_parser
 opcode0	CImg.h	/^      unsigned int opcode0(const char op) {$/;"	f	struct:cimg_library::CImg::_cimg_math_parser
@@ -2559,6 +2580,7 @@ rol	CImg.h	/^    CImg<T>& rol(const unsigned int n=1) {$/;"	f	struct:cimg_librar
 rol	CImg.h	/^    inline T rol(const T a, const unsigned int n=1) {$/;"	f	namespace:cimg_library::cimg
 rol	CImg.h	/^    inline double rol(const double a, const unsigned int n=1) {$/;"	f	namespace:cimg_library::cimg
 rol	CImg.h	/^    inline float rol(const float a, const unsigned int n=1) {$/;"	f	namespace:cimg_library::cimg
+root	octree.h	/^        octree_node root;$/;"	m	class:octree
 ror	CImg.h	/^    CImg<T>& ror(const CImg<t>& img) {$/;"	f	struct:cimg_library::CImg
 ror	CImg.h	/^    CImg<T>& ror(const char *const expression) {$/;"	f	struct:cimg_library::CImg
 ror	CImg.h	/^    CImg<T>& ror(const unsigned int n=1) {$/;"	f	struct:cimg_library::CImg
@@ -2571,6 +2593,7 @@ rotation_matrix	CImg.h	/^    static CImg<T> rotation_matrix(const float x, const
 round	CImg.h	/^    CImg<T>& round(const double y=1, const int rounding_type=0) {$/;"	f	struct:cimg_library::CImg
 round	CImg.h	/^    inline T round(const T x, const double y=1, const int rounding_type=0) {$/;"	f	namespace:cimg_library::cimg
 rt	hw5.cpp	/^ray_tracer rt;$/;"	v
+rt	octree.h	/^        point3 rt; \/\/ Right-top$/;"	m	class:octree_node
 run	ray_tracer.cpp	/^void ray_tracer::run(int img_width, int img_height, scene& s)$/;"	f	class:ray_tracer
 save	CImg.h	/^    const CImg<T>& save(const char *const filename, const int number=-1) const {$/;"	f	struct:cimg_library::CImg
 save	CImg.h	/^    const CImgList<T>& save(const char *const filename, const int number=-1) const {$/;"	f	struct:cimg_library::CImgList
@@ -2710,6 +2733,7 @@ sqr	CImg.h	/^  inline CImg<_cimg_Tfloat> sqr(const CImg<T>& instance) {$/;"	f	na
 sqrt	CImg.h	/^    CImg<T>& sqrt() {$/;"	f	struct:cimg_library::CImg
 sqrt	CImg.h	/^  inline CImg<_cimg_Tfloat> sqrt(const CImg<T>& instance) {$/;"	f	namespace:cimg_library
 srand	CImg.h	/^    inline void srand() {$/;"	f	namespace:cimg_library::cimg
+start	octree.cpp	/^intersect_info octree::start(ray eye_ray, float time) const$/;"	f	class:octree
 stats	CImg.h	/^    CImg<T>& stats(const unsigned int variance_method=1) {$/;"	f	struct:cimg_library::CImg
 strbuffersize	CImg.h	/^    inline const char *strbuffersize(const unsigned long size) {$/;"	f	namespace:cimg_library::cimg
 strcasecmp	CImg.h	/^    inline int strcasecmp(const char *const s1, const char *const s2) {$/;"	f	namespace:cimg_library::cimg
@@ -2852,7 +2876,6 @@ tic	CImg.h	/^    inline unsigned long tic() {$/;"	f	namespace:cimg_library::cimg
 tictoc	CImg.h	/^    inline unsigned long tictoc(const bool is_tic) {$/;"	f	namespace:cimg_library::cimg
 time	CImg.h	/^    inline unsigned long time() {$/;"	f	namespace:cimg_library::cimg
 time	object.h	/^        float time;$/;"	m	class:object
-time	ray_tracer.h	/^        float time; \/\/ 0.0 ~1.0$/;"	m	class:scene
 title	CImg.h	/^    const char *title() const {$/;"	f	struct:cimg_library::CImgDisplay
 toc	CImg.h	/^    inline unsigned long toc() {$/;"	f	namespace:cimg_library::cimg
 toggle_fullscreen	CImg.h	/^    CImgDisplay& toggle_fullscreen(const bool force_redraw=true) {$/;"	f	struct:cimg_library::CImgDisplay
@@ -2863,6 +2886,7 @@ transparency	ray_tracer.h	/^    float transparency;$/;"	m	class:ray_tree_node
 transpose	CImg.h	/^    CImg<T>& transpose() {$/;"	f	struct:cimg_library::CImg
 transpose	CImg.h	/^  inline CImg<T> transpose(const CImg<T>& instance) {$/;"	f	namespace:cimg_library
 traverse_tree	ray_tracer.h	/^inline vector3 traverse_tree(std::shared_ptr<ray_tree_node> node, int depth = 0)$/;"	f
+tree	ray_tracer.h	/^        octree tree;$/;"	m	class:scene
 triangle	triangle.h	/^        triangle(const vector3& v0, const vector3& v1, const vector3& v2)$/;"	f	class:triangle
 triangle	triangle.h	/^        triangle(const vector3& v0, const vector3& v1, const vector3& v2,$/;"	f	class:triangle
 triangle	triangle.h	/^class triangle : public object$/;"	c
@@ -3035,3 +3059,4 @@ xyYtoXYZ	CImg.h	/^    CImg<T>& xyYtoXYZ() {$/;"	f	struct:cimg_library::CImg
 ~_functor4d_streamline_expr	CImg.h	/^      ~_functor4d_streamline_expr() { delete mp; }$/;"	f	struct:cimg_library::CImg::_functor4d_streamline_expr
 ~object	object.h	/^        virtual ~object() {}$/;"	f	class:object
 ~ray_tree_node	ray_tracer.h	/^    ~ray_tree_node()$/;"	f	class:ray_tree_node
+~scene	ray_tracer.h	/^        virtual ~scene() {}$/;"	f	class:scene
