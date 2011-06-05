@@ -53,7 +53,7 @@ struct intersect_info
     bool intersect;
 
     ray in_ray;
-    std::shared_ptr<object> obj;
+    std::shared_ptr<const object> obj;
     float dist; // ray.org + dist*ray.dir
     bool from_in_to_out;
 
@@ -74,134 +74,31 @@ class object : public std::enable_shared_from_this<object>
         virtual bool is_sphere() const { return false; }
         virtual vector3 get_normal(const point3& pt, const float time) const = 0; // Phong shading
 
+        virtual plane_t get_plane(const float time) const { assert(false); }
+        virtual int front_or_back(const plane_t& p) const { assert(false); }
+
+        virtual int get_size() const { return 1; }
+        virtual std::shared_ptr<const object> get_item(int idx) const { return shared_from_this(); }
+        virtual std::shared_ptr<object> get_item(int idx) { return shared_from_this(); }
+
         point3 get_pos(float time) const { return pos + move_dir*time; }
         virtual void set_pos(const point3& new_pos) { pos = new_pos; }
 
         // get_hit_dist 함수를 상위 클래스 것으로 사용할 수 있게 하기 위해 분리
-        virtual intersect_info check(const ray& in_ray, float time) { return check(in_ray, time, get_hit_dist(in_ray, time)); }
-        virtual intersect_info check(const ray& in_ray, float time, std::pair<float, float> dist)
-        {
-            intersect_info result(in_ray);
-
-            if (fabs(dist.first) <= FABS_EPS_F) dist.first = 0.0;
-            if (fabs(dist.second) <= FABS_EPS_F) dist.second = 0.0;
-
-            if (dist.first < -EPS_F && dist.second < -EPS_F) // -, -
-            {
-                return result;
-            }
-            else if (dist.first < -EPS_F && dist.second > EPS_F) // -, +
-            {
-                result.intersect = true;
-                result.from_in_to_out = true;
-                result.dist = dist.second;
-            }
-            else if (dist.first > EPS_F) // +, +
-            {
-                result.intersect = true;
-                result.dist = dist.first;
-            }
-            else if (fabs(dist.first) <= EPS_F && dist.second > EPS_F) // 0, +
-            {
-                dist.first = 0.0;
-                result.intersect = true;
-                result.from_in_to_out = true;
-                result.dist = dist.second;
-            }
-            else  // 0, 0 && -, 0
-            {
-                point3 pt = in_ray*dist.second;
-
-                bool is_dir_outward = dot(in_ray.dir, get_normal(pt, time)) >= -EPS_F;
-
-                result.intersect = !is_dir_outward;
-                result.dist = dist.first;
-            }
-
-            if (DEBUG_MODE)
-                if (result.intersect && !is_sphere())
-                {
-                    //std::cout << dist.first << " " << dist.second << "     " << result.dist << " " << EPS_F<< std::endl;
-                }
-
-            if (result.intersect)
-            {
-                result.obj = shared_from_this();
-                result.normal = get_normal(result.get_pt(), time);
-            }
-            return result;
-        }
+        virtual intersect_info check(const ray& in_ray, float time) const { return check(in_ray, time, get_hit_dist(in_ray, time)); }
+        virtual intersect_info check(const ray& in_ray, float time, std::pair<float, float> dist) const;
 
         // intersect with ray
-        std::pair<ray, ray> calc_reflect_refract(const intersect_info& info)
-        {
-            assert(info.intersect);
-
-            const ray& in_ray = info.in_ray;
-            const bool from_in_to_out = info.from_in_to_out;
-            const point3 pt = info.get_pt();
-            const vector3& u = info.in_ray.dir;
-            vector3 n = info.normal;
-
-            float out_refr_idx = refr_idx;
-            if (from_in_to_out)
-            {
-                out_refr_idx = REFR_AIR;
-                n = -n;
-            }
-
-            /*
-            if (!is_sphere())
-            {
-                out_refr_idx = REFR_AIR;
-                n = -n;
-            }
-            */
-
-            vector3 refl = get_reflect(n, u);
-            vector3 refr = get_refract(n, u, in_ray.refr_idx, out_refr_idx);
-
-            //jittering reflection
-            const float jitter = ((float)rand() / (float)RAND_MAX) - 0.5;
-
-#if JITTER_REFL_ON
-            const float zone_size = cml::rad((float)JITTER_ANGLE_DEG) / (float)(JITTER*JITTER);
-            refl = rotate_vector(refl, unit_cross(n, u), zone_size*(in_ray.code - JITTER*JITTER/2 + jitter));
-#endif
-
-#if JITTER_REFR_ON
-            const float zone_size_r = cml::rad((float)JITTER_ANGLE_DEG_R) / (float)(JITTER*JITTER);
-            refr = rotate_vector(refr, unit_cross(n, u), zone_size_r*(in_ray.code - JITTER*JITTER/2 + jitter));
-#endif
-
-            ray refl_ray(pt, refl, in_ray.refr_idx);
-            refl_ray.code = in_ray.code;
-
-            ray refr_ray(pt, refr, out_refr_idx);
-            refr_ray.code = in_ray.code;
-
-            if (from_in_to_out)// || (is_sphere() && dot(in_ray.dir, pt - get_pos(time)) >= 0))
-            {
-                refl_ray.flag = false;
-            }
-            
-            if (/*fabs(dot(n, u)) <= EPS_F ||*/ mat.transparency >= 1.0 - FABS_EPS_F)
-            {
-                refr_ray.flag = false;
-            }
-
-            return std::make_pair(refl_ray, refr_ray);
-        }
-
+        std::pair<ray, ray> calc_reflect_refract(const intersect_info& info) const;
         vector3 calc_local_illu(const point3& pt, const vector3& normal, const light& light, const vector3& v) const;
 
         material mat;
         vector3 move_dir;
+        float refr_idx;
 
     protected:
         virtual std::pair<float, float> get_hit_dist(const ray& ray, const float time) const = 0;
 
-        float refr_idx;
         float time;
         point3 pos; // 절대 그냥 접근하지 말 것!! 반드시 get_pos(time) 사용.
 };
@@ -209,11 +106,59 @@ class object : public std::enable_shared_from_this<object>
 class sphere : public object
 {
     public:
-        sphere(const vector3& pos) : object(pos), r(1.0) {}
+        sphere(const vector3& pos, float r) : object(pos), r(r), plane_n(-vector3().cardinal(0))
+    {
+    }
 
         vector3 get_normal(const point3& pt, const float time) const { return (pt - get_pos(time)).normalize(); }
         virtual bool is_sphere() const { return true; }
-        
+        virtual plane_t get_plane(const float time) const
+        {
+            point3 plane_pos = get_pos(time);// + (r + 2*std::numeric_limits<float>::epsilon())*plane_n;
+            return plane_t(plane_n, -dot(plane_n, plane_pos));
+        }
+        virtual int front_or_back(const plane_t& p) const
+        {
+            int pos_f_or_b = 0;
+            float det = dot(p.imaginary(), get_pos(0.0)) + p.real();
+
+            // 구의 중심
+            pos_f_or_b = BSP_OVERLAP;
+            if (det > std::numeric_limits<float>::epsilon())
+                pos_f_or_b = BSP_FRONT;
+            else if (det < -std::numeric_limits<float>::epsilon())
+                pos_f_or_b = BSP_BACK;
+
+            if (pos_f_or_b == BSP_OVERLAP)
+            {
+               if (fabs(r) <= FABS_EPS_F) return BSP_OVERLAP;
+               return BSP_INTERSECT;
+            }
+
+            // pos: F or B, not O
+            // plane 방향 최대점
+            point3 pt;
+            if (pos_f_or_b == BSP_FRONT)
+                pt = get_pos(0.0) + r*-p.imaginary();
+            else
+                pt = get_pos(0.0) + r*p.imaginary();
+
+            {
+                float det = dot(p.imaginary(), pt) + p.real();
+
+                int f_or_b = BSP_OVERLAP;
+                if (det > std::numeric_limits<float>::epsilon())
+                    f_or_b = BSP_FRONT;
+                else if (det < -std::numeric_limits<float>::epsilon())
+                    f_or_b = BSP_BACK;
+
+                if (pos_f_or_b == f_or_b || f_or_b == BSP_OVERLAP)
+                    return pos_f_or_b;
+                return BSP_INTERSECT;
+            }
+        }
+
+        vector3 plane_n; // BSP plane normal
     protected:
         std::pair<float, float> get_hit_dist(const ray& ray, const float time) const
         {

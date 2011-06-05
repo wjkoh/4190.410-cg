@@ -2,7 +2,7 @@
 
 template<>
 polyhedron<20>::polyhedron(const vector3& pos, float r)
-    : sphere(pos), r(r)
+    : sphere(pos, r)
 {
     /* r: any radius in which the polyhedron is inscribed */
     double Pi = 3.141592653589793238462643383279502884197;
@@ -43,7 +43,7 @@ polyhedron<20>::polyhedron(const vector3& pos, float r)
 
 template<>
 polyhedron<6>::polyhedron(const vector3& pos, float r)
-    : sphere(pos), r(r)
+    : sphere(pos, r)
 {
     double Pi = 3.141592653589793238462643383279502884197;
     double phiaa = 35.264391; /* the phi needed for generation */

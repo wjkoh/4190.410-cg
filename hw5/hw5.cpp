@@ -27,6 +27,11 @@ using namespace cimg_library;
 // makes pos member var. private
 // timer
 // command-line arguments
+// texture mapping
+// bump mapping
+// scene data file
+// PLY import
+// triangle transmission
 
 void init(void)
 {
@@ -78,14 +83,14 @@ int main(int argc, char** argv)
     // Ray Tracing
     scene s;
 
-    shared_ptr<object> sphere1(new sphere(vector3(1.0, 1.0, -0.0)));
+    shared_ptr<object> sphere1(new sphere(vector3(1.0, 1.0, -0.0), 1.0));
     sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
     sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
     sphere1->mat.transparency = 0.2;
     sphere1->mat.shininess = 100;
     s.objs.push_back(sphere1);
 
-    shared_ptr<object> sphere2(new sphere(vector3(-1.5, 0, -1.0)));
+    shared_ptr<object> sphere2(new sphere(vector3(-1.5, 0, -1.0), 1.0));
     sphere2->mat.diffuse = vector3(0.0, 0.0, 1.0);
     sphere2->mat.specular = vector3(1.0, 1.0, 1.0);
     sphere2->mat.transparency = 1.0;
@@ -142,6 +147,8 @@ int main(int argc, char** argv)
     //s.lights.push_back(light(vector3(-1, -2, 0)));
     //s.lights.push_back(light(vector3(0, 2, -1)));
    
+    s.tree.build(s);
+
     time_t rawtime;
     struct tm* timeinfo;
     char buffer[80];

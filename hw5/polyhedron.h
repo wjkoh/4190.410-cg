@@ -9,9 +9,13 @@ template<int NUM_OF_FACES> // 6, 20
 class polyhedron : public sphere
 {
     public:
-        polyhedron(const vector3& pos, float r = 1.5);
+        polyhedron(const vector3& pos, float r);
 
-        virtual intersect_info check(const ray& in_ray, const float time, std::pair<float, float>)
+        virtual int get_size() const { return triangles.size(); }
+        virtual std::shared_ptr<const object> get_item(int idx) const { return triangles[idx]; }
+        virtual std::shared_ptr<object> get_item(int idx) { return triangles[idx]; }
+
+        virtual intersect_info check(const ray& in_ray, float time, std::pair<float, float>) const
         {
             intersect_info result(in_ray);
 
@@ -26,7 +30,7 @@ class polyhedron : public sphere
             result.dist = std::numeric_limits<float>::max();
             for (auto i = triangles.begin(); i != triangles.end(); ++i)
             {
-                intersect_info tmp_info = i->check(in_ray, time);
+                intersect_info tmp_info = (*i)->check(in_ray, time);
                 if (tmp_info.intersect && tmp_info.dist < result.dist)
                 {
                     result = tmp_info;
@@ -53,28 +57,29 @@ class polyhedron : public sphere
 
         void polygon(int i, int j, int k, int l = -1)
         {
-            triangle t(vertices[i], vertices[j], vertices[k]);
-            //t.mat = mat;
+            std::shared_ptr<triangle> t(new triangle(vertices[i] + pos, vertices[j] + pos, vertices[k] + pos));
+            //std::cout << "vert " << vertices[i] << " " << vertices[j] << " " << vertices[k] << std::endl;
+            //std::cout << pos << std::endl;
+            t->mat = mat;
+            t->refr_idx = refr_idx;
+            //std::cout << "vert2 " << (*t)[0] << " " << (*t)[1] << " " << (*t)[2] << std::endl;
 
-            t[0] += pos;
-            t[1] += pos;
-            t[2] += pos;
+            //(*t).set_vertex((*t)[0] + pos, (*t)[1] + pos, (*t)[2] + pos);
             triangles.push_back(t);
 
             if (l >= 0)
             {
-                triangle t2(vertices[k], vertices[l], vertices[i]);
-                //t2.mat = mat;
+                std::shared_ptr<triangle> t(new triangle(vertices[k], vertices[l], vertices[i]));
+                t->mat = mat;
+                t->refr_idx = refr_idx;
 
-                t2[0] += pos;
-                t2[1] += pos;
-                t2[2] += pos;
-                triangles.push_back(t2);
+                (*t).set_vertex((*t)[0] + pos, (*t)[1] + pos, (*t)[2] + pos);
+                triangles.push_back(t);
             }
         }
 
     private:
-        std::vector<triangle> triangles;
+        std::vector<std::shared_ptr<triangle>> triangles;
         vector3 vertices[12]; /* 12 vertices with x, y, z coordinates */
         float r; // radius
 };

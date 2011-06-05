@@ -4,7 +4,6 @@
 #include "common.h"
 #include "object.h"
 
-typedef quaterniond_p plane_t; // ax+by+cz+d=0 -> (a, b, c, d)
 
 class triangle : public object
 {
@@ -48,10 +47,43 @@ class triangle : public object
             return unit_cross(bc, ba);
         }
 
-        plane_t get_plane(const float time) const
+        virtual plane_t get_plane(const float time) const
         {
             vector3 normal = get_normal(v[0], time);
             return plane_t(normal, -dot(normal, v[1])); // 0, 1, 2 아무거나 상관없음
+        }
+
+        virtual int front_or_back(const plane_t& p) const
+        {
+            int f_or_b[3] = {0};
+
+            for (int i = 0; i < 3; ++i)
+            {
+                float det = dot(p.imaginary(), (*this)[i]) + p.real();
+
+                f_or_b[i] = BSP_OVERLAP;
+                if (det > 2*std::numeric_limits<float>::epsilon())
+                    f_or_b[i] = BSP_FRONT;
+                else if (det < -2*std::numeric_limits<float>::epsilon())
+                    f_or_b[i] = BSP_BACK;
+            }
+
+            // FFF or BBB or OOO
+            if (f_or_b[0] == f_or_b[1] && f_or_b[1] == f_or_b[2])
+                return f_or_b[0];
+
+            int tmp = BSP_OVERLAP;
+            for (int i = 0; i < 3; ++i)
+            {
+                if (f_or_b[i] == BSP_OVERLAP) continue;
+
+                if (tmp == BSP_OVERLAP)
+                    tmp = f_or_b[i];
+                else if (tmp != f_or_b[i]) // F,B or B,F
+                    return BSP_INTERSECT;
+            }
+            return tmp;
+            //return BSP_OVERLAP;
         }
 
         const vector3& operator[](int idx) const    { return v[idx]; }

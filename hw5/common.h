@@ -7,6 +7,7 @@
 #include <iostream>
 #include <list>
 #include <map>
+#include <set>
 #include <sstream>
 #include <string>
 #include <utility>
@@ -21,6 +22,7 @@ typedef cml::quaternionf_p quaternionf_p;
 typedef cml::quaterniond_p quaterniond_p;
 typedef cml::matrix44f_c matrix;
 typedef cml::matrixd_c matrixd;
+typedef quaternionf_p plane_t; // ax+by+cz+d=0 -> (a, b, c, d)
 
 // typedefs
 typedef vector3 point3;
@@ -79,16 +81,26 @@ static vector3 c_o_lens(0, 0, -1.0);
 #define JITTER_REFR_ON 0
 #define JITTER_REFL_ON 0
 #define DOF_ON 1
+#define BSP_ENABLED 0
 
 // for debugging
 #include <cassert>
 
 #if 1
-#define _D_ cout << __FILE__ << " " << __LINE__ << endl;
+#define _D_ std::cout << __FILE__ << " " << __LINE__ << std::endl;
 #else
 #define _D_
 #endif
 
 static bool DEBUG_MODE = false;
+
+// BSP front or back
+enum
+{
+    BSP_FRONT = 0,
+    BSP_INTERSECT,
+    BSP_OVERLAP,
+    BSP_BACK,
+};
 
 #endif // _COMMON_H_

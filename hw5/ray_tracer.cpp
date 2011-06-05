@@ -72,9 +72,11 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
             // DOF
             const vector3 C_O_PIXEL((-img_width/2 + j)*RES + RES/2.0, (img_height/2 - i)*RES - RES/2.0, 0);
 
+#if DOF_ON
             vector3 focal_line = normalize(c_o_lens - C_O_PIXEL);
             float s_ = i_/dot(focal_line, center_line);
             vector3 focus = s_*focal_line + c_o_lens;
+#endif
 
             for (int k = 0; k < JITTER*JITTER; ++k)
             {
@@ -121,4 +123,5 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
             image[j][i] = intensity;
         }
     }
+    cout << endl;
 }

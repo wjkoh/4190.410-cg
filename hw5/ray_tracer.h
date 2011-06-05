@@ -6,6 +6,7 @@
 #include "triangle.h"
 #include "polyhedron.h"
 #include "octree.h"
+#include "bsp_tree.h"
 
 class scene
 {
@@ -23,7 +24,8 @@ class scene
                 i->set_pos(i->get_pos(0.0) + c_o_lens + delta);
         }
 
-        octree tree;
+        //octree tree;
+        bsp_tree tree;
         std::vector<std::shared_ptr<object> > objs;
         std::vector<light> lights;
         vector3 g_amb_light;
@@ -39,18 +41,23 @@ class ray_tree_node
 
     void process(const scene& s, const ray& in_ray, float time, int depth = 0)
     {
-        auto min_i = s.objs.end();
-        intersect_info min_info(in_ray);
 
-        for (auto i = s.objs.begin(); i != s.objs.end(); ++i)
+#if BSP_ENABLED
+        intersect_info&& min_info = s.tree.traverse(in_ray);
+#else
+        intersect_info min_info(in_ray);
         {
-            intersect_info tmp_info = (*i)->check(in_ray, time);
-            if (tmp_info.intersect && tmp_info.dist < min_info.dist)
+            for (auto i = s.objs.begin(); i != s.objs.end(); ++i)
             {
-                min_i = i;
-                min_info = tmp_info;
+                intersect_info tmp_info = (*i)->check(in_ray, time);
+                if (tmp_info.intersect && tmp_info.dist < min_info.dist)
+                {
+                    min_info = tmp_info;
+                }
             }
         }
+#endif
+        auto min_i = min_info.obj;
 
         ++depth;
         if (depth > MAX_DEPTH) return;
@@ -73,16 +80,23 @@ class ray_tree_node
                     vector3 ray_vec = ray_pt - pt;
                     float ray_dist = ray_vec.length();
 
-                    ray ray1(pt, ray_vec); // shadow ray
+                    ray s_ray(pt, ray_vec); // shadow ray
+
+#if BSP_ENABLED
+                    intersect_info&& min_info = s.tree.traverse(s_ray);
+                    if (!min_info.intersect || min_info.dist > ray_dist)
+                        ++hit_count;
+#else
                     auto result = std::find_if(s.objs.begin(), s.objs.end(),
-                                               [ray1, ray_dist, time](std::shared_ptr<object> obj)
+                                               [s_ray, ray_dist, time](std::shared_ptr<object> obj)
                                                -> bool
                                                {
-                                               intersect_info info = obj->check(ray1, time);
+                                               intersect_info info = obj->check(s_ray, time);
                                                return info.intersect && info.dist < ray_dist;
                                                });
                     if (result == s.objs.end())
                         ++hit_count;
+#endif
                 }
 
                 if (hit_count > 0)
@@ -93,24 +107,24 @@ class ray_tree_node
             }
             DEBUG_MODE = false;
 
-            specular = (*min_i)->mat.specular;
-            transparency = (*min_i)->mat.transparency;
-            reflection = (*min_i)->mat.reflection;
+            specular = (min_i)->mat.specular;
+            transparency = (min_i)->mat.transparency;
+            reflection = (min_i)->mat.reflection;
 
-            local_illu = ((*min_i)->mat.ambient)*s.g_amb_light;
+            local_illu = ((min_i)->mat.ambient)*s.g_amb_light;
             {
                 vector3 tmp_illu; // VS2010
                 tmp_illu.zero();
                 std::for_each(lights.begin(), lights.end(),
                               [=, &tmp_illu](const light& lit)
                               {
-                              tmp_illu += (*min_i)->calc_local_illu(pt, normal, lit, in_ray.dir);
+                              tmp_illu += (min_i)->calc_local_illu(pt, normal, lit, in_ray.dir);
                               }
                              );
                 local_illu += tmp_illu;
             }
 
-            auto result = (*min_i)->calc_reflect_refract(min_info);
+            auto result = (min_i)->calc_reflect_refract(min_info);
             if (result.first.flag)
             {
                 r = std::shared_ptr<ray_tree_node>(new ray_tree_node(s, result.first, depth)); // reflection
