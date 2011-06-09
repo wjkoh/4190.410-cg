@@ -15,6 +15,7 @@
 
 // CML
 #include "cml/cml.h"
+typedef cml::vector2f vector2;
 typedef cml::vector3f vector3;
 typedef cml::vector3d vector3d;
 typedef cml::vector4f vector4;
@@ -63,25 +64,38 @@ inline vector3 operator*(const vector3& lhs, const vector3& rhs)
 }
 
 const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);
-const int IMG_WIDTH = 800;
-const int IMG_HEIGHT = 600;
-const int LENS_WIDTH = 10; // 사실은 aperture size
-const int LENS_HEIGHT = 10;
+const vector3 c_o_lens(0, 0, 2.0);
+static vector3 C_O_IMG_PLANE(0, 0, 3.0);
+
+/*
+const int IMG_WIDTH = 1024;
+const int IMG_HEIGHT = 768;
+const int LENS_WIDTH = 2; // 사실은 aperture size
+const int LENS_HEIGHT = 2;
 const float RES = 0.01;
 const int MAX_DEPTH = 10;
-const int JITTER = 2; // JITTER*JITTER 개의 subpixel ray
-const int SHADOW_RAY = 3; // SHADOW_RAY*SHADOW_RAY 개의 shadow ray
+const int JITTER = 3; // JITTER*JITTER 개의 subpixel ray
+const int SHADOW_RAY = 2; // SHADOW_RAY*SHADOW_RAY 개의 shadow ray
 const float JITTER_ANGLE_DEG = 5; // 주의! int면 rad()에서 0이 나온다.
 const float JITTER_ANGLE_DEG_R = 5; // 주의! int면 rad()에서 0이 나온다.
+*/
 
-const vector3 C_O_IMG_PLANE(0, 0, 0);
-static vector3 c_o_lens(0, 0, -1.0);
+extern int MAX_DEPTH;
+extern float RES;
+extern int IMG_WIDTH;
+extern int IMG_HEIGHT;
+extern int LENS_WIDTH;
+extern int LENS_HEIGHT;
+extern int JITTER; // JITTER*JITTER 개의 subpixel ray
+extern int SHADOW_RAY; // SHADOW_RAY*SHADOW_RAY 개의 shadow ray
+extern float JITTER_ANGLE_DEG; // 주의! int면 rad()에서 0이 나온다.
+extern float JITTER_ANGLE_DEG_R; // 주의! int면 rad()에서 0이 나온다.
 
 // Function On/Off
-#define JITTER_REFR_ON 0
-#define JITTER_REFL_ON 0
-#define DOF_ON 1
-#define BSP_ENABLED 0
+extern bool JITTER_REFR_ON;
+extern bool JITTER_REFL_ON;
+extern bool DOF_ON;
+extern bool BSP_ENABLED;
 
 // for debugging
 #include <cassert>
@@ -102,5 +116,8 @@ enum
     BSP_OVERLAP,
     BSP_BACK,
 };
+
+#include "CImg.h"
+using namespace cimg_library;
 
 #endif // _COMMON_H_

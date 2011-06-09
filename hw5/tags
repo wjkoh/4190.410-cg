@@ -10,7 +10,7 @@ BACK	octree.h	/^    BACK$/;"	e	enum:__anon2
 BACKGND_COLOR	common.h	/^const vector3 BACKGND_COLOR = vector3(0.0, 0.0, 0.0);$/;"	v
 BOTTOM	octree.h	/^    BOTTOM,$/;"	e	enum:__anon2
 BSP_BACK	common.h	/^    BSP_BACK,$/;"	e	enum:__anon1
-BSP_ENABLED	common.h	/^#define BSP_ENABLED /;"	d
+BSP_ENABLED	hw5.cpp	/^bool BSP_ENABLED = false;$/;"	v
 BSP_FRONT	common.h	/^    BSP_FRONT = 0,$/;"	e	enum:__anon1
 BSP_INTERSECT	common.h	/^    BSP_INTERSECT,$/;"	e	enum:__anon1
 BSP_OVERLAP	common.h	/^    BSP_OVERLAP,$/;"	e	enum:__anon1
@@ -80,7 +80,7 @@ CMYtoRGB	CImg.h	/^    CImg<T>& CMYtoRGB() {$/;"	f	struct:cimg_library::CImg
 CXX	Makefile	/^CXX=ccache g++-mp-4.5$/;"	m
 CXXFLAGS	Makefile	/^CXXFLAGS = -std=c++0x \\$/;"	m
 DEBUG_MODE	common.h	/^static bool DEBUG_MODE = false;$/;"	v
-DOF_ON	common.h	/^#define DOF_ON /;"	d
+DOF_ON	hw5.cpp	/^bool DOF_ON = true;$/;"	v
 EPS_D	common.h	/^const double EPS_D = std::numeric_limits<double>::epsilon();$/;"	v
 EPS_F	common.h	/^const float EPS_F = 20*std::numeric_limits<float>::epsilon();$/;"	v
 FABS_EPS_F	common.h	/^const double FABS_EPS_F = std::numeric_limits<float>::epsilon();$/;"	v
@@ -93,21 +93,21 @@ HSItoRGB	CImg.h	/^    CImg<T>& HSItoRGB() {$/;"	f	struct:cimg_library::CImg
 HSLtoRGB	CImg.h	/^    CImg<T>& HSLtoRGB() {$/;"	f	struct:cimg_library::CImg
 HSV_LUT256	CImg.h	/^    static const CImg<Tuchar>& HSV_LUT256() {$/;"	f	struct:cimg_library::CImg
 HSVtoRGB	CImg.h	/^    CImg<T>& HSVtoRGB() {$/;"	f	struct:cimg_library::CImg
-IMG_HEIGHT	common.h	/^const int IMG_HEIGHT = 600;$/;"	v
-IMG_WIDTH	common.h	/^const int IMG_WIDTH = 800;$/;"	v
+IMG_HEIGHT	hw5.cpp	/^int IMG_HEIGHT = 768;$/;"	v
+IMG_WIDTH	hw5.cpp	/^int IMG_WIDTH = 1024;$/;"	v
 INC	Makefile	/^INC=. \/opt\/local\/include$/;"	m
-JITTER	common.h	/^const int JITTER = 2; \/\/ JITTER*JITTER 개의 subpixel ray$/;"	v
-JITTER_ANGLE_DEG	common.h	/^const float JITTER_ANGLE_DEG = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
-JITTER_ANGLE_DEG_R	common.h	/^const float JITTER_ANGLE_DEG_R = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
-JITTER_REFL_ON	common.h	/^#define JITTER_REFL_ON /;"	d
-JITTER_REFR_ON	common.h	/^#define JITTER_REFR_ON /;"	d
+JITTER	hw5.cpp	/^int JITTER = 1; \/\/ JITTER*JITTER 개의 subpixel ray$/;"	v
+JITTER_ANGLE_DEG	hw5.cpp	/^float JITTER_ANGLE_DEG = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
+JITTER_ANGLE_DEG_R	hw5.cpp	/^float JITTER_ANGLE_DEG_R = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
+JITTER_REFL_ON	hw5.cpp	/^bool JITTER_REFL_ON = false;$/;"	v
+JITTER_REFR_ON	hw5.cpp	/^bool JITTER_REFR_ON = false;$/;"	v
 LEFT	octree.h	/^    LEFT,$/;"	e	enum:__anon2
-LENS_HEIGHT	common.h	/^const int LENS_HEIGHT = 10;$/;"	v
-LENS_WIDTH	common.h	/^const int LENS_WIDTH = 10; \/\/ 사실은 aperture size$/;"	v
+LENS_HEIGHT	hw5.cpp	/^int LENS_HEIGHT = 2;$/;"	v
+LENS_WIDTH	hw5.cpp	/^int LENS_WIDTH = 2; \/\/ 사실은 aperture size$/;"	v
 LIB	Makefile	/^LIB=\/opt\/local\/lib$/;"	m
 LabtoRGB	CImg.h	/^    CImg<T>& LabtoRGB() {$/;"	f	struct:cimg_library::CImg
 LabtoXYZ	CImg.h	/^    CImg<T>& LabtoXYZ() {$/;"	f	struct:cimg_library::CImg
-MAX_DEPTH	common.h	/^const int MAX_DEPTH = 10;$/;"	v
+MAX_DEPTH	hw5.cpp	/^int MAX_DEPTH = 10;$/;"	v
 MSE	CImg.h	/^    Tdouble MSE(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
 Magick_info	CImg.h	/^      Magick_info() {$/;"	f	struct:cimg_library::cimg::Magick_info
 Magick_info	CImg.h	/^    static struct Magick_info {$/;"	s	namespace:cimg_library::cimg
@@ -121,7 +121,7 @@ PSNR	CImg.h	/^    Tdouble PSNR(const CImg<t>& img, const Tdouble valmax=255) con
 REFR_AIR	common.h	/^const float REFR_AIR = 1.000277;$/;"	v
 REFR_GLASS	common.h	/^const float REFR_GLASS = 1.510;$/;"	v
 REFR_WATER	common.h	/^const float REFR_WATER = 1.3330;$/;"	v
-RES	common.h	/^const float RES = 0.01;$/;"	v
+RES	hw5.cpp	/^float RES = 0.01;$/;"	v
 RGBtoBayer	CImg.h	/^    CImg<T>& RGBtoBayer() {$/;"	f	struct:cimg_library::CImg
 RGBtoCMY	CImg.h	/^    CImg<T>& RGBtoCMY() {$/;"	f	struct:cimg_library::CImg
 RGBtoCMYK	CImg.h	/^    CImg<T>& RGBtoCMYK() {$/;"	f	struct:cimg_library::CImg
@@ -134,8 +134,10 @@ RGBtoYCbCr	CImg.h	/^    CImg<T>& RGBtoYCbCr() {$/;"	f	struct:cimg_library::CImg
 RGBtoYUV	CImg.h	/^    CImg<T>& RGBtoYUV() {$/;"	f	struct:cimg_library::CImg
 RGBtoxyY	CImg.h	/^    CImg<T>& RGBtoxyY() {$/;"	f	struct:cimg_library::CImg
 RIGHT	octree.h	/^    RIGHT = 0,$/;"	e	enum:__anon2
-SHADOW_RAY	common.h	/^const int SHADOW_RAY = 3; \/\/ SHADOW_RAY*SHADOW_RAY 개의 shadow ray$/;"	v
+SHADOW_RAY	hw5.cpp	/^int SHADOW_RAY = 2; \/\/ SHADOW_RAY*SHADOW_RAY 개의 shadow ray$/;"	v
 SVD	CImg.h	/^    const CImg<T>& SVD(CImg<t>& U, CImg<t>& S, CImg<t>& V, const bool sorting=true,$/;"	f	struct:cimg_library::CImg
+TEX_DIR	scene.cpp	/^#define TEX_DIR(/;"	d	file:
+TEX_DIR	scene.cpp	/^#undef TEX_DIR$/;"	d	file:
 TOP	octree.h	/^    TOP,$/;"	e	enum:__anon2
 Tbool	CImg.h	/^    typedef typename cimg::superset<T,bool>::type Tbool;$/;"	t	struct:cimg_library::CImg
 Tbool	CImg.h	/^    typedef typename cimg::superset<T,bool>::type Tbool;$/;"	t	struct:cimg_library::CImgList
@@ -190,6 +192,7 @@ _OBJECT_H_	object.h	/^#define _OBJECT_H_$/;"	d
 _OCTREE_H_	octree.h	/^#define _OCTREE_H_$/;"	d
 _POLYHEDRON_H_	polyhedron.h	/^#define _POLYHEDRON_H_$/;"	d
 _RAY_TRACER_H_	ray_tracer.h	/^#define _RAY_TRACER_H_$/;"	d
+_SCENE_H_	scene.h	/^#define _SCENE_H_$/;"	d
 _TRIANGLE_H_	triangle.h	/^#define _TRIANGLE_H_$/;"	d
 _WIN32_IE	CImg.h	/^#define _WIN32_IE /;"	d
 __STDC_CONSTANT_MACROS	CImg.h	/^#define __STDC_CONSTANT_MACROS /;"	d
@@ -693,9 +696,11 @@ bsp_tree	bsp_tree.h	/^class bsp_tree$/;"	c
 bsp_tree_node	bsp_tree.cpp	/^bsp_tree_node::bsp_tree_node(const plane_t& p)$/;"	f	class:bsp_tree_node
 bsp_tree_node	bsp_tree.h	/^class bsp_tree_node$/;"	c
 build	bsp_tree.cpp	/^void bsp_tree::build(scene& s)$/;"	f	class:bsp_tree
+bump_map	material.h	/^        std::shared_ptr<CImg<float>> bump_map;$/;"	m	class:material
+bump_map	object.h	/^        std::shared_ptr<CImg<float>> bump_map;$/;"	m	class:object
 button	CImg.h	/^    unsigned int button() const {$/;"	f	struct:cimg_library::CImgDisplay
 byte_order	CImg.h	/^      bool             byte_order;$/;"	m	struct:cimg_library::cimg::X11_info
-calc_local_illu	object.cpp	/^vector3 object::calc_local_illu(const point3& pt, const vector3& n, const light& light, const vector3& u) const$/;"	f	class:object
+calc_local_illu	object.cpp	/^vector3 object::calc_local_illu(const point3& pt, const vector3& n__, const light& light, const vector3& u) const$/;"	f	class:object
 calc_reflect_refract	object.cpp	/^std::pair<ray, ray> object::calc_reflect_refract(const intersect_info& info) const$/;"	f	class:object
 calling_function	CImg.h	/^      const char *const calling_function;$/;"	m	struct:cimg_library::CImg::_cimg_math_parser
 channel	CImg.h	/^    CImg<T>& channel(const unsigned int c0) {$/;"	f	struct:cimg_library::CImg
@@ -1359,7 +1364,7 @@ front_or_back	object.h	/^        virtual int front_or_back(const plane_t& p) con
 front_or_back	object.h	/^        virtual int front_or_back(const plane_t& p) const$/;"	f	class:sphere
 front_or_back	triangle.h	/^        virtual int front_or_back(const plane_t& p) const$/;"	f	class:triangle
 fwrite	CImg.h	/^    inline int fwrite(const T *ptr, const unsigned int nmemb, std::FILE *stream) {$/;"	f	namespace:cimg_library::cimg
-g_amb_light	ray_tracer.h	/^        vector3 g_amb_light;$/;"	m	class:scene
+g_amb_light	scene.h	/^        vector3 g_amb_light;$/;"	m	class:scene
 gesvd	CImg.h	/^    inline void gesvd(char &JOB, int &M, int &N, T *lapA, int &MN,$/;"	f	namespace:cimg_library::cimg
 gesvd	CImg.h	/^    inline void gesvd(char &JOB, int &M, int &N, float *lapA, int &MN,$/;"	f	namespace:cimg_library::cimg
 get_BayertoRGB	CImg.h	/^    CImg<Tuchar> get_BayertoRGB(const unsigned int interpolation_type=3) const {$/;"	f	struct:cimg_library::CImg
@@ -1569,9 +1574,9 @@ get_mirror	CImg.h	/^    CImg<T> get_mirror(const char axis) const {$/;"	f	struct
 get_mul	CImg.h	/^    CImg<_cimg_Tt> get_mul(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
 get_noise	CImg.h	/^    CImg<T> get_noise(const double sigma, const unsigned int noise_type=0) const {$/;"	f	struct:cimg_library::CImg
 get_norm	CImg.h	/^    CImg<Tfloat> get_norm(const int norm_type=2) const {$/;"	f	struct:cimg_library::CImg
-get_normal	object.h	/^        vector3 get_normal(const point3& pt, const float time) const { return (pt - get_pos(time)).normalize(); } \/\/ TODO: area light는 triangle처럼 바꿔야 하지 않을까?$/;"	f	class:light
-get_normal	object.h	/^        vector3 get_normal(const point3& pt, const float time) const { return (pt - get_pos(time)).normalize(); }$/;"	f	class:sphere
-get_normal	triangle.h	/^        vector3 get_normal(const point3&, const float time) const$/;"	f	class:triangle
+get_normal	object.cpp	/^vector3 sphere::get_normal(const point3& pt, const float time, bool bump) const$/;"	f	class:sphere
+get_normal	object.h	/^        vector3 get_normal(const point3& pt, const float time, bool bump = false) const { return (pt - get_pos(time)).normalize(); } \/\/ TODO: area light는 triangle처럼 바꿔야 하지 않을까?$/;"	f	class:light
+get_normal	triangle.cpp	/^vector3 triangle::get_normal(const point3& pt, const float time, bool bump) const$/;"	f	class:triangle
 get_normalize	CImg.h	/^    CImg<Tfloat> get_normalize() const {$/;"	f	struct:cimg_library::CImg
 get_normalize	CImg.h	/^    CImg<Tfloat> get_normalize(const T value_min, const T value_max) const {$/;"	f	struct:cimg_library::CImg
 get_object3dtoCImg3d	CImg.h	/^    CImg<floatT> get_object3dtoCImg3d() const {$/;"	f	struct:cimg_library::CImg
@@ -1671,6 +1676,7 @@ get_tan	CImg.h	/^    CImg<Tfloat> get_tan() const {$/;"	f	struct:cimg_library::C
 get_tanh	CImg.h	/^    CImg<Tfloat> get_tanh() const {$/;"	f	struct:cimg_library::CImg
 get_tensor	CImg.h	/^    CImg<T> get_tensor() const {$/;"	f	struct:cimg_library::CImg
 get_tensor_at	CImg.h	/^    CImg<T> get_tensor_at(const unsigned int x, const unsigned int y=0, const unsigned int z=0) const {$/;"	f	struct:cimg_library::CImg
+get_texture	object.cpp	/^vector3 object::get_texture(const point3& pt) const$/;"	f	class:object
 get_threshold	CImg.h	/^    CImg<T> get_threshold(const T value, const bool soft_threshold=false, const bool strict_threshold=false) const {$/;"	f	struct:cimg_library::CImg
 get_transpose	CImg.h	/^    CImg<T> get_transpose() const {$/;"	f	struct:cimg_library::CImg
 get_unroll	CImg.h	/^    CImg<T> get_unroll(const char axis) const {$/;"	f	struct:cimg_library::CImg
@@ -1713,7 +1719,7 @@ id	CImg.h	/^      static unsigned int id() { return 8U; }$/;"	f	struct:cimg_libr
 id	CImg.h	/^      static unsigned int id() { return 9U; }$/;"	f	struct:cimg_library::cimg::type
 identity_matrix	CImg.h	/^    CImg<T>& identity_matrix() {$/;"	f	struct:cimg_library::CImg
 identity_matrix	CImg.h	/^    static CImg<T> identity_matrix(const unsigned int N) {$/;"	f	struct:cimg_library::CImg
-image	ray_tracer.h	/^        vector3 image[IMG_WIDTH][IMG_HEIGHT];$/;"	m	class:ray_tracer
+image	ray_tracer.h	/^        std::vector<std::vector<vector3>> image;$/;"	m	class:ray_tracer
 imagemagick_path	CImg.h	/^    inline const char* imagemagick_path(const char *const user_path=0, const bool reinit_path=false) {$/;"	f	namespace:cimg_library::cimg
 images	CImg.h	/^    CImgList<T>& images(const unsigned int i0, const unsigned int i1) {$/;"	f	struct:cimg_library::CImgList
 in_ray	object.h	/^    ray in_ray;$/;"	m	struct:intersect_info
@@ -1743,6 +1749,7 @@ invert	CImg.h	/^  inline CImg<_cimg_Tfloat> invert(const CImg<T>& instance) {$/;
 invert_endianness	CImg.h	/^    CImg<T>& invert_endianness() {$/;"	f	struct:cimg_library::CImg
 invert_endianness	CImg.h	/^    inline T& invert_endianness(T& a) {$/;"	f	namespace:cimg_library::cimg
 invert_endianness	CImg.h	/^    inline void invert_endianness(T* const buffer, const unsigned int size) {$/;"	f	namespace:cimg_library::cimg
+inverted_xy	triangle.h	/^        bool inverted_xy; \/\/ quad 등을 만들 때 xy축 방향이 반대인 triangle. v[2] - v[1] -> -x$/;"	m	class:triangle
 is_CImg3d	CImg.h	/^    bool is_CImg3d(const bool full_check=true, char *const error_message=0) const {$/;"	f	struct:cimg_library::CImg
 is_blue_first	CImg.h	/^      bool             is_blue_first;$/;"	m	struct:cimg_library::cimg::X11_info
 is_closed	CImg.h	/^    bool is_closed() const {$/;"	f	struct:cimg_library::CImgDisplay
@@ -2089,8 +2096,8 @@ level	CImg.h	/^      CImg<uintT> level, opcode;$/;"	m	struct:cimg_library::CImg:
 light	object.h	/^        light()$/;"	f	class:light
 light	object.h	/^        light(const vector3& pos)$/;"	f	class:light
 light	object.h	/^class light : public object \/\/ point, directional, area$/;"	c
-lights	ray_tracer.h	/^        std::vector<light> lights;$/;"	m	class:scene
 lights	ray_tracer.h	/^    std::vector<light> lights; \/\/ shadow rays (light std::vector)$/;"	m	class:ray_tree_node
+lights	scene.h	/^        std::vector<light> lights;$/;"	m	class:scene
 line	CImg.h	/^    CImg<T>& line(const unsigned int y0) {$/;"	f	struct:cimg_library::CImg
 linear_atX	CImg.h	/^    Tfloat linear_atX(const float fx, const int y, const int z, const int c, const T out_val) const {$/;"	f	struct:cimg_library::CImg
 linear_atX	CImg.h	/^    Tfloat linear_atX(const float fx, const int y=0, const int z=0, const int c=0) const {$/;"	f	struct:cimg_library::CImg
@@ -2174,7 +2181,7 @@ logo40x38	CImg.h	/^    static CImg<T> logo40x38() {$/;"	f	struct:cimg_library::C
 longT	CImg.h	/^    typedef typename cimg::last<T,long>::type longT;$/;"	t	struct:cimg_library::CImg
 longT	CImg.h	/^    typedef typename cimg::last<T,long>::type longT;$/;"	t	struct:cimg_library::CImgList
 magnitude	CImg.h	/^    Tdouble magnitude(const int magnitude_type=2) const {$/;"	f	struct:cimg_library::CImg
-main	hw5.cpp	/^int main(int argc, char** argv)$/;"	f
+main	hw5.cpp	/^int main(int argc, char* argv[])$/;"	f
 main	hw5_backup.cpp	/^int main(int argc, char** argv)$/;"	f
 make_polygon	polyhedron.h	/^inline void polyhedron<20>::make_polygon()$/;"	f	class:polyhedron
 make_polygon	polyhedron.h	/^inline void polyhedron<6>::make_polygon()$/;"	f	class:polyhedron
@@ -2272,7 +2279,7 @@ mouse_y	CImg.h	/^    int mouse_y() const {$/;"	f	struct:cimg_library::CImgDispla
 move	CImg.h	/^    CImgDisplay& move(const int pos_x, const int pos_y) {$/;"	f	struct:cimg_library::CImgDisplay
 move	CImg.h	/^    CImgDisplay& move(const int posx, const int posy) {$/;"	f	struct:cimg_library::CImgDisplay
 move_dir	object.h	/^        vector3 move_dir;$/;"	m	class:object
-move_scene	ray_tracer.h	/^        void move_scene(const vector3& delta = vector3(0, 0, 0))$/;"	f	class:scene
+move_scene	scene.h	/^        void move_scene(const vector3& delta = vector3(0, 0, 0))$/;"	f	class:scene
 move_to	CImg.h	/^    CImg<T>& move_to(CImg<T>& img) {$/;"	f	struct:cimg_library::CImg
 move_to	CImg.h	/^    CImg<t>& move_to(CImg<t>& img) {$/;"	f	struct:cimg_library::CImg
 move_to	CImg.h	/^    CImgList<t>& move_to(CImgList<t>& list) {$/;"	f	struct:cimg_library::CImgList
@@ -2377,7 +2384,7 @@ object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d() {$/;"	f	struct:cimg_li
 object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d(const CImgList<tp>& primitives) {$/;"	f	struct:cimg_library::CImg
 object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d(const CImgList<tp>& primitives,$/;"	f	struct:cimg_library::CImg
 objs	octree.h	/^        std::vector<std::shared_ptr<object>> objs; \/\/ objects in this cube$/;"	m	class:octree_node
-objs	ray_tracer.h	/^        std::vector<std::shared_ptr<object> > objs;$/;"	m	class:scene
+objs	scene.h	/^        std::vector<std::shared_ptr<object> > objs;$/;"	m	class:scene
 octree	octree.h	/^class octree$/;"	c
 octree_node	octree.h	/^        octree_node()$/;"	f	class:octree_node
 octree_node	octree.h	/^class octree_node$/;"	c
@@ -2556,6 +2563,9 @@ programfiles_path	CImg.h	/^    inline const char* programfiles_path(const char *
 projections2d	CImg.h	/^    CImg<T>& projections2d(const unsigned int x0, const unsigned int y0, const unsigned int z0) {$/;"	f	struct:cimg_library::CImg
 pseudoinvert	CImg.h	/^    CImg<T>& pseudoinvert() {$/;"	f	struct:cimg_library::CImg
 pseudoinvert	CImg.h	/^  inline CImg<_cimg_Tfloat> pseudoinvert(const CImg<T>& instance) {$/;"	f	namespace:cimg_library
+pt_to_tex_coord	object.cpp	/^vector2 sphere::pt_to_tex_coord(const point3& pt, bool bump) const$/;"	f	class:sphere
+pt_to_tex_coord	object.h	/^        virtual vector2 pt_to_tex_coord(const point3& pt, bool bump = false) const { assert(false); }$/;"	f	class:object
+pt_to_tex_coord	triangle.cpp	/^vector2 triangle::pt_to_tex_coord(const point3& pt, bool bump) const$/;"	f	class:triangle
 push_back	CImg.h	/^    CImgList<T>& push_back(const CImg<t>& img) {$/;"	f	struct:cimg_library::CImgList
 push_back	CImg.h	/^    CImgList<T>& push_back(const CImgList<t>& list) {$/;"	f	struct:cimg_library::CImgList
 push_front	CImg.h	/^    CImgList<T>& push_front(const CImg<t>& img) {$/;"	f	struct:cimg_library::CImgList
@@ -2570,6 +2580,7 @@ rand	CImg.h	/^    CImg<T>& rand(const T val_min, const T val_max) {$/;"	f	struct
 rand	CImg.h	/^    inline double rand() {$/;"	f	namespace:cimg_library::cimg
 ray	object.h	/^        ray(const point3& org, const vector3& dir = -Z, float refr_idx = REFR_AIR)$/;"	f	class:ray
 ray	object.h	/^class ray$/;"	c
+ray_tracer	ray_tracer.h	/^        ray_tracer() : image(IMG_WIDTH, std::vector<vector3>(IMG_HEIGHT)) {}$/;"	f	class:ray_tracer
 ray_tracer	ray_tracer.h	/^class ray_tracer$/;"	c
 ray_tree_node	ray_tracer.h	/^    ray_tree_node(const scene& s, const ray& in_ray, int depth = 0)$/;"	f	class:ray_tree_node
 ray_tree_node	ray_tracer.h	/^class ray_tree_node$/;"	c
@@ -2700,8 +2711,10 @@ save_yuv	CImg.h	/^    const CImg<T>& save_yuv(const char *const filename, const 
 save_yuv	CImg.h	/^    const CImg<T>& save_yuv(std::FILE *const file, const bool rgb2yuv=true) const {$/;"	f	struct:cimg_library::CImg
 save_yuv	CImg.h	/^    const CImgList<T>& save_yuv(const char *const filename=0, const bool rgb2yuv=true) const {$/;"	f	struct:cimg_library::CImgList
 save_yuv	CImg.h	/^    const CImgList<T>& save_yuv(std::FILE *const file, const bool rgb2yuv=true) const {$/;"	f	struct:cimg_library::CImgList
-scene	ray_tracer.h	/^        scene()$/;"	f	class:scene
-scene	ray_tracer.h	/^class scene$/;"	c
+scene	scene.cpp	/^scene::scene(int scene_num)$/;"	f	class:scene
+scene	scene.h	/^class scene$/;"	c
+scene_aux_0	scene.cpp	/^void scene_aux_0(scene& s)$/;"	f
+scene_aux_1	scene.cpp	/^void scene_aux_1(scene& s)$/;"	f
 screen_height	CImg.h	/^    static int screen_height() {$/;"	f	struct:cimg_library::CImgDisplay
 screen_width	CImg.h	/^    static int screen_width() {$/;"	f	struct:cimg_library::CImgDisplay
 select	CImg.h	/^    CImg<T>& select(CImgDisplay &disp,$/;"	f	struct:cimg_library::CImg
@@ -2896,6 +2909,7 @@ syev	CImg.h	/^    inline void syev(char &JOB, char &UPLO, int &N, float *lapA, f
 symmetric_eigen	CImg.h	/^    const CImg<T>& symmetric_eigen(CImg<t>& val, CImg<t>& vec) const {$/;"	f	struct:cimg_library::CImg
 system	CImg.h	/^    inline int system(const char *const command, const char *const module_name=0) {$/;"	f	namespace:cimg_library::cimg
 t	ray_tracer.h	/^    std::shared_ptr<ray_tree_node> t;$/;"	m	class:ray_tree_node
+t	triangle.h	/^        vector3 t[3];   \/\/ texture coord$/;"	m	class:triangle
 t_bold	CImg.h	/^    const char t_bold[] = { 0x1b, '[', '1', 'm', 0 };$/;"	m	namespace:cimg_library::cimg
 t_green	CImg.h	/^    const char t_green[] = { 0x1b, '[', '0', ';', '3', '2', ';', '5', '9', 'm', 0 };$/;"	m	namespace:cimg_library::cimg
 t_normal	CImg.h	/^    const char t_normal[] = { 0x1b, '[', '0', ';', '0', ';', '0', 'm', 0 };$/;"	m	namespace:cimg_library::cimg
@@ -2911,6 +2925,8 @@ tensor	CImg.h	/^    CImg<T>& tensor() {$/;"	f	struct:cimg_library::CImg
 tensor	CImg.h	/^    static CImg<T> tensor(const T& a1) {$/;"	f	struct:cimg_library::CImg
 tensor	CImg.h	/^    static CImg<T> tensor(const T& a1, const T& a2, const T& a3) {$/;"	f	struct:cimg_library::CImg
 tensor	CImg.h	/^    static CImg<T> tensor(const T& a1, const T& a2, const T& a3, const T& a4, const T& a5, const T& a6) {$/;"	f	struct:cimg_library::CImg
+texture	material.h	/^        std::shared_ptr<CImg<float>> texture;$/;"	m	class:material
+texture	object.h	/^        std::shared_ptr<CImg<float>> texture;$/;"	m	class:object
 texturize_object3d	CImg.h	/^    const CImg<T>& texturize_object3d(CImgList<tp>& primitives, CImgList<tc>& colors,$/;"	f	struct:cimg_library::CImg
 threshold	CImg.h	/^    CImg<T>& threshold(const T value, const bool soft_threshold=false, const bool strict_threshold=false) {$/;"	f	struct:cimg_library::CImg
 tic	CImg.h	/^    inline unsigned long tic() {$/;"	f	namespace:cimg_library::cimg
@@ -2929,7 +2945,7 @@ transpose	CImg.h	/^  inline CImg<T> transpose(const CImg<T>& instance) {$/;"	f	n
 traverse	bsp_tree.cpp	/^intersect_info bsp_tree::traverse(const ray& eye_ray) const$/;"	f	class:bsp_tree
 traverse	bsp_tree.cpp	/^intersect_info bsp_tree_node::traverse(const ray& eye_ray) const$/;"	f	class:bsp_tree_node
 traverse_tree	ray_tracer.h	/^inline vector3 traverse_tree(std::shared_ptr<ray_tree_node> node, int depth = 0)$/;"	f
-tree	ray_tracer.h	/^        bsp_tree tree;$/;"	m	class:scene
+tree	scene.h	/^        bsp_tree tree;$/;"	m	class:scene
 triangle	triangle.h	/^        triangle(const vector3& v0, const vector3& v1, const vector3& v2)$/;"	f	class:triangle
 triangle	triangle.h	/^        triangle(const vector3& v0, const vector3& v1, const vector3& v2,$/;"	f	class:triangle
 triangle	triangle.h	/^class triangle : public object$/;"	c
@@ -3060,6 +3076,7 @@ vector	CImg.h	/^    static CImg<T> vector(const T& a0, const T& a1, const T& a2,
 vector	CImg.h	/^    static CImg<T> vector(const T& a0, const T& a1, const T& a2, const T& a3, const T& a4) {$/;"	f	struct:cimg_library::CImg
 vector	CImg.h	/^    static CImg<T> vector(const T& a0, const T& a1, const T& a2, const T& a3, const T& a4, const T& a5) {$/;"	f	struct:cimg_library::CImg
 vector	CImg.h	/^    static CImg<T> vector(const T& a0, const T& a1, const T& a2, const T& a3,$/;"	f	struct:cimg_library::CImg
+vector2	common.h	/^typedef cml::vector2f vector2;$/;"	t
 vector3	common.h	/^typedef cml::vector3f vector3;$/;"	t
 vector3d	common.h	/^typedef cml::vector3d vector3d;$/;"	t
 vector4	common.h	/^typedef cml::vector4f vector4;$/;"	t

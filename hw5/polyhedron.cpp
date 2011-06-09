@@ -19,7 +19,7 @@ polyhedron<20>::polyhedron(const vector3& pos, float r)
     vertices[11][0]=0.0;
     vertices[11][1]=0.0;
     vertices[11][2]=-r;
-    double the = 0.0;
+    double the = Pi/10.0; //0.0;
 
     for(int i=1; i<6; i++)
     {

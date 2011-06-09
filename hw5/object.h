@@ -72,7 +72,9 @@ class object : public std::enable_shared_from_this<object>
         virtual ~object() {}
 
         virtual bool is_sphere() const { return false; }
-        virtual vector3 get_normal(const point3& pt, const float time) const = 0; // Phong shading
+        virtual vector3 get_normal(const point3& pt, const float time, bool bump = false) const = 0; // Phong shading
+        virtual vector3 get_texture(const point3& pt) const;
+        virtual vector2 pt_to_tex_coord(const point3& pt, bool bump = false) const { assert(false); }
 
         virtual plane_t get_plane(const float time) const { assert(false); }
         virtual int front_or_back(const plane_t& p) const { assert(false); }
@@ -95,6 +97,8 @@ class object : public std::enable_shared_from_this<object>
         material mat;
         vector3 move_dir;
         float refr_idx;
+        std::shared_ptr<CImg<float>> texture;
+        std::shared_ptr<CImg<float>> bump_map;
 
     protected:
         virtual std::pair<float, float> get_hit_dist(const ray& ray, const float time) const = 0;
@@ -110,7 +114,9 @@ class sphere : public object
     {
     }
 
-        vector3 get_normal(const point3& pt, const float time) const { return (pt - get_pos(time)).normalize(); }
+        vector3 get_normal(const point3& pt, const float time, bool bump = false) const;
+        //vector3 get_texture(const point3& pt) const;
+        virtual vector2 pt_to_tex_coord(const point3& pt, bool bump = false) const;
         virtual bool is_sphere() const { return true; }
         virtual plane_t get_plane(const float time) const
         {
@@ -194,7 +200,7 @@ class light : public object // point, directional, area
             dir = vector3().zero() - get_pos(0.0);
         }
 
-        vector3 get_normal(const point3& pt, const float time) const { return (pt - get_pos(time)).normalize(); } // TODO: area light는 triangle처럼 바꿔야 하지 않을까?
+        vector3 get_normal(const point3& pt, const float time, bool bump = false) const { return (pt - get_pos(time)).normalize(); } // TODO: area light는 triangle처럼 바꿔야 하지 않을까?
 
         point3 get_jittered_pos(int idx, const float time) const 
         {

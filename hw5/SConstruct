@@ -4,7 +4,7 @@ env = Environment(
                   CXX = '/opt/local/bin/g++-mp-4.5',
                   CPPFLAGS = ' -std=c++0x -pipe '
                   #+ ' -g'
-                  + ' -O3 -march=native -ffast-math -ftree-vectorize -ftree-vectorizer-verbose=1'
+                  + ' -O3 -march=native -ffast-math -ftree-vectorize' # -ftree-vectorizer-verbose=1'
                   + ' -fopenmp'
                   + ' -Dcimg_display=0 -fno-tree-pre -Dcimg_use_openmp' # for CImg
                   ,
@@ -12,7 +12,7 @@ env = Environment(
                   LINKFLAGS=['-framework', 'OpenGL', '-framework', 'GLUT', '-fopenmp']
                  )
 
-srcs = ['hw5.cpp', 'ray_tracer.cpp', 'object.cpp', 'triangle.cpp', 'polyhedron.cpp', 'bsp_tree.cpp', 'octree.cpp']
+srcs = ['hw5.cpp', 'ray_tracer.cpp', 'object.cpp', 'triangle.cpp', 'polyhedron.cpp', 'bsp_tree.cpp', 'octree.cpp', 'scene.cpp']
 prog = env.Program('hw5', srcs)
 
 env.Command('tags', Glob('*.cpp *.h'), 'echo CTAGS && ctags *')

@@ -3,33 +3,7 @@
 
 #include "common.h"
 #include "object.h"
-#include "triangle.h"
-#include "polyhedron.h"
-#include "octree.h"
-#include "bsp_tree.h"
-
-class scene
-{
-    public:
-        scene()
-            : g_amb_light(0.4, 0.4, 0.4)
-        {}
-
-        void move_scene(const vector3& delta = vector3(0, 0, 0))
-        {
-            for (auto i = objs.begin(); i != objs.end(); ++i)
-                (*i)->set_pos((*i)->get_pos(0.0) + c_o_lens + delta);
-
-            for (auto i = lights.begin(); i != lights.end(); ++i)
-                i->set_pos(i->get_pos(0.0) + c_o_lens + delta);
-        }
-
-        //octree tree;
-        bsp_tree tree;
-        std::vector<std::shared_ptr<object> > objs;
-        std::vector<light> lights;
-        vector3 g_amb_light;
-};
+#include "scene.h"
 
 class ray_tree_node
 {
@@ -41,11 +15,12 @@ class ray_tree_node
 
     void process(const scene& s, const ray& in_ray, float time, int depth = 0)
     {
-
-#if BSP_ENABLED
-        intersect_info&& min_info = s.tree.traverse(in_ray);
-#else
         intersect_info min_info(in_ray);
+        if (BSP_ENABLED)
+        {
+            min_info = s.tree.traverse(in_ray);
+        }
+        else
         {
             for (auto i = s.objs.begin(); i != s.objs.end(); ++i)
             {
@@ -56,7 +31,6 @@ class ray_tree_node
                 }
             }
         }
-#endif
         auto min_i = min_info.obj;
 
         ++depth;
@@ -179,8 +153,9 @@ inline vector3 traverse_tree(std::shared_ptr<ray_tree_node> node, int depth = 0)
 class ray_tracer
 {
     public:
+        ray_tracer() : image(IMG_WIDTH, std::vector<vector3>(IMG_HEIGHT)) {}
         void run(int img_width, int img_height, scene& s);
-        vector3 image[IMG_WIDTH][IMG_HEIGHT];
+        std::vector<std::vector<vector3>> image;
 };
 
 #endif

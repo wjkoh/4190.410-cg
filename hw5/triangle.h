@@ -9,7 +9,7 @@ class triangle : public object
 {
     public:
         triangle(const vector3& v0, const vector3& v1, const vector3& v2)
-            : object((v0 + v1 + v2)/3.0)
+            : object((v0 + v1 + v2)/3.0), inverted_xy(false)
         {
             set_vertex(v0, v1, v2);
 
@@ -19,7 +19,7 @@ class triangle : public object
 
         triangle(const vector3& v0, const vector3& v1, const vector3& v2,
                    const vector3& n0, const vector3& n1, const vector3& n2)
-            : object((v0 + v1 + v2)/3.0)
+            : object((v0 + v1 + v2)/3.0), inverted_xy(false)
         {
             set_vertex(v0, v1, v2);
             set_normal(n0, n1, n2);
@@ -40,12 +40,7 @@ class triangle : public object
             n[2] = n2;
         }
 
-        vector3 get_normal(const point3&, const float time) const
-        {
-            vector3 ba = v[0] - v[1];
-            vector3 bc = v[2] - v[1];
-            return unit_cross(bc, ba);
-        }
+        virtual vector3 get_normal(const point3& pt, const float time, bool bump = false) const;
 
         virtual plane_t get_plane(const float time) const
         {
@@ -117,6 +112,9 @@ class triangle : public object
 
         std::list<triangle> split() const;
 
+        //virtual vector3 get_texture(const point3& pt) const;
+        virtual vector2 pt_to_tex_coord(const point3& pt, bool bump = false) const;
+
         std::pair<float, float> get_barycentric_coord(const vector3& p) const
         {
             // Compute vectors        
@@ -157,6 +155,8 @@ class triangle : public object
 
         vector3 v[3];   // 3 points of a triangle
         vector3 n[3];   // normal vector
+        vector3 t[3];   // texture coord
+        bool inverted_xy; // quad 등을 만들 때 xy축 방향이 반대인 triangle. v[2] - v[1] -> -x
 };
 
 inline std::ostream& operator<<(std::ostream& os, const triangle& t)

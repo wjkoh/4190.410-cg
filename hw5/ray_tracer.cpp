@@ -4,19 +4,20 @@ using namespace std;
 
 void ray_tracer::run(int img_width, int img_height, scene& s)
 {
+    image.resize(img_width, vector<vector3>(img_height));
+
     const float term = RES / (float)JITTER;
 
-    float f_ = 0.9;
-    float i_ = 2.0;
-    float o_ = i_*f_/(i_-f_);
-    assert(o_ > 0);
+    float f_ = 1.2;
+    float o_ = (vector3().zero() - c_o_lens).length(); // focus<->lens
+    float i_ = o_*f_/(o_-f_); // lens<->image plane
+    assert(i_ > 0);
 
-#if DOF_ON
-    //float o = (c_o_lens - c_o_img_plane).length();
+    // DOF
     vector3 center_line = normalize(c_o_lens - C_O_IMG_PLANE);
-    c_o_lens = o_*center_line;
-    s.move_scene(vector3(0, 0, -1.5));
-#endif
+    C_O_IMG_PLANE = c_o_lens + (-i_*center_line);
+    //s.move_scene(vector3(0, 0, -1.5));
+    // DOF
 
     /* initialize random seed: */
     srand(time(NULL));
@@ -70,13 +71,13 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
             std::random_shuffle(lens_positions.begin(), lens_positions.end());
 
             // DOF
-            const vector3 C_O_PIXEL((-img_width/2 + j)*RES + RES/2.0, (img_height/2 - i)*RES - RES/2.0, 0);
-
-#if DOF_ON
+            vector3 C_O_PIXEL((-img_width/2 + j)*RES + RES/2.0, (img_height/2 - i)*RES - RES/2.0, 0);
+            C_O_PIXEL += C_O_IMG_PLANE;
+            
             vector3 focal_line = normalize(c_o_lens - C_O_PIXEL);
-            float s_ = i_/dot(focal_line, center_line);
-            vector3 focus = s_*focal_line + c_o_lens;
-#endif
+            float s_ = o_/dot(focal_line, center_line);
+            vector3 focus = c_o_lens + s_*focal_line;
+            // DOF
 
             for (int k = 0; k < JITTER*JITTER; ++k)
             {
@@ -99,11 +100,9 @@ void ray_tracer::run(int img_width, int img_height, scene& s)
                 point3 ray_lens_org((-LENS_WIDTH/2 + xx*l1_x + 0.5*xx)*RES, (LENS_HEIGHT/2 - yy*l1_y - 0.5*yy)*RES, 0);
                 ray_lens_org += c_o_lens;
 
-#if DOF_ON
-                ray ray1(ray_lens_org, focus - ray_lens_org);
-#else
                 ray ray1(ray_org);
-#endif
+                if (DOF_ON)
+                    ray1 = ray(ray_lens_org, focus - ray_lens_org);
                 ray1.code = codes[k];
 
                 float interval = 1.0/(float)(JITTER*JITTER);

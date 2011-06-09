@@ -1,6 +1,79 @@
 #include "triangle.h"
 using namespace std;
 
+vector2 triangle::pt_to_tex_coord(const point3& pt, bool bump) const
+{
+    std::pair<float, float> u_v = get_barycentric_coord(pt);
+
+    shared_ptr<CImg<float>> tex(texture);
+    if (bump)
+        tex = bump_map;
+    assert(tex);
+
+    vector3 u_ = v[2] - v[1];
+    vector3 v_ = v[0] - v[1];
+
+    vector3 x, y, z;
+    orthonormal_basis_axial(v_, u_, x, y, z, true, cml::axis_order_yxz);
+
+    vector2 u(u_.length(), 0);
+    vector2 v(dot(v_, x), dot(v_, y));
+        
+    float ratio = min(tex->width()/(u.length()), tex->height()/(v[1])); // 256
+    u *= ratio;
+    v *= ratio;
+
+    vector2 result = u*(u_v.first) + v*(u_v.second);
+    if (inverted_xy)
+        result = u*(1.0-u_v.first) + v*(1.0-u_v.second);
+    if (result[0] > tex->width())
+    {
+        //result[0] = (result[0] - tex->width()); // wrap
+        result[0] = tex->width() - (result[0] - tex->width()); // mirror
+    }
+    if (result[1] > tex->height())
+    {
+        result[1] = tex->height() - (result[1] - tex->height()); 
+    }
+    return result;
+}
+
+vector3 triangle::get_normal(const point3& pt, const float time, bool bump) const
+{
+    if (bump && bump_map)
+    {
+        vector2 pt_xy = pt_to_tex_coord(pt, true);
+
+        vector3 normal;
+        for (int i = 0; i < 3; ++i)
+        {
+            normal[i] = bump_map->cubic_atXY(pt_xy[0], pt_xy[1], 0, i) / 255.0 * 2.0 - 1.0;
+            if (i == 1)
+                normal[i] *= -1.0;
+        }
+        return normal.normalize();
+    }
+
+    vector3 ba = v[0] - v[1];
+    vector3 bc = v[2] - v[1];
+    return unit_cross(bc, ba);
+}
+
+/*
+vector3 triangle::get_texture(const point3& pt) const
+{
+    if (!texture) return vector3(1, 1, 1);
+
+    vector2 pt_xy = pt_to_tex_coord(pt);
+
+    vector3 color;
+    for (int i = 0; i < 3; ++i)
+        color[i] = texture->cubic_atXY(pt_xy[0], pt_xy[1], 0, i) / 255.0;
+    //std::cout << std::endl << color << " " << u_v.first << " " << u_v.second << " " << texture->width() << std::endl;
+    return color;
+}
+*/
+
 list<triangle> triangle::split() const
 {
     vector<vector3> vertices;

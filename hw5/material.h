@@ -32,6 +32,9 @@ class material
         float shininess;
         float transparency;
         float reflection;
+
+        std::shared_ptr<CImg<float>> texture;
+        std::shared_ptr<CImg<float>> bump_map;
 };
 
 //std::map<std::string, material> material_map;
