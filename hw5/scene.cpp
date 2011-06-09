@@ -258,13 +258,13 @@ void scene_aux_0(scene& s)
     s.objs.push_back(sphere1);
 
     {
-    shared_ptr<object> sphere1(new sphere(vector3(1.5, 0.0, 0.0), 0.8));
+    shared_ptr<object> sphere1(new sphere(vector3(-2.0, 1.5, -1.5), 0.8));
     sphere1->mat.diffuse = vector3(1.0, 1.0, 1.0);
     sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
-    sphere1->mat.transparency = 0.1;
+    sphere1->mat.transparency = 0.4;
     sphere1->mat.shininess = 100;
-    sphere1->mat.reflection = 0.1;
-    //s.objs.push_back(sphere1);
+    sphere1->mat.reflection = 0.0;
+    s.objs.push_back(sphere1);
     }
 
     {
@@ -307,15 +307,18 @@ void scene_aux_0(scene& s)
     icosa1->make_polygon();
     s.objs.push_back(icosa1);
 
-    s.lights.push_back(light(vector3(0, 0, 7)));
+    s.lights.push_back(light(vector3(0, 0, 8)));
     s.lights.back().dir = vector3(0, 0, -1);
 
-    s.lights.push_back(light(vector3(0, 7, 0)));
+    s.lights.push_back(light(vector3(0, 8, 0)));
     s.lights.back().dir = vector3(0, -1, 0);
 }
 
 void scene_aux_3(scene& s)
 {
+    for (int i = 0; i < 36; ++i)
+    {
+        //cml::two_pi();
     shared_ptr<object> sphere1(new sphere(vector3(-0.0, 0.0, 0.0), 0.8));
     sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
     sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
@@ -323,6 +326,7 @@ void scene_aux_3(scene& s)
     sphere1->mat.shininess = 100;
     sphere1->mat.reflection = 1.0;
     s.objs.push_back(sphere1);
+    }
 
     s.lights.push_back(light(vector3(0, 0, 7)));
     s.lights.back().dir = vector3(0, 0, -1);

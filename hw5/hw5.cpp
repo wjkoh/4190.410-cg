@@ -118,7 +118,7 @@ int main(int argc, char* argv[])
                 IMG_HEIGHT = IMG_WIDTH*3/4;
                 break;
             case 5:
-                BSP_ENABLED = argv[i];
+                BSP_ENABLED = atoi(argv[i]);
                 break;
         }
     }
