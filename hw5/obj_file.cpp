@@ -36,8 +36,8 @@ vector<shared_ptr<triangle>> read_obj_file(const string& fname)
 
     vector<shared_ptr<triangle>> result;
     float ratio = 1.0;
-    float x_offset = -0.5;
-    float y_offset = -1.5;
+    float x_offset = -0.0;
+    float y_offset = -0.0;
     while (file.good())
     {
         stringstream ss(getline_and_ss(file));

@@ -15,6 +15,7 @@ shared_ptr<CImg<float>> bricks(new CImg<float>(TEX_DIR("bricks.jpg")));
 shared_ptr<CImg<float>> checker(new CImg<float>(TEX_DIR("CB_Texture_02_by_CB_Stock.jpg")));
 shared_ptr<CImg<float>> grunge(new CImg<float>(TEX_DIR("Grunge_texture_by_darkrose42_stock.jpg")));
 
+/*
 shared_ptr<CImg<float>> blue(new CImg<float>(TEX_DIR("3783098647_fb208001b5_b.jpg")));
 shared_ptr<CImg<float>> circle(new CImg<float>(TEX_DIR("bumpmap.jpg")));
 shared_ptr<CImg<float>> frosted_glass(new CImg<float>(TEX_DIR("frosted_glass_bathroom_4060478.JPG")));
@@ -22,6 +23,7 @@ shared_ptr<CImg<float>> glass(new CImg<float>(TEX_DIR("glass_texture_P1012107.JP
 shared_ptr<CImg<float>> stone(new CImg<float>(TEX_DIR("hrt-stone-texture-3.jpg")));
 shared_ptr<CImg<float>> frosted_glass2(new CImg<float>(TEX_DIR("frosted_glass_4060475.JPG")));
 shared_ptr<CImg<float>> emboss(new CImg<float>(TEX_DIR("Normal Map.bmp")));
+*/
 
 #undef TEX_DIR
 
