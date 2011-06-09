@@ -2713,7 +2713,7 @@ save_yuv	CImg.h	/^    const CImg<T>& save_yuv(const char *const filename, const 
 save_yuv	CImg.h	/^    const CImg<T>& save_yuv(std::FILE *const file, const bool rgb2yuv=true) const {$/;"	f	struct:cimg_library::CImg
 save_yuv	CImg.h	/^    const CImgList<T>& save_yuv(const char *const filename=0, const bool rgb2yuv=true) const {$/;"	f	struct:cimg_library::CImgList
 save_yuv	CImg.h	/^    const CImgList<T>& save_yuv(std::FILE *const file, const bool rgb2yuv=true) const {$/;"	f	struct:cimg_library::CImgList
-scene	scene.cpp	/^scene::scene(int scene_num)$/;"	f	class:scene
+scene	scene.cpp	/^    scene::scene(int scene_num)$/;"	f	class:scene
 scene	scene.h	/^class scene$/;"	c
 scene_aux_0	scene.cpp	/^void scene_aux_0(scene& s)$/;"	f
 scene_aux_1	scene.cpp	/^void scene_aux_1(scene& s)$/;"	f

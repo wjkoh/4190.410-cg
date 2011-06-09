@@ -7,19 +7,20 @@ using namespace std;
 const string tex_dir("./textures/");
 #define TEX_DIR(X) (tex_dir + string(X) + ".bmp").c_str() // GraphicsMagick이 깔려 있으면 .bmp는 빼도 된다.
 
-shared_ptr<CImg<float>> image(new CImg<float>(TEX_DIR("52964_Black-Metal-Texture.jpg")));
 shared_ptr<CImg<float>> wall(new CImg<float>(TEX_DIR("docwallorigin2dt.jpg")));
-shared_ptr<CImg<float>> circle(new CImg<float>(TEX_DIR("bumpmap.jpg")));
+shared_ptr<CImg<float>> image(new CImg<float>(TEX_DIR("52964_Black-Metal-Texture.jpg")));
 shared_ptr<CImg<float>> water(new CImg<float>(TEX_DIR("Fresh_water_ocean_texture.jpg")));
 shared_ptr<CImg<float>> bricks(new CImg<float>(TEX_DIR("bricks.jpg")));
 shared_ptr<CImg<float>> checker(new CImg<float>(TEX_DIR("CB_Texture_02_by_CB_Stock.jpg")));
+shared_ptr<CImg<float>> grunge(new CImg<float>(TEX_DIR("Grunge_texture_by_darkrose42_stock.jpg")));
+
+shared_ptr<CImg<float>> blue(new CImg<float>(TEX_DIR("3783098647_fb208001b5_b.jpg")));
+shared_ptr<CImg<float>> circle(new CImg<float>(TEX_DIR("bumpmap.jpg")));
 shared_ptr<CImg<float>> frosted_glass(new CImg<float>(TEX_DIR("frosted_glass_bathroom_4060478.JPG")));
 shared_ptr<CImg<float>> glass(new CImg<float>(TEX_DIR("glass_texture_P1012107.JPG")));
-shared_ptr<CImg<float>> blue(new CImg<float>(TEX_DIR("3783098647_fb208001b5_b.jpg")));
 shared_ptr<CImg<float>> stone(new CImg<float>(TEX_DIR("hrt-stone-texture-3.jpg")));
 shared_ptr<CImg<float>> frosted_glass2(new CImg<float>(TEX_DIR("frosted_glass_4060475.JPG")));
 shared_ptr<CImg<float>> emboss(new CImg<float>(TEX_DIR("Normal Map.bmp")));
-shared_ptr<CImg<float>> grunge(new CImg<float>(TEX_DIR("Grunge_texture_by_darkrose42_stock.jpg")));
 
 #undef TEX_DIR
 
@@ -35,12 +36,12 @@ void scene::make_quad(const vector3& v0, const vector3& v1, const vector3& v2,
     objs.push_back(triangle1);
 
     {
-    shared_ptr<triangle> triangle1(new triangle(v2, v3, v0));
-    triangle1->mat = mat;
-    triangle1->texture = tex;
-    triangle1->bump_map = bump;
-    triangle1->inverted_xy = true;
-    objs.push_back(triangle1);
+        shared_ptr<triangle> triangle1(new triangle(v2, v3, v0));
+        triangle1->mat = mat;
+        triangle1->texture = tex;
+        triangle1->bump_map = bump;
+        triangle1->inverted_xy = true;
+        objs.push_back(triangle1);
     }
 }
 
@@ -258,34 +259,34 @@ void scene_aux_0(scene& s)
     s.objs.push_back(sphere1);
 
     {
-    shared_ptr<object> sphere1(new sphere(vector3(-1.0, 1.5, -1.5), 0.8));
-    sphere1->mat.diffuse = vector3(0.2, 0.2, 0.2);
-    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
-    sphere1->mat.transparency = 1.0;
-    sphere1->mat.shininess = 0;
-    sphere1->mat.reflection = 1.0;
-    s.objs.push_back(sphere1);
+        shared_ptr<object> sphere1(new sphere(vector3(-1.0, 1.5, -1.5), 0.8));
+        sphere1->mat.diffuse = vector3(0.2, 0.2, 0.2);
+        sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+        sphere1->mat.transparency = 1.0;
+        sphere1->mat.shininess = 0;
+        sphere1->mat.reflection = 1.0;
+        s.objs.push_back(sphere1);
     }
 
     {
-    shared_ptr<object> sphere1(new sphere(vector3(1.2, 0.0, 1.0), 0.5));
-    sphere1->mat.diffuse = vector3(0.2, 0.2, 0.2);
-    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
-    sphere1->mat.transparency = 1.0;
-    sphere1->mat.shininess = 100;
-    sphere1->mat.reflection = 1;
-    s.objs.push_back(sphere1);
+        shared_ptr<object> sphere1(new sphere(vector3(1.2, 0.0, 1.0), 0.5));
+        sphere1->mat.diffuse = vector3(0.2, 0.2, 0.2);
+        sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+        sphere1->mat.transparency = 1.0;
+        sphere1->mat.shininess = 100;
+        sphere1->mat.reflection = 1;
+        s.objs.push_back(sphere1);
     }
 
     {
-    shared_ptr<object> sphere1(new sphere(vector3(-1.0, -1.0, 0.3), 0.5));
-    sphere1->mat.diffuse = vector3(1.0, 1.0, 1.0);
-    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
-    sphere1->mat.transparency = 1.0;
-    sphere1->mat.shininess = 100;
-    sphere1->mat.reflection = 0.1;
-    sphere1->texture = water;
-    s.objs.push_back(sphere1);
+        shared_ptr<object> sphere1(new sphere(vector3(-1.0, -1.0, 0.3), 0.5));
+        sphere1->mat.diffuse = vector3(1.0, 1.0, 1.0);
+        sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+        sphere1->mat.transparency = 1.0;
+        sphere1->mat.shininess = 100;
+        sphere1->mat.reflection = 0.1;
+        sphere1->texture = water;
+        s.objs.push_back(sphere1);
     }
 
     shared_ptr<cube> cube1(new cube(vector3(1.2, 1.0, 0.0), 1));
@@ -325,7 +326,7 @@ void scene_aux_3(scene& s)
         vector3 v;
         spherical_to_cartesian(r, theta, phi, 1, cml::latitude, v);
         v += vector3(0, 0, -2);
-        
+
         shared_ptr<object> sphere1(new sphere(v, 0.2));
         sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
         sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
@@ -342,8 +343,8 @@ void scene_aux_3(scene& s)
     s.lights.back().dir = vector3(0, 0, -1);
 }
 
-scene::scene(int scene_num)
-    : g_amb_light(0.4, 0.4, 0.4)
+    scene::scene(int scene_num)
+: g_amb_light(0.4, 0.4, 0.4)
 {
     switch (scene_num)
     {
@@ -354,4 +355,3 @@ scene::scene(int scene_num)
         default: assert(false);
     }
 }
-

@@ -129,7 +129,6 @@ int main(int argc, char* argv[])
     cout << "* image size: " << IMG_WIDTH << "x" << IMG_HEIGHT << endl;
     cout << "* BSP on/off: " << BSP_ENABLED << endl;
     cout << endl;
-    cout << endl;
 
     // Ray Tracing
     scene s(scene_num);

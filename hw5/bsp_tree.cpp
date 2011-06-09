@@ -23,7 +23,7 @@ void bsp_tree_node::add(shared_ptr<const object> obj, bool leaf, int depth)
     if (depth > max_depth)
     {
         max_depth = depth;
-        cout << "max depth " << max_depth << endl;
+        //cout << "max depth " << max_depth << endl;
     }
     ++depth;
 
@@ -96,7 +96,7 @@ intersect_info bsp_tree_node::traverse(const ray& eye_ray) const
             eye_front = false;
         else
         {
-            if (dot(eye_ray.dir, p.imaginary()) > 0)
+            if (dot(eye_ray.dir, p.imaginary()) > FABS_EPS_F)
                 eye_front = true;
             else
                 eye_front = false;
@@ -114,8 +114,10 @@ intersect_info bsp_tree_node::traverse(const ray& eye_ray) const
     intersect_info info1(eye_ray);
     if (next) info1 = next->traverse(eye_ray);
 
+    // intersect
     intersect_info&& org_info = find_min_intersect(intersect, eye_ray);
-    bool front_intersect = org_info.intersect && (org_info.dist <= dist_to_plane - FABS_EPS_F);
+    bool front_intersect = org_info.intersect && (dist_to_plane < -FABS_EPS_F || (org_info.dist < dist_to_plane - FABS_EPS_F));
+
     if (front_intersect)
     {
         if (info1.intersect && org_info.intersect)
@@ -213,7 +215,15 @@ void bsp_tree::build(scene& s)
         }
         */
     }
-    cout << "objs size " << objs.size() << endl;
+    cout << "* # of objects: " << objs.size() << endl;
+
+    /*
+    root = shared_ptr<bsp_tree_node>(new bsp_tree_node(objs.front()->get_plane(0.0)));
+    for (auto i = objs.begin(); i != objs.end(); ++i)
+    {
+        root->add(*i);
+    }
+    */
 
     const int threshold = (objs.size() - 1)/2;
     for (auto it = objs.begin(); it != objs.end(); ++it)
@@ -279,12 +289,12 @@ void bsp_tree::build(scene& s)
     root = shared_ptr<bsp_tree_node>(new bsp_tree_node(useful.front().obj->get_plane(0.0)));
     for (auto i = useful.begin(); i != useful.end(); ++i)
     {
-        cout << i->fitness << " " << i->intersect << endl;
+        //cout << i->fitness << " " << i->intersect << endl;
         root->add(i->obj, false);
     }
     for (auto i = not_useful.begin(); i != not_useful.end(); ++i)
     {
-        cout << i->fitness << " " << i->intersect << endl;
+        //cout << i->fitness << " " << i->intersect << endl;
         root->add(i->obj, true);
     }
 }
