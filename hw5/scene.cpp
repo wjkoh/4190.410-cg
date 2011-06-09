@@ -258,12 +258,12 @@ void scene_aux_0(scene& s)
     s.objs.push_back(sphere1);
 
     {
-    shared_ptr<object> sphere1(new sphere(vector3(-2.0, 1.5, -1.5), 0.8));
-    sphere1->mat.diffuse = vector3(1.0, 1.0, 1.0);
+    shared_ptr<object> sphere1(new sphere(vector3(-1.0, 1.5, -1.5), 0.8));
+    sphere1->mat.diffuse = vector3(0.2, 0.2, 0.2);
     sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
-    sphere1->mat.transparency = 0.4;
-    sphere1->mat.shininess = 100;
-    sphere1->mat.reflection = 0.0;
+    sphere1->mat.transparency = 1.0;
+    sphere1->mat.shininess = 0;
+    sphere1->mat.reflection = 1.0;
     s.objs.push_back(sphere1);
     }
 
@@ -310,29 +310,36 @@ void scene_aux_0(scene& s)
     s.lights.push_back(light(vector3(0, 0, 8)));
     s.lights.back().dir = vector3(0, 0, -1);
 
-    s.lights.push_back(light(vector3(0, 8, 0)));
+    s.lights.push_back(light(vector3(0, 9, 0)));
     s.lights.back().dir = vector3(0, -1, 0);
 }
 
 void scene_aux_3(scene& s)
 {
-    for (int i = 0; i < 36; ++i)
+    float phi = 0.0;
+    int MAX = 36;
+    float r = 4;
+    for (int i = 0; i < MAX; ++i)
     {
-        //cml::two_pi();
-    shared_ptr<object> sphere1(new sphere(vector3(-0.0, 0.0, 0.0), 0.8));
-    sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
-    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
-    sphere1->mat.transparency = 0.2;
-    sphere1->mat.shininess = 100;
-    sphere1->mat.reflection = 1.0;
-    s.objs.push_back(sphere1);
+        float theta = cml::constants<float>::two_pi() * i / (float)MAX;
+        vector3 v;
+        spherical_to_cartesian(r, theta, phi, 1, cml::latitude, v);
+        v += vector3(0, 0, -2);
+        
+        shared_ptr<object> sphere1(new sphere(v, 0.2));
+        sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
+        sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+        sphere1->mat.transparency = 0.2;
+        sphere1->mat.shininess = 100;
+        sphere1->mat.reflection = 1.0;
+        s.objs.push_back(sphere1);
     }
 
-    s.lights.push_back(light(vector3(0, 0, 7)));
+    s.lights.push_back(light(vector3(0, 0, 2)));
     s.lights.back().dir = vector3(0, 0, -1);
 
-    s.lights.push_back(light(vector3(0, 9, 0)));
-    s.lights.back().dir = vector3(0, -1, -1);
+    s.lights.push_back(light(vector3(0, 0, 0)));
+    s.lights.back().dir = vector3(0, 0, -1);
 }
 
 scene::scene(int scene_num)
@@ -343,6 +350,7 @@ scene::scene(int scene_num)
         case 0: scene_aux_0(*this); break;
         case 1: scene_aux_1(*this); break;
         case 2: scene_aux_2(*this); break;
+        case 3: scene_aux_3(*this); break;
         default: assert(false);
     }
 }

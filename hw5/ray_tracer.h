@@ -66,7 +66,7 @@ class ray_tree_node
                     ray s_ray(pt, ray_vec); // shadow ray
 
                     bool flag = false;
-                    if (BSP_ENABLED)
+                    if (false /*BSP_ENABLED*/)
                     {
                         intersect_info&& min_info = s.tree.traverse(s_ray);
                         if (!min_info.intersect || min_info.dist > ray_dist)
