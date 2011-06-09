@@ -15,6 +15,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <fstream>
 
 // CML
 #include "cml/cml.h"

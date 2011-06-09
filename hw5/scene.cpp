@@ -3,6 +3,7 @@ using namespace std;
 
 #include "triangle.h"
 #include "polyhedron.h"
+#include "obj_file.h"
 
 const string tex_dir("./textures/");
 #define TEX_DIR(X) (tex_dir + string(X) + ".bmp").c_str() // GraphicsMagick이 깔려 있으면 .bmp는 빼도 된다.
@@ -317,6 +318,12 @@ void scene_aux_0(scene& s)
 
 void scene_aux_3(scene& s)
 {
+    auto tri_lst = read_obj_file("cube.obj");
+    for (auto i = tri_lst.begin(); i != tri_lst.end(); ++i)
+    {
+        s.objs.push_back(*i);
+    }
+
     float phi = 0.0;
     int MAX = 36;
     float r = 4;

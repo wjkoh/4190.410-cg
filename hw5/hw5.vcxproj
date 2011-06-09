@@ -87,6 +87,7 @@
     <ClInclude Include="common.h" />
     <ClInclude Include="material.h" />
     <ClInclude Include="object.h" />
+    <ClInclude Include="obj_file.h" />
     <ClInclude Include="octree.h" />
     <ClInclude Include="polyhedron.h" />
     <ClInclude Include="ray_tracer.h" />
@@ -99,6 +100,7 @@
     <ClCompile Include="bsp_tree.cpp" />
     <ClCompile Include="hw5.cpp" />
     <ClCompile Include="object.cpp" />
+    <ClCompile Include="obj_file.cpp" />
     <ClCompile Include="octree.cpp" />
     <ClCompile Include="polyhedron.cpp" />
     <ClCompile Include="ray_tracer.cpp" />
