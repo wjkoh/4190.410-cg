@@ -198,7 +198,7 @@ vector3 sphere::get_normal(const point3& pt, const float time, bool bump) const
         m.inverse();
 
         vector3 r_n = transform_vector(m, normal);
-        return r_n;
+        return r_n.normalize();
     }
 
     return n;

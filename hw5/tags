@@ -96,14 +96,14 @@ HSVtoRGB	CImg.h	/^    CImg<T>& HSVtoRGB() {$/;"	f	struct:cimg_library::CImg
 IMG_HEIGHT	hw5.cpp	/^int IMG_HEIGHT = 768;$/;"	v
 IMG_WIDTH	hw5.cpp	/^int IMG_WIDTH = 1024;$/;"	v
 INC	Makefile	/^INC=. \/opt\/local\/include$/;"	m
-JITTER	hw5.cpp	/^int JITTER = 1; \/\/ JITTER*JITTER 개의 subpixel ray$/;"	v
+JITTER	hw5.cpp	/^int JITTER = 3; \/\/ JITTER*JITTER 개의 subpixel ray$/;"	v
 JITTER_ANGLE_DEG	hw5.cpp	/^float JITTER_ANGLE_DEG = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_ANGLE_DEG_R	hw5.cpp	/^float JITTER_ANGLE_DEG_R = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_REFL_ON	hw5.cpp	/^bool JITTER_REFL_ON = false;$/;"	v
 JITTER_REFR_ON	hw5.cpp	/^bool JITTER_REFR_ON = false;$/;"	v
 LEFT	octree.h	/^    LEFT,$/;"	e	enum:__anon2
-LENS_HEIGHT	hw5.cpp	/^int LENS_HEIGHT = 2;$/;"	v
-LENS_WIDTH	hw5.cpp	/^int LENS_WIDTH = 2; \/\/ 사실은 aperture size$/;"	v
+LENS_HEIGHT	hw5.cpp	/^int LENS_HEIGHT = 4;$/;"	v
+LENS_WIDTH	hw5.cpp	/^int LENS_WIDTH = 4; \/\/ 사실은 aperture size$/;"	v
 LIB	Makefile	/^LIB=\/opt\/local\/lib$/;"	m
 LabtoRGB	CImg.h	/^    CImg<T>& LabtoRGB() {$/;"	f	struct:cimg_library::CImg
 LabtoXYZ	CImg.h	/^    CImg<T>& LabtoXYZ() {$/;"	f	struct:cimg_library::CImg
@@ -111,6 +111,7 @@ MAX_DEPTH	hw5.cpp	/^int MAX_DEPTH = 10;$/;"	v
 MSE	CImg.h	/^    Tdouble MSE(const CImg<t>& img) const {$/;"	f	struct:cimg_library::CImg
 Magick_info	CImg.h	/^      Magick_info() {$/;"	f	struct:cimg_library::cimg::Magick_info
 Magick_info	CImg.h	/^    static struct Magick_info {$/;"	s	namespace:cimg_library::cimg
+NOMINMAX	common.h	/^#define NOMINMAX$/;"	d
 None	CImg.h	/^#define None /;"	d
 None	CImg.h	/^#undef None$/;"	d
 OBJS	Makefile	/^OBJS = hw5.o object.o triangle.o polyhedron.o$/;"	m
@@ -134,7 +135,7 @@ RGBtoYCbCr	CImg.h	/^    CImg<T>& RGBtoYCbCr() {$/;"	f	struct:cimg_library::CImg
 RGBtoYUV	CImg.h	/^    CImg<T>& RGBtoYUV() {$/;"	f	struct:cimg_library::CImg
 RGBtoxyY	CImg.h	/^    CImg<T>& RGBtoxyY() {$/;"	f	struct:cimg_library::CImg
 RIGHT	octree.h	/^    RIGHT = 0,$/;"	e	enum:__anon2
-SHADOW_RAY	hw5.cpp	/^int SHADOW_RAY = 2; \/\/ SHADOW_RAY*SHADOW_RAY 개의 shadow ray$/;"	v
+SHADOW_RAY	hw5.cpp	/^int SHADOW_RAY = 1; \/\/ SHADOW_RAY*SHADOW_RAY 개의 shadow ray$/;"	v
 SVD	CImg.h	/^    const CImg<T>& SVD(CImg<t>& U, CImg<t>& S, CImg<t>& V, const bool sorting=true,$/;"	f	struct:cimg_library::CImg
 TEX_DIR	scene.cpp	/^#define TEX_DIR(/;"	d	file:
 TEX_DIR	scene.cpp	/^#undef TEX_DIR$/;"	d	file:
@@ -1360,7 +1361,7 @@ front	CImg.h	/^    T& front() {$/;"	f	struct:cimg_library::CImg
 front	CImg.h	/^    const CImg<T>& front() const {$/;"	f	struct:cimg_library::CImgList
 front	CImg.h	/^    const T& front() const {$/;"	f	struct:cimg_library::CImg
 front	bsp_tree.h	/^        bsp_tree_node* front;$/;"	m	class:bsp_tree_node
-front_or_back	object.h	/^        virtual int front_or_back(const plane_t& p) const { assert(false); }$/;"	f	class:object
+front_or_back	object.h	/^        virtual int front_or_back(const plane_t& p) const { assert(false); return 0; }$/;"	f	class:object
 front_or_back	object.h	/^        virtual int front_or_back(const plane_t& p) const$/;"	f	class:sphere
 front_or_back	triangle.h	/^        virtual int front_or_back(const plane_t& p) const$/;"	f	class:triangle
 fwrite	CImg.h	/^    inline int fwrite(const T *ptr, const unsigned int nmemb, std::FILE *stream) {$/;"	f	namespace:cimg_library::cimg
@@ -1583,7 +1584,7 @@ get_object3dtoCImg3d	CImg.h	/^    CImg<floatT> get_object3dtoCImg3d() const {$/;
 get_object3dtoCImg3d	CImg.h	/^    CImg<floatT> get_object3dtoCImg3d(const CImgList<tp>& primitives) const {$/;"	f	struct:cimg_library::CImg
 get_object3dtoCImg3d	CImg.h	/^    CImg<floatT> get_object3dtoCImg3d(const CImgList<tp>& primitives,$/;"	f	struct:cimg_library::CImg
 get_permute_axes	CImg.h	/^    CImg<T> get_permute_axes(const char *const order) const {$/;"	f	struct:cimg_library::CImg
-get_plane	object.h	/^        virtual plane_t get_plane(const float time) const { assert(false); }$/;"	f	class:object
+get_plane	object.h	/^        virtual plane_t get_plane(const float time) const { assert(false); return plane_t(); }$/;"	f	class:object
 get_plane	object.h	/^        virtual plane_t get_plane(const float time) const$/;"	f	class:sphere
 get_plane	triangle.h	/^        virtual plane_t get_plane(const float time) const$/;"	f	class:triangle
 get_pos	object.h	/^        point3 get_pos(float time) const { return pos + move_dir*time; }$/;"	f	class:object
@@ -2185,6 +2186,7 @@ main	hw5.cpp	/^int main(int argc, char* argv[])$/;"	f
 main	hw5_backup.cpp	/^int main(int argc, char** argv)$/;"	f
 make_polygon	polyhedron.h	/^inline void polyhedron<20>::make_polygon()$/;"	f	class:polyhedron
 make_polygon	polyhedron.h	/^inline void polyhedron<6>::make_polygon()$/;"	f	class:polyhedron
+make_quad	scene.cpp	/^void scene::make_quad(const vector3& v0, const vector3& v1, const vector3& v2,$/;"	f	class:scene
 map	CImg.h	/^    CImg<T>& map(const CImg<t>& palette) {$/;"	f	struct:cimg_library::CImg
 mat	object.h	/^        material mat;$/;"	m	class:object
 material	material.h	/^        material()$/;"	f	class:material
@@ -2564,7 +2566,7 @@ projections2d	CImg.h	/^    CImg<T>& projections2d(const unsigned int x0, const u
 pseudoinvert	CImg.h	/^    CImg<T>& pseudoinvert() {$/;"	f	struct:cimg_library::CImg
 pseudoinvert	CImg.h	/^  inline CImg<_cimg_Tfloat> pseudoinvert(const CImg<T>& instance) {$/;"	f	namespace:cimg_library
 pt_to_tex_coord	object.cpp	/^vector2 sphere::pt_to_tex_coord(const point3& pt, bool bump) const$/;"	f	class:sphere
-pt_to_tex_coord	object.h	/^        virtual vector2 pt_to_tex_coord(const point3& pt, bool bump = false) const { assert(false); }$/;"	f	class:object
+pt_to_tex_coord	object.h	/^        virtual vector2 pt_to_tex_coord(const point3& pt, bool bump = false) const { assert(false); return vector2(); }$/;"	f	class:object
 pt_to_tex_coord	triangle.cpp	/^vector2 triangle::pt_to_tex_coord(const point3& pt, bool bump) const$/;"	f	class:triangle
 push_back	CImg.h	/^    CImgList<T>& push_back(const CImg<t>& img) {$/;"	f	struct:cimg_library::CImgList
 push_back	CImg.h	/^    CImgList<T>& push_back(const CImgList<t>& list) {$/;"	f	struct:cimg_library::CImgList
@@ -2715,6 +2717,7 @@ scene	scene.cpp	/^scene::scene(int scene_num)$/;"	f	class:scene
 scene	scene.h	/^class scene$/;"	c
 scene_aux_0	scene.cpp	/^void scene_aux_0(scene& s)$/;"	f
 scene_aux_1	scene.cpp	/^void scene_aux_1(scene& s)$/;"	f
+scene_aux_2	scene.cpp	/^void scene_aux_2(scene& s)$/;"	f
 screen_height	CImg.h	/^    static int screen_height() {$/;"	f	struct:cimg_library::CImgDisplay
 screen_width	CImg.h	/^    static int screen_width() {$/;"	f	struct:cimg_library::CImgDisplay
 select	CImg.h	/^    CImg<T>& select(CImgDisplay &disp,$/;"	f	struct:cimg_library::CImg

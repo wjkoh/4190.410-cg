@@ -4,33 +4,6 @@ using namespace std;
 #include "triangle.h"
 #include "polyhedron.h"
 
-#if 0
-void make_quad(const vector3& v0, const vector3& v2)
-{
-    vector3 v0();
-    vector3 v1();
-    vector3 v2();
-    vector3 v3();
-
-    material mat;
-    mat.diffuse = vector3(1.0, 1.0, 1.0);
-    mat.specular = vector3(0.2, 0.2, 0.2);
-    mat.transparency = 1.0;
-    mat.shininess = 20;
-
-    shared_ptr<object> triangle1(new triangle(v1, v2, v3));
-    triangle1->mat = mat;
-    triangle1->texture = bricks;
-    s.objs.push_back(triangle1);
-
-    shared_ptr<object> triangle1(new triangle(v3, v0, v1));
-    triangle1->mat = mat;
-    triangle1->texture = bricks;
-    s.objs.push_back(triangle1);
-}
-#endif
-
-
 const string tex_dir("./textures/");
 #define TEX_DIR(X) (tex_dir + string(X) + ".bmp").c_str() // GraphicsMagick이 깔려 있으면 .bmp는 빼도 된다.
 
@@ -39,16 +12,39 @@ shared_ptr<CImg<float>> wall(new CImg<float>(TEX_DIR("docwallorigin2dt.jpg")));
 shared_ptr<CImg<float>> circle(new CImg<float>(TEX_DIR("bumpmap.jpg")));
 shared_ptr<CImg<float>> water(new CImg<float>(TEX_DIR("Fresh_water_ocean_texture.jpg")));
 shared_ptr<CImg<float>> bricks(new CImg<float>(TEX_DIR("bricks.jpg")));
+shared_ptr<CImg<float>> checker(new CImg<float>(TEX_DIR("CB_Texture_02_by_CB_Stock.jpg")));
 shared_ptr<CImg<float>> frosted_glass(new CImg<float>(TEX_DIR("frosted_glass_bathroom_4060478.JPG")));
 shared_ptr<CImg<float>> glass(new CImg<float>(TEX_DIR("glass_texture_P1012107.JPG")));
 shared_ptr<CImg<float>> blue(new CImg<float>(TEX_DIR("3783098647_fb208001b5_b.jpg")));
 shared_ptr<CImg<float>> stone(new CImg<float>(TEX_DIR("hrt-stone-texture-3.jpg")));
 shared_ptr<CImg<float>> frosted_glass2(new CImg<float>(TEX_DIR("frosted_glass_4060475.JPG")));
 shared_ptr<CImg<float>> emboss(new CImg<float>(TEX_DIR("Normal Map.bmp")));
+shared_ptr<CImg<float>> grunge(new CImg<float>(TEX_DIR("Grunge_texture_by_darkrose42_stock.jpg")));
 
 #undef TEX_DIR
 
-void scene_aux_0(scene& s)
+void scene::make_quad(const vector3& v0, const vector3& v1, const vector3& v2,
+                      const material& mat, shared_ptr<CImg<float>> tex, shared_ptr<CImg<float>> bump)
+{
+    vector3 v3(v0 + (v2 - v1));
+
+    shared_ptr<object> triangle1(new triangle(v0, v1, v2));
+    triangle1->mat = mat;
+    triangle1->texture = tex;
+    triangle1->bump_map = bump;
+    objs.push_back(triangle1);
+
+    {
+    shared_ptr<triangle> triangle1(new triangle(v2, v3, v0));
+    triangle1->mat = mat;
+    triangle1->texture = tex;
+    triangle1->bump_map = bump;
+    triangle1->inverted_xy = true;
+    objs.push_back(triangle1);
+    }
+}
+
+void scene_aux_1(scene& s)
 {
     shared_ptr<object> sphere1(new sphere(vector3(1.0, 1.0, -0.0), 1.0));
     sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
@@ -115,7 +111,7 @@ void scene_aux_0(scene& s)
     //s.lights.push_back(light(vector3(0, 2, -1)));
 }
 
-void scene_aux_1(scene& s)
+void scene_aux_2(scene& s)
 {
     shared_ptr<object> sphere1(new sphere(vector3(1.0, 1.0, -0.0), 1.0));
     sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
@@ -155,7 +151,8 @@ void scene_aux_1(scene& s)
         triangle1->mat.transparency = 1.0;
         triangle1->mat.shininess = 0;
         triangle1->mat.reflection = 0;
-        triangle1->texture = bricks;
+        triangle1->texture = checker;
+        //triangle1->texture = bricks;
         //triangle1->bump_map = wall;
         s.objs.push_back(triangle1);
     }
@@ -195,6 +192,130 @@ void scene_aux_1(scene& s)
     //s.lights.push_back(light(vector3(0, 2, -1)));
 }
 
+void scene_aux_0(scene& s)
+{
+    material wall_m;
+    wall_m.diffuse = vector3(0.5, 0.5, 0.5);
+    wall_m.transparency = 1.0;
+    wall_m.shininess = 0;
+    wall_m.reflection = 0;
+
+    material floor_m;
+    floor_m.diffuse = vector3(1.0, 1.0, 1.0);
+    floor_m.transparency = 1.0;
+    floor_m.shininess = 0;
+    floor_m.reflection = 0;
+
+    material bump_m;
+    bump_m.diffuse = vector3(0.4, 0.4, 0.4);
+    bump_m.transparency = 1.0;
+    bump_m.shininess = 1;
+    bump_m.reflection = 0.0;
+
+    const float floor_len = 4.0;
+    const float wall_len = 6.0;
+
+    const float floor_y = -1.5;
+    const float wall_y = floor_y;
+    s.make_quad(
+                vector3(-floor_len, floor_y, -floor_len),
+                vector3(-floor_len, floor_y, floor_len),
+                vector3(floor_len, floor_y, floor_len),
+                floor_m,
+                checker
+               );
+
+    s.make_quad(
+                vector3(-floor_len, floor_y + wall_len, floor_len),
+                vector3(-floor_len, floor_y, floor_len),
+                vector3(-floor_len, floor_y, -floor_len),
+                bump_m,
+                grunge,
+                shared_ptr<CImg<float>>()
+               );
+
+    s.make_quad(
+                vector3(-floor_len, floor_y + wall_len, -floor_len),
+                vector3(-floor_len, floor_y, -floor_len),
+                vector3(floor_len, floor_y, -floor_len),
+                wall_m,
+                grunge,
+                shared_ptr<CImg<float>>()
+               );
+
+    s.make_quad(
+                vector3(floor_len, floor_y + wall_len, -floor_len),
+                vector3(floor_len, floor_y, -floor_len),
+                vector3(floor_len, floor_y, floor_len),
+                wall_m,
+                grunge
+               );
+
+    shared_ptr<object> sphere1(new sphere(vector3(-0.0, 0.0, 0.0), 0.8));
+    sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
+    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+    sphere1->mat.transparency = 0.2;
+    sphere1->mat.shininess = 100;
+    sphere1->mat.reflection = 1.0;
+    s.objs.push_back(sphere1);
+
+    {
+    shared_ptr<object> sphere1(new sphere(vector3(1.5, 0.0, 0.0), 0.8));
+    sphere1->mat.diffuse = vector3(1.0, 1.0, 1.0);
+    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+    sphere1->mat.transparency = 0.1;
+    sphere1->mat.shininess = 100;
+    sphere1->mat.reflection = 0.1;
+    //s.objs.push_back(sphere1);
+    }
+
+    {
+    shared_ptr<object> sphere1(new sphere(vector3(1.2, 0.0, 1.0), 0.5));
+    sphere1->mat.diffuse = vector3(0.2, 0.2, 0.2);
+    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+    sphere1->mat.transparency = 1.0;
+    sphere1->mat.shininess = 100;
+    sphere1->mat.reflection = 1;
+    s.objs.push_back(sphere1);
+    }
+
+    {
+    shared_ptr<object> sphere1(new sphere(vector3(-1.0, -1.0, 0.3), 0.5));
+    sphere1->mat.diffuse = vector3(1.0, 1.0, 1.0);
+    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+    sphere1->mat.transparency = 1.0;
+    sphere1->mat.shininess = 100;
+    sphere1->mat.reflection = 0.1;
+    sphere1->texture = water;
+    s.objs.push_back(sphere1);
+    }
+
+    shared_ptr<cube> cube1(new cube(vector3(1.2, 1.0, 0.0), 1));
+    cube1->mat.diffuse = vector3(0.2, 0.2, 0.2);
+    cube1->mat.specular = vector3(1.0, 1.0, 1.0);
+    cube1->mat.transparency = 1.0;
+    cube1->mat.shininess = 1;
+    cube1->mat.reflection = 0.0;
+    cube1->bump_map = wall;
+    cube1->make_polygon();
+    s.objs.push_back(cube1);
+
+    shared_ptr<icosahedron> icosa1(new icosahedron(vector3(-2.0, -0.0, -1.0), 1));
+    icosa1->mat.diffuse = vector3(0.1, 0.5, 0.0);
+    icosa1->mat.specular = vector3(1.0, 1.0, 1.0);
+    icosa1->mat.transparency = 1.0;
+    icosa1->mat.shininess = 100;
+    icosa1->mat.reflection = 0.5;
+    icosa1->make_polygon();
+    s.objs.push_back(icosa1);
+
+    s.lights.push_back(light(vector3(0, 0, 7)));
+    s.lights.back().dir = vector3(0, 0, -1);
+
+    s.lights.push_back(light(vector3(0, 5, 0)));
+    s.lights.back().dir = vector3(0, -1, 0);
+}
+
 scene::scene(int scene_num)
     : g_amb_light(0.4, 0.4, 0.4)
 {
@@ -202,6 +323,7 @@ scene::scene(int scene_num)
     {
         case 0: scene_aux_0(*this); break;
         case 1: scene_aux_1(*this); break;
+        case 2: scene_aux_2(*this); break;
         default: assert(false);
     }
 }

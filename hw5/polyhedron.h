@@ -62,6 +62,8 @@ class polyhedron : public sphere
             //std::cout << pos << std::endl;
             t->mat = mat;
             t->refr_idx = refr_idx;
+            t->texture = texture;
+            t->bump_map = bump_map;
             //std::cout << "vert2 " << (*t)[0] << " " << (*t)[1] << " " << (*t)[2] << std::endl;
 
             //(*t).set_vertex((*t)[0] + pos, (*t)[1] + pos, (*t)[2] + pos);
@@ -72,6 +74,9 @@ class polyhedron : public sphere
                 std::shared_ptr<triangle> t(new triangle(vertices[k], vertices[l], vertices[i]));
                 t->mat = mat;
                 t->refr_idx = refr_idx;
+                t->texture = texture;
+                t->bump_map = bump_map;
+                t->inverted_xy = true;
 
                 (*t).set_vertex((*t)[0] + pos, (*t)[1] + pos, (*t)[2] + pos);
                 triangles.push_back(t);

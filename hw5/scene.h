@@ -19,6 +19,11 @@ class scene
                 i->set_pos(i->get_pos(0.0) + c_o_lens + delta);
         }
 
+        void make_quad(const vector3& v0, const vector3& v1, const vector3& v2,
+                       const material& mat,
+                       std::shared_ptr<CImg<float>> tex = std::shared_ptr<CImg<float>>(),
+                       std::shared_ptr<CImg<float>> bump = std::shared_ptr<CImg<float>>());
+
         //octree tree;
         bsp_tree tree;
         std::vector<std::shared_ptr<object> > objs;

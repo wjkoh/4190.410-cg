@@ -19,27 +19,42 @@ vector2 triangle::pt_to_tex_coord(const point3& pt, bool bump) const
     vector2 u(u_.length(), 0);
     vector2 v(dot(v_, x), dot(v_, y));
         
-    float ratio = min(tex->width()/(u.length()), tex->height()/(v[1])); // 256
+    float ratio = min(128.0f, min(tex->width()/(u.length()), tex->height()/(v[1]))); // 256
     u *= ratio;
     v *= ratio;
 
     vector2 result = u*(u_v.first) + v*(u_v.second);
     if (inverted_xy)
         result = u*(1.0-u_v.first) + v*(1.0-u_v.second);
+
+    int div = result[0]/tex->width();
+
+    if (result[0] < 0)
+    {
+        result[0] = -(result[0] - div*tex->width()); // mirror
+    }
     if (result[0] > tex->width())
     {
-        //result[0] = (result[0] - tex->width()); // wrap
-        result[0] = tex->width() - (result[0] - tex->width()); // mirror
+        //result[0] = (result[0] - div*tex->width()); // wrap
+        result[0] = tex->width() - (result[0] - div*tex->width()); // mirror
+    }
+    if (result[1] < 0)
+    {
+        result[1] = -(result[1] - div*tex->height()); 
     }
     if (result[1] > tex->height())
     {
-        result[1] = tex->height() - (result[1] - tex->height()); 
+        result[1] = tex->height() - (result[1] - div*tex->height()); 
     }
     return result;
 }
 
 vector3 triangle::get_normal(const point3& pt, const float time, bool bump) const
 {
+    vector3 ba = v[0] - v[1];
+    vector3 bc = v[2] - v[1];
+    vector3 n = unit_cross(bc, ba);
+
     if (bump && bump_map)
     {
         vector2 pt_xy = pt_to_tex_coord(pt, true);
@@ -51,12 +66,17 @@ vector3 triangle::get_normal(const point3& pt, const float time, bool bump) cons
             if (i == 1)
                 normal[i] *= -1.0;
         }
-        return normal.normalize();
+
+        matrix m;
+        vector3 x = unit_cross(Y, n);
+        matrix_rotation_align(m, n, x, true, cml::axis_order_zxy);
+        //m.inverse();
+
+        vector3 r_n = transform_vector(m, normal);
+        return r_n.normalize();
     }
 
-    vector3 ba = v[0] - v[1];
-    vector3 bc = v[2] - v[1];
-    return unit_cross(bc, ba);
+    return n;
 }
 
 /*

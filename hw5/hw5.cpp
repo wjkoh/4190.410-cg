@@ -34,8 +34,8 @@ using namespace std;
 // Global variables
 int IMG_WIDTH = 1024;
 int IMG_HEIGHT = 768;
-int LENS_WIDTH = 2; // 사실은 aperture size
-int LENS_HEIGHT = 2;
+int LENS_WIDTH = 4; // 사실은 aperture size
+int LENS_HEIGHT = 4;
 float RES = 0.01;
 int MAX_DEPTH = 10;
 int JITTER = 1; // JITTER*JITTER 개의 subpixel ray
