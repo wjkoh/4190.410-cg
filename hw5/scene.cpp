@@ -32,7 +32,7 @@ void make_quad(const vector3& v0, const vector3& v2)
 
 
 const string tex_dir("./textures/");
-#define TEX_DIR(X) (tex_dir + (X)).c_str()
+#define TEX_DIR(X) (tex_dir + string(X) + ".bmp").c_str() // GraphicsMagick이 깔려 있으면 .bmp는 빼도 된다.
 
 shared_ptr<CImg<float>> image(new CImg<float>(TEX_DIR("52964_Black-Metal-Texture.jpg")));
 shared_ptr<CImg<float>> wall(new CImg<float>(TEX_DIR("docwallorigin2dt.jpg")));
@@ -98,13 +98,13 @@ void scene_aux_0(scene& s)
     cube1->mat.shininess = 20;
     s.objs.push_back(cube1);
 
-    shared_ptr<object> ico1(new icosahedron(vector3(0.0, -1.0, -0.5), 1));
-    ico1->mat.diffuse = vector3(0.0, 1.0, 0.0);
-    ico1->mat.specular = vector3(1.0, 1.0, 1.0);
-    ico1->mat.transparency = 0.1;
-    ico1->mat.shininess = 100;
-    ico1->mat.reflection = 0.5;
-    s.objs.push_back(ico1);
+    shared_ptr<object> icosa1(new icosahedron(vector3(0.0, -1.0, -0.5), 1));
+    icosa1->mat.diffuse = vector3(0.0, 1.0, 0.0);
+    icosa1->mat.specular = vector3(1.0, 1.0, 1.0);
+    icosa1->mat.transparency = 0.1;
+    icosa1->mat.shininess = 100;
+    icosa1->mat.reflection = 0.5;
+    s.objs.push_back(icosa1);
 
     s.lights.push_back(light(vector3(0, 0, 5)));
     s.lights.back().dir = vector3(0, 0, -1);
@@ -178,13 +178,13 @@ void scene_aux_1(scene& s)
     cube1->mat.shininess = 20;
     s.objs.push_back(cube1);
 
-    shared_ptr<object> ico1(new icosahedron(vector3(0.0, -1.0, -0.5), 1));
-    ico1->mat.diffuse = vector3(0.0, 1.0, 0.0);
-    ico1->mat.specular = vector3(1.0, 1.0, 1.0);
-    ico1->mat.transparency = 0.1;
-    ico1->mat.shininess = 100;
-    ico1->mat.reflection = 0.5;
-    //s.objs.push_back(ico1);
+    shared_ptr<object> icosa1(new icosahedron(vector3(0.0, -1.0, -0.5), 1));
+    icosa1->mat.diffuse = vector3(0.0, 1.0, 0.0);
+    icosa1->mat.specular = vector3(1.0, 1.0, 1.0);
+    icosa1->mat.transparency = 0.1;
+    icosa1->mat.shininess = 100;
+    icosa1->mat.reflection = 0.5;
+    //s.objs.push_back(icosa1);
 
     s.lights.push_back(light(vector3(-1.5, 5, -1)));
     s.lights.back().dir = vector3(0, -1, 0);

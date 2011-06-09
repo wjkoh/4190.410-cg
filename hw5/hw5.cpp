@@ -124,8 +124,8 @@ int main(int argc, char* argv[])
     }
 
     cout << "* scene #: " << scene_num << endl;
-    cout << "* # of sampling: " << pow(JITTER, 2) << endl;
-    cout << "* # of shadow rays: " << pow(SHADOW_RAY, 2) << endl;
+    cout << "* # of sampling: " << JITTER*JITTER << endl;
+    cout << "* # of shadow rays: " << SHADOW_RAY*SHADOW_RAY << endl;
     cout << "* image size: " << IMG_WIDTH << "x" << IMG_HEIGHT << endl;
     cout << "* BSP on/off: " << BSP_ENABLED << endl;
     cout << endl;

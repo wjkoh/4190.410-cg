@@ -1,3 +1,5 @@
+#define NOMINMAX
+
 #ifndef _COMMON_H_
 #define _COMMON_H_
 
@@ -5,6 +7,7 @@
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <iterator>
 #include <list>
 #include <map>
 #include <set>

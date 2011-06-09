@@ -74,10 +74,10 @@ class object : public std::enable_shared_from_this<object>
         virtual bool is_sphere() const { return false; }
         virtual vector3 get_normal(const point3& pt, const float time, bool bump = false) const = 0; // Phong shading
         virtual vector3 get_texture(const point3& pt) const;
-        virtual vector2 pt_to_tex_coord(const point3& pt, bool bump = false) const { assert(false); }
+        virtual vector2 pt_to_tex_coord(const point3& pt, bool bump = false) const { assert(false); return vector2(); }
 
-        virtual plane_t get_plane(const float time) const { assert(false); }
-        virtual int front_or_back(const plane_t& p) const { assert(false); }
+        virtual plane_t get_plane(const float time) const { assert(false); return plane_t(); }
+        virtual int front_or_back(const plane_t& p) const { assert(false); return 0; }
 
         virtual int get_size() const { return 1; }
         virtual std::shared_ptr<const object> get_item(int idx) const { return shared_from_this(); }
@@ -142,7 +142,7 @@ class sphere : public object
             }
 
             // pos: F or B, not O
-            // plane 방향 최대점
+            // plane 방향 최대점 
             point3 pt;
             if (pos_f_or_b == BSP_FRONT)
                 pt = get_pos(0.0) + r*-p.imaginary();
