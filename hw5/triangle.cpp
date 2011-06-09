@@ -19,7 +19,7 @@ vector2 triangle::pt_to_tex_coord(const point3& pt, bool bump) const
     vector2 u(u_.length(), 0);
     vector2 v(dot(v_, x), dot(v_, y));
         
-    float ratio = min(128.0f, min(tex->width()/(u.length()), tex->height()/(v[1]))); // 256
+    float ratio = max(128.0f, min(tex->width()/(u.length()), tex->height()/(v[1]))); // 256
     u *= ratio;
     v *= ratio;
 

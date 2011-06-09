@@ -31,6 +31,15 @@ class ray_tree_node
                 }
             }
         }
+        // motion blur
+        for (auto i = s.moving_objs.begin(); i != s.moving_objs.end(); ++i)
+        {
+            intersect_info tmp_info = (*i)->check(in_ray, time);
+            if (tmp_info.intersect && tmp_info.dist < min_info.dist)
+            {
+                min_info = tmp_info;
+            }
+        }
         auto min_i = min_info.obj;
 
         ++depth;
@@ -56,21 +65,39 @@ class ray_tree_node
 
                     ray s_ray(pt, ray_vec); // shadow ray
 
-#if BSP_ENABLED
-                    intersect_info&& min_info = s.tree.traverse(s_ray);
-                    if (!min_info.intersect || min_info.dist > ray_dist)
-                        ++hit_count;
-#else
-                    auto result = std::find_if(s.objs.begin(), s.objs.end(),
-                                               [s_ray, ray_dist, time](std::shared_ptr<object> obj)
-                                               -> bool
-                                               {
-                                               intersect_info info = obj->check(s_ray, time);
-                                               return info.intersect && info.dist < ray_dist;
-                                               });
-                    if (result == s.objs.end())
-                        ++hit_count;
-#endif
+                    bool flag = false;
+                    if (BSP_ENABLED)
+                    {
+                        intersect_info&& min_info = s.tree.traverse(s_ray);
+                        if (!min_info.intersect || min_info.dist > ray_dist)
+                            flag = true;
+                    }
+                    else
+                    {
+                        auto result = std::find_if(s.objs.begin(), s.objs.end(),
+                                                   [s_ray, ray_dist, time](std::shared_ptr<object> obj)
+                                                   -> bool
+                                                   {
+                                                   intersect_info info = obj->check(s_ray, time);
+                                                   return info.intersect && info.dist < ray_dist;
+                                                   });
+                        if (result == s.objs.end())
+                            flag = true;
+                    }
+
+                    if (flag)
+                    {
+                        // motion blur
+                        auto result = std::find_if(s.moving_objs.begin(), s.moving_objs.end(),
+                                                   [s_ray, ray_dist, time](std::shared_ptr<object> obj)
+                                                   -> bool
+                                                   {
+                                                   intersect_info info = obj->check(s_ray, time);
+                                                   return info.intersect && info.dist < ray_dist;
+                                                   });
+                        if (result == s.moving_objs.end())
+                            ++hit_count;
+                    }
                 }
 
                 if (hit_count > 0)

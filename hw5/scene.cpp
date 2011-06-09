@@ -59,7 +59,7 @@ void scene_aux_1(scene& s)
     sphere2->mat.transparency = 1.0;
     sphere2->mat.shininess = 20;
     sphere2->move_dir = vector3(0, 2.5, 0);
-    s.objs.push_back(sphere2);
+    s.moving_objs.push_back(sphere2);
 
     shared_ptr<object> triangle1(new triangle(vector3(2.0, 0, -3.0), vector3(0.0, 2.0, -3.0), vector3(-2.0, 0, -3.0)));
     triangle1->mat.diffuse = vector3(0.0, 1.0, 0.0);
@@ -151,9 +151,7 @@ void scene_aux_2(scene& s)
         triangle1->mat.transparency = 1.0;
         triangle1->mat.shininess = 0;
         triangle1->mat.reflection = 0;
-        triangle1->texture = checker;
-        //triangle1->texture = bricks;
-        //triangle1->bump_map = wall;
+        triangle1->texture = bricks;
         s.objs.push_back(triangle1);
     }
     {
@@ -254,9 +252,9 @@ void scene_aux_0(scene& s)
     shared_ptr<object> sphere1(new sphere(vector3(-0.0, 0.0, 0.0), 0.8));
     sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
     sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
-    sphere1->mat.transparency = 0.2;
+    sphere1->mat.transparency = 0.4;
     sphere1->mat.shininess = 100;
-    sphere1->mat.reflection = 1.0;
+    sphere1->mat.reflection = 0.1;
     s.objs.push_back(sphere1);
 
     {
@@ -312,8 +310,25 @@ void scene_aux_0(scene& s)
     s.lights.push_back(light(vector3(0, 0, 7)));
     s.lights.back().dir = vector3(0, 0, -1);
 
-    s.lights.push_back(light(vector3(0, 5, 0)));
+    s.lights.push_back(light(vector3(0, 7, 0)));
     s.lights.back().dir = vector3(0, -1, 0);
+}
+
+void scene_aux_3(scene& s)
+{
+    shared_ptr<object> sphere1(new sphere(vector3(-0.0, 0.0, 0.0), 0.8));
+    sphere1->mat.diffuse = vector3(1.0, 0.0, 0.0);
+    sphere1->mat.specular = vector3(1.0, 1.0, 1.0);
+    sphere1->mat.transparency = 0.2;
+    sphere1->mat.shininess = 100;
+    sphere1->mat.reflection = 1.0;
+    s.objs.push_back(sphere1);
+
+    s.lights.push_back(light(vector3(0, 0, 7)));
+    s.lights.back().dir = vector3(0, 0, -1);
+
+    s.lights.push_back(light(vector3(0, 9, 0)));
+    s.lights.back().dir = vector3(0, -1, -1);
 }
 
 scene::scene(int scene_num)

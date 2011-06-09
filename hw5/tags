@@ -96,7 +96,7 @@ HSVtoRGB	CImg.h	/^    CImg<T>& HSVtoRGB() {$/;"	f	struct:cimg_library::CImg
 IMG_HEIGHT	hw5.cpp	/^int IMG_HEIGHT = 768;$/;"	v
 IMG_WIDTH	hw5.cpp	/^int IMG_WIDTH = 1024;$/;"	v
 INC	Makefile	/^INC=. \/opt\/local\/include$/;"	m
-JITTER	hw5.cpp	/^int JITTER = 3; \/\/ JITTER*JITTER 개의 subpixel ray$/;"	v
+JITTER	hw5.cpp	/^int JITTER = 1; \/\/ JITTER*JITTER 개의 subpixel ray$/;"	v
 JITTER_ANGLE_DEG	hw5.cpp	/^float JITTER_ANGLE_DEG = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_ANGLE_DEG_R	hw5.cpp	/^float JITTER_ANGLE_DEG_R = 5; \/\/ 주의! int면 rad()에서 0이 나온다.$/;"	v
 JITTER_REFL_ON	hw5.cpp	/^bool JITTER_REFL_ON = false;$/;"	v
@@ -135,7 +135,7 @@ RGBtoYCbCr	CImg.h	/^    CImg<T>& RGBtoYCbCr() {$/;"	f	struct:cimg_library::CImg
 RGBtoYUV	CImg.h	/^    CImg<T>& RGBtoYUV() {$/;"	f	struct:cimg_library::CImg
 RGBtoxyY	CImg.h	/^    CImg<T>& RGBtoxyY() {$/;"	f	struct:cimg_library::CImg
 RIGHT	octree.h	/^    RIGHT = 0,$/;"	e	enum:__anon2
-SHADOW_RAY	hw5.cpp	/^int SHADOW_RAY = 1; \/\/ SHADOW_RAY*SHADOW_RAY 개의 shadow ray$/;"	v
+SHADOW_RAY	hw5.cpp	/^int SHADOW_RAY = 2; \/\/ SHADOW_RAY*SHADOW_RAY 개의 shadow ray$/;"	v
 SVD	CImg.h	/^    const CImg<T>& SVD(CImg<t>& U, CImg<t>& S, CImg<t>& V, const bool sorting=true,$/;"	f	struct:cimg_library::CImg
 TEX_DIR	scene.cpp	/^#define TEX_DIR(/;"	d	file:
 TEX_DIR	scene.cpp	/^#undef TEX_DIR$/;"	d	file:
@@ -2281,12 +2281,12 @@ mouse_y	CImg.h	/^    int mouse_y() const {$/;"	f	struct:cimg_library::CImgDispla
 move	CImg.h	/^    CImgDisplay& move(const int pos_x, const int pos_y) {$/;"	f	struct:cimg_library::CImgDisplay
 move	CImg.h	/^    CImgDisplay& move(const int posx, const int posy) {$/;"	f	struct:cimg_library::CImgDisplay
 move_dir	object.h	/^        vector3 move_dir;$/;"	m	class:object
-move_scene	scene.h	/^        void move_scene(const vector3& delta = vector3(0, 0, 0))$/;"	f	class:scene
 move_to	CImg.h	/^    CImg<T>& move_to(CImg<T>& img) {$/;"	f	struct:cimg_library::CImg
 move_to	CImg.h	/^    CImg<t>& move_to(CImg<t>& img) {$/;"	f	struct:cimg_library::CImg
 move_to	CImg.h	/^    CImgList<t>& move_to(CImgList<t>& list) {$/;"	f	struct:cimg_library::CImgList
 move_to	CImg.h	/^    CImgList<t>& move_to(CImgList<t>& list, const unsigned int pos) {$/;"	f	struct:cimg_library::CImgList
 move_to	CImg.h	/^    CImgList<t>& move_to(CImgList<t>& list, const unsigned int pos=~0U) {$/;"	f	struct:cimg_library::CImg
+moving_objs	scene.h	/^        std::vector<std::shared_ptr<object>> moving_objs;$/;"	m	class:scene
 mp	CImg.h	/^      _cimg_math_parser *mp;$/;"	m	struct:cimg_library::CImg::_functor2d_expr
 mp	CImg.h	/^      _cimg_math_parser *mp;$/;"	m	struct:cimg_library::CImg::_functor3d_expr
 mp	CImg.h	/^      _cimg_math_parser *mp;$/;"	m	struct:cimg_library::CImg::_functor4d_streamline_expr
@@ -2386,7 +2386,7 @@ object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d() {$/;"	f	struct:cimg_li
 object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d(const CImgList<tp>& primitives) {$/;"	f	struct:cimg_library::CImg
 object3dtoCImg3d	CImg.h	/^    CImg<T>& object3dtoCImg3d(const CImgList<tp>& primitives,$/;"	f	struct:cimg_library::CImg
 objs	octree.h	/^        std::vector<std::shared_ptr<object>> objs; \/\/ objects in this cube$/;"	m	class:octree_node
-objs	scene.h	/^        std::vector<std::shared_ptr<object> > objs;$/;"	m	class:scene
+objs	scene.h	/^        std::vector<std::shared_ptr<object>> objs;$/;"	m	class:scene
 octree	octree.h	/^class octree$/;"	c
 octree_node	octree.h	/^        octree_node()$/;"	f	class:octree_node
 octree_node	octree.h	/^class octree_node$/;"	c
@@ -2718,6 +2718,7 @@ scene	scene.h	/^class scene$/;"	c
 scene_aux_0	scene.cpp	/^void scene_aux_0(scene& s)$/;"	f
 scene_aux_1	scene.cpp	/^void scene_aux_1(scene& s)$/;"	f
 scene_aux_2	scene.cpp	/^void scene_aux_2(scene& s)$/;"	f
+scene_aux_3	scene.cpp	/^void scene_aux_3(scene& s)$/;"	f
 screen_height	CImg.h	/^    static int screen_height() {$/;"	f	struct:cimg_library::CImgDisplay
 screen_width	CImg.h	/^    static int screen_width() {$/;"	f	struct:cimg_library::CImgDisplay
 select	CImg.h	/^    CImg<T>& select(CImgDisplay &disp,$/;"	f	struct:cimg_library::CImg

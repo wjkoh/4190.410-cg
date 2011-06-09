@@ -10,6 +10,7 @@ class scene
     public:
         scene(int scene_num);
 
+        /*
         void move_scene(const vector3& delta = vector3(0, 0, 0))
         {
             for (auto i = objs.begin(); i != objs.end(); ++i)
@@ -18,6 +19,7 @@ class scene
             for (auto i = lights.begin(); i != lights.end(); ++i)
                 i->set_pos(i->get_pos(0.0) + c_o_lens + delta);
         }
+        */
 
         void make_quad(const vector3& v0, const vector3& v1, const vector3& v2,
                        const material& mat,
@@ -26,7 +28,8 @@ class scene
 
         //octree tree;
         bsp_tree tree;
-        std::vector<std::shared_ptr<object> > objs;
+        std::vector<std::shared_ptr<object>> objs;
+        std::vector<std::shared_ptr<object>> moving_objs;
         std::vector<light> lights;
         vector3 g_amb_light;
 };
