@@ -345,11 +345,8 @@ void scene_aux_3(scene& s)
         s.objs.push_back(sphere1);
     }
 
-    s.lights.push_back(light(vector3(0, 0, 2)));
-    s.lights.back().dir = vector3(0, 0, -1);
-
-    s.lights.push_back(light(vector3(0, 0, 0)));
-    s.lights.back().dir = vector3(0, 0, -1);
+    s.lights.push_back(light(vector3(0, 2, 2)));
+    s.lights.back().dir = vector3(0, -1, -1);
 }
 
     scene::scene(int scene_num)

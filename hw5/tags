@@ -190,6 +190,7 @@ _LU	CImg.h	/^    CImg<T>& _LU(CImg<t>& indx, bool& d) {$/;"	f	struct:cimg_librar
 _MATERIAL_H_	material.h	/^#define _MATERIAL_H_$/;"	d
 _Magick_info	CImg.h	/^    } _Magick_info;$/;"	m	namespace:cimg_library::cimg	typeref:struct:cimg_library::cimg::Magick_info
 _OBJECT_H_	object.h	/^#define _OBJECT_H_$/;"	d
+_OBJ_FILE_H_	obj_file.h	/^#define _OBJ_FILE_H_$/;"	d
 _OCTREE_H_	octree.h	/^#define _OCTREE_H_$/;"	d
 _POLYHEDRON_H_	polyhedron.h	/^#define _POLYHEDRON_H_$/;"	d
 _RAY_TRACER_H_	ray_tracer.h	/^#define _RAY_TRACER_H_$/;"	d
@@ -1687,6 +1688,7 @@ get_warp	CImg.h	/^    CImg<T> get_warp(const CImg<t>& warp, const bool is_relati
 get_watershed	CImg.h	/^    CImg<T> get_watershed(const CImg<t>& priority, const bool fill_lines=true) const {$/;"	f	struct:cimg_library::CImg
 get_xyYtoRGB	CImg.h	/^    CImg<Tuchar> get_xyYtoRGB() const {$/;"	f	struct:cimg_library::CImg
 get_xyYtoXYZ	CImg.h	/^    CImg<Tfloat> get_xyYtoXYZ() const {$/;"	f	struct:cimg_library::CImg
+getline_and_ss	obj_file.cpp	/^string getline_and_ss(fstream& fs)$/;"	f
 getrf	CImg.h	/^    inline void getrf(int &N, T *lapA, int *IPIV, int &INFO) {$/;"	f	namespace:cimg_library::cimg
 getrf	CImg.h	/^    inline void getrf(int &N, float *lapA, int *IPIV, int &INFO) {$/;"	f	namespace:cimg_library::cimg
 getri	CImg.h	/^    inline void getri(int &N, T *lapA, int *IPIV, T* WORK, int &LWORK, int &INFO) {$/;"	f	namespace:cimg_library::cimg
@@ -2586,6 +2588,7 @@ ray_tracer	ray_tracer.h	/^        ray_tracer() : image(IMG_WIDTH, std::vector<ve
 ray_tracer	ray_tracer.h	/^class ray_tracer$/;"	c
 ray_tree_node	ray_tracer.h	/^    ray_tree_node(const scene& s, const ray& in_ray, int depth = 0)$/;"	f	class:ray_tree_node
 ray_tree_node	ray_tracer.h	/^class ray_tree_node$/;"	c
+read_obj_file	obj_file.cpp	/^vector<shared_ptr<triangle>> read_obj_file(const string& fname)$/;"	f
 ref	CImg.h	/^      const CImg<T>& ref;$/;"	m	struct:cimg_library::CImg::_functor2d_float
 ref	CImg.h	/^      const CImg<T>& ref;$/;"	m	struct:cimg_library::CImg::_functor2d_int
 ref	CImg.h	/^      const CImg<T>& ref;$/;"	m	struct:cimg_library::CImg::_functor3d_float
