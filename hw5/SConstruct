@@ -13,10 +13,12 @@ env = Environment(
                  )
 
 # Parallel build
-import os
-num_cpu = int(os.environ.get('NUM_CPU', 2))
+import multiprocessing
+num_cpu = multiprocessing.cpu_count()
+
 SetOption('num_jobs', num_cpu)
 print "running with -j", GetOption('num_jobs')
+#
 
 srcs = ['hw5.cpp', 'ray_tracer.cpp', 'object.cpp', 'triangle.cpp', 'polyhedron.cpp', 'bsp_tree.cpp', 'octree.cpp', 'scene.cpp', 'obj_file.cpp']
 prog = env.Program('hw5', srcs)
