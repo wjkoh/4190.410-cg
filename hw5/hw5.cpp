@@ -32,13 +32,13 @@ using namespace std;
 // triangle transmission
 
 // Global variables
-int IMG_WIDTH = 1024;
-int IMG_HEIGHT = 768;
-int LENS_WIDTH = 4; // 사실은 aperture size
-int LENS_HEIGHT = 4;
+int IMG_WIDTH = 1280;
+int IMG_HEIGHT = 1024;
+int LENS_WIDTH = 8; // 사실은 aperture size
+int LENS_HEIGHT = 8;
 float RES = 0.01;
 int MAX_DEPTH = 10;
-int JITTER = 1; // JITTER*JITTER 개의 subpixel ray
+int JITTER = 2; // JITTER*JITTER 개의 subpixel ray
 int SHADOW_RAY = 2; // SHADOW_RAY*SHADOW_RAY 개의 shadow ray
 float JITTER_ANGLE_DEG = 5; // 주의! int면 rad()에서 0이 나온다.
 float JITTER_ANGLE_DEG_R = 5; // 주의! int면 rad()에서 0이 나온다.
